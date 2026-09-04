@@ -6,10 +6,11 @@ flash a board attached to another computer. Install released firmware without
 editing source. Use USB-C for installation; Bluetooth and Wi-Fi are device
 control options, not firmware-update paths here.
 
-## 1. Identify the board and ask when uncertain
+## 1. Connect the device; read it before asking about the board
 
-Read the [supported displays](README.md#supported-displays). Ask the user which
-board they have, or inspect a photo of the label and PCB revision.
+Read the [supported displays](README.md#supported-displays). First install the
+serial tools in step 2 and query the connected device. Do not require the user
+to know the model/revision before this read-only discovery.
 
 | Board argument | Exact hardware | Flash |
 | --- | --- | --- |
@@ -17,8 +18,9 @@ board they have, or inspect a photo of the label and PCB revision.
 | `round-1.32` | Waveshare ESP32-S3-Touch-AMOLED-1.32 | 8 MB |
 
 **An ESP32-S3 chip ID or USB VID/PID cannot identify the display or PCB revision.**
-The 1.64 V2 is unsupported. Do not guess, use a 1.64 image on the round board,
-or patch pins during an ordinary installation. Ask for a board photo if needed.
+The 1.64 V2 is unsupported. Do not use a 1.64 image on the round board or patch
+pins during an ordinary installation. See the discovery rules below when a
+device cannot report a supported target.
 
 Connect a known **data-capable** USB cable directly to the computer. Close Taby,
 serial monitors, and other applications using the port for the installation.
@@ -61,6 +63,42 @@ An Arduino IDE or complete ESP-IDF installation is not required for prebuilt bun
 In subsequent commands, `PYTHON` means `.\.venv\Scripts\python.exe` on Windows
 or `.venv/bin/python` on macOS/Linux. Replace that word with the actual executable;
 it is a placeholder, not a command to install.
+
+### Read the connected device and select its target
+
+Select the connected port from `ports`, then run:
+
+```text
+PYTHON tools/device.py identify --port PORT
+```
+
+This sends the read-only `INFO` command without intentionally resetting the
+device. It filters private fields and compares the reported target and display
+dimensions with `firmware/boards.json`.
+
+- **`firmware_target`:** use the returned `board` and `revision` for an update
+  when the existing display works correctly. Do not ask the user to read a PCB
+  marking again if this working target is already established. `amoled-1.64`
+  currently maps to V1; `round-1.32` maps to the original round board.
+- **`unknown` or no Taby reply:** older firmware (including the tested 1.0.6
+  build), blank boards, and vendor demos may not report a target. Ask for the
+  board marking, order details that specify the revision, or a clear PCB photo.
+- **`unsupported` or `conflict`:** explain the reported mismatch. Do not select
+  another bundle just because its screen size or flash capacity looks similar.
+
+The target is compiled into the running firmware; it is **not** an independently
+measured PCB revision. Wrong firmware can report the wrong target even with a
+blank screen. Firmware versions, asset versions, flash capacity, and ESP32 chip
+revision are not proof of the Waveshare PCB revision. A later update can reuse a
+target whose display was already tested successfully.
+
+For 1.64 V1/V2, Waveshare documents identification by PCB marking and different
+LCD chip-select wiring, not a USB-readable revision ID. Use the
+[manufacturer's illustrated revision guide](https://docs.waveshare.com/ESP32-S3-Touch-AMOLED-1.64)
+when discovery is inconclusive. Do not trial-flash multiple board images as an
+automatic detection method. If the owner explicitly authorizes a development
+test with a provisional board selection, record that uncertainty and require
+display validation afterward; do not describe it as automatic detection.
 
 ### If the board does not appear: USB drivers and permissions
 
@@ -117,16 +155,16 @@ Replace `BOARD`, `BUNDLE_DIRECTORY`, and `PORT` with the identified values:
 
 ```text
 PYTHON tools/install.py inspect --board BOARD --bundle BUNDLE_DIRECTORY
-PYTHON tools/device.py info --port PORT
+PYTHON tools/device.py identify --port PORT
 ```
 
 `inspect` opens no serial port. It checks the board, revision, every binary's
-size/hash, and permitted flash offsets. `info` reads a running Taby without
+size/hash, and permitted flash offsets. `identify` reads a running Taby without
 intentionally resetting it. A blank/vendor board may not answer `INFO`.
 If it does answer, check that its hardware target agrees with the selected board.
 
 Explain the selected board and version. The user's installation request and
-confirmed board identify the intended target; do not repeatedly ask for the
+established board target identify the intended target; do not repeatedly ask for the
 same permission. Then run:
 
 ```text
@@ -153,9 +191,17 @@ PYTHON tools/device.py animation --port PORT --id confirmation
 Ask the user whether the animation looks correct. Protocol acceptance is not
 proof that the screen, touch, and artwork are visually correct. Report any
 unverified step clearly; do not report success from esptool's exit alone.
+For additional animation tests, choose IDs actually listed in
+`assets/BOARD/manifest.json` and repeat the `animation` command. This tests the
+documented USB control path. It is not an MCP test: report MCP success only after
+calling a tool on the Taby app's maintained MCP interface and checking its result.
 
 ### If esptool cannot connect or the device stays in download mode
 
+- If the native USB serial port remains accessible but Taby does not answer,
+  try `PYTHON tools/device.py reset --port PORT`. This requests a normal USB
+  reset without writing flash. Wait a few seconds, list ports, and run `verify`.
+  If software reset fails, use the board's buttons below.
 - **1.64 V1:** hold BOOT, press/release RESET, then release BOOT.
 - **Round 1.32:** hold BOOT while powering the board on again, then release BOOT.
   Follow [Waveshare's board guide](https://docs.waveshare.com/ESP32-S3-Touch-AMOLED-1.32).
@@ -176,3 +222,28 @@ firmware, not the desktop application, and does not create an account or claim a
 For a custom project, use the [documented device commands](firmware/README.md#talk-to-taby).
 An MCP server is not needed to install firmware. We maintain the app integration;
 authors maintain their own MCP servers and other clients.
+
+### Verify the app's MCP integration separately
+
+Use MCP tool discovery on the installed app connection first. App versions with
+**Settings -> Integrations -> Local API & MCP** expose `taby_list_animations` and
+`taby_play_animation` when the connection has the required permissions. Grant
+**Use physical Taby** (`device.physical.write`) through the app, then invoke
+`taby_play_animation` with an ID returned by its catalog, for example:
+
+```json
+{
+  "animationId": "confirmation",
+  "targets": ["physical"],
+  "durationSeconds": 4,
+  "requestId": "physical-install-confirmation"
+}
+```
+
+Check the returned physical delivery result and the actual display. Keep tokens
+private and use the app-generated connection settings. If these settings/tools
+are absent, report the app handoff as unavailable; do not invent an endpoint or
+create a replacement MCP server as part of firmware installation. As checked on
+2026-09-05, the TRIIIS-LABS/app-taby V4 development app does not expose this MCP
+server yet; the earlier Hey Taby app implements it. Firmware installation and
+direct USB animation checks still work independently of that app feature.

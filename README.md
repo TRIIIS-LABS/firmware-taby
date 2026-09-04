@@ -34,10 +34,11 @@ that can run commands on your computer:
 Install Physical Taby on my connected device by following:
 https://github.com/TRIIIS-LABS/firmware-taby/blob/main/INSTALL.md
 
-Read the guide first. Identify my operating system and exact supported board
-and hardware revision; ask me if those cannot be determined reliably. Install
-the ESP32 flashing and serial dependencies and resolve any missing USB driver
-or serial permission. Get the matching official firmware and animation bundle,
+Read the guide first. Identify my operating system, install the ESP32 flashing
+and serial dependencies, and resolve any missing USB driver or serial permission.
+Run the guide's read-only device identification first. Reuse a supported target
+from an already working Taby; ask about the PCB revision only if it remains
+uncertain. Get the matching official firmware and animation bundle,
 validate it, install it, and verify the running device. Guide me through any
 physical button presses. Then help me use it with the Taby app. Do not change
 firmware source just to perform an installation.

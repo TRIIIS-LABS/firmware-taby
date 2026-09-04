@@ -3,6 +3,7 @@ import argparse
 import json
 import re
 import time
+from common import BOARDS
 
 try:
     import serial
@@ -52,11 +53,34 @@ def info(port):
     return {key: raw[key] for key in SAFE_INFO if key in raw}
 
 
+def identify(actual):
+    """Interpret firmware metadata without pretending it measures PCB wiring."""
+    actual = {key: actual[key] for key in SAFE_INFO if key in actual}
+    target = actual.get("hardware_target")
+    profile = BOARDS.get(target) if isinstance(target, str) else None
+    result = {"device": actual, "board": None, "revision": None,
+              "physical_revision_verified": False}
+    if not target:
+        return {**result, "status": "unknown",
+                "next_step": "No hardware target reported. Identify the PCB marking or purchase record; firmware/assets versions and USB IDs are not revision proof."}
+    if profile is None:
+        return {**result, "status": "unsupported",
+                "next_step": "Reported target is not supported by this installer. Do not substitute another board's bundle."}
+    for field, expected in (("display_width", profile["width"]),
+                            ("display_height", profile["height"])):
+        if field in actual and actual[field] != expected:
+            return {**result, "status": "conflict",
+                    "next_step": "Display dimensions conflict with the reported target. Resolve the mismatch before flashing."}
+    return {**result, "status": "firmware_target", "board": target,
+            "revision": profile["revision"], "evidence": "running_firmware_metadata",
+            "next_step": "Use this target for an update if the existing display is working correctly. This identifies the installed build, not an independent PCB revision measurement."}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="action", required=True)
     sub.add_parser("ports", help="List ports without opening or resetting them")
-    for action in ("info", "animation"):
+    for action in ("info", "identify", "animation", "reset"):
         command = sub.add_parser(action)
         command.add_argument("--port", required=True)
         if action == "animation":
@@ -68,6 +92,21 @@ def main():
                           for p in list_ports.comports()], indent=2))
     elif args.action == "info":
         print(json.dumps(info(args.port), indent=2))
+    elif args.action == "identify":
+        print(json.dumps(identify(info(args.port)), indent=2))
+    elif args.action == "reset":
+        from esptool.reset import HardReset
+        connection = serial.Serial(port=None, baudrate=115200, timeout=0.2)
+        connection.dtr = False
+        connection.rts = False
+        connection.port = args.port
+        connection.open()
+        try:
+            HardReset(connection, uses_usb=True)()
+        finally:
+            connection.close()
+        print(json.dumps({"reset_requested": True,
+                          "next_step": "Wait for boot, list ports, then run install.py verify."}))
     else:
         if not re.fullmatch(r"[a-z][a-z0-9_]{0,62}", args.id):
             raise ValueError("Use an animation ID from this board's asset manifest")

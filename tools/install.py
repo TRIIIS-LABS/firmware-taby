@@ -35,7 +35,7 @@ def main():
     parser.add_argument("--board", required=True, choices=BOARDS)
     parser.add_argument("--port")
     parser.add_argument("--confirmed-board", action="store_true",
-                        help="The user has identified this exact board/revision and requested installation")
+                        help="The target is established from a working Taby or user identification, and installation is authorized")
     args = parser.parse_args()
     manifest, files = load_bundle(args.bundle, args.board)
     print(json.dumps({"board": manifest["board"], "revision": manifest["revision"],
@@ -49,7 +49,7 @@ def main():
     from device import info
     if args.action == "flash":
         if not args.confirmed_board:
-            parser.error("Identify the board and revision with the user, then pass --confirmed-board")
+            parser.error("Run device.py identify; establish the working target or identify it with the user, then pass --confirmed-board")
         # esptool's ROM read resets the device but does not write flash. A generic
         # ESP32-S3 chip ID cannot distinguish a round board or the 1.64 V1/V2.
         probe = subprocess.run([sys.executable, "-m", "esptool", "--chip", "esp32s3",

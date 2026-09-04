@@ -172,3 +172,28 @@ and verify the actual SPIFFS build fits the board's partition.
   Existing unused-function compiler warnings remain; the build has no errors.
 - These new 1.0.8 bundles have not been flashed during extraction. Visual/touch
   verification and publication of the first public release remain maintainer steps.
+
+2026-09-05, public release installation follow-up, Windows / USB COM5:
+
+- A separate installation workspace downloaded official v1.0.8 release ZIPs and
+  validated their published SHA-256 files. The owner authorized testing the
+  1.64 V1 image with a provisional V1 hardware selection.
+- The device moved from 1.0.6 / assets 0.3.2 to 1.0.8 / assets 0.3.3. The public
+  `install.py verify` command passed against the downloaded 1.64 bundle; INFO
+  reported `amoled-1.64`, rectangle, 280 x 456, USB ready, and factory identity.
+- An additional esptool digest comparison matched the downloaded bootloader,
+  partition table, firmware, and assets against device flash. Comparing the
+  initially blank OTA-selection image after first boot reported a mismatch:
+  ESP-IDF writes the selected OTA sequence during boot. That mutable record is
+  not an immutable release-image check; do not reflash it merely to match its
+  initial all-0xFF image.
+- The public `device.py animation` helper received acceptance for `confirmation`,
+  `boxing`, and `flower_grow`. Visual and touch confirmation remain separate
+  from these protocol results. The round device was not flashed in this test.
+- `device.py identify` now reads the connected firmware before asking the user
+  about hardware. Its reported V1 revision is inferred from the installed target,
+  not an independent measurement of PCB wiring. Unknown/conflicting targets do
+  not select a bundle. Fourteen installer/serial tests and both asset checks pass.
+- Direct USB commands were tested. The app's MCP animation path has not been
+  verified in this session; USB command acceptance must not be reported as MCP
+  success. Public firmware installation does not install an MCP server.
