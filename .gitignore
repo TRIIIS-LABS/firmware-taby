@@ -1,0 +1,15 @@
+.local/
+.venv/
+__pycache__/
+*.pyc
+dist/
+firmware/build*/
+firmware/sdkconfig
+firmware/sdkconfig.*
+!firmware/sdkconfig.defaults
+firmware/managed_components/
+.env*
+factory/
+firmware/factory/
+*.pem
+*.key

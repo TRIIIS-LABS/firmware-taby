@@ -1,0 +1,12 @@
+# Active development layout for the production firmware transition.
+# This keeps one real app slot plus an installable AMOLED asset partition.
+# Recovery remains in partitions.production.csv until the recovery app exists.
+#
+# Name,     Type, SubType,  Offset,   Size,     Flags
+nvs,        data, nvs,      0x9000,   0x10000,
+otadata,    data, ota,      0x19000,  0x2000,
+phy_init,   data, phy,      0x1b000,  0x1000,
+factory_data,data, nvs,      0x1c000,  0x4000,
+coredump,   data, coredump, 0x20000,  0x20000,
+ota_0,      app,  ota_0,    0x40000,  0x400000,
+assets,     data, spiffs,   0x440000, 0xbc0000,

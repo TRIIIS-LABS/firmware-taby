@@ -1,0 +1,852 @@
+{
+  "schema": "taby_amoled_asset_catalog_v1",
+  "pack_schema": "taby_amoled_asset_pack_v1",
+  "version": "0.3.3",
+  "mount_path": "/assets",
+  "display": {
+    "width": 280,
+    "height": 456
+  },
+  "animations": [
+    {
+      "id": "angry_01_loop",
+      "version": 1,
+      "duration_ms": 2542,
+      "fallback_label": "ANGRY",
+      "loop_policy": "loop",
+      "relative_path": "a/342748ab.gif",
+      "byte_length": 61431,
+      "sha256": "28273fe5dc5aaaa56120e3a5f64682a71752a29627d7ed983993c445c184cf20"
+    },
+    {
+      "id": "angry_02_loop",
+      "version": 1,
+      "duration_ms": 2500,
+      "fallback_label": "ANGRY",
+      "loop_policy": "loop",
+      "relative_path": "a/ab6244d8.gif",
+      "byte_length": 53555,
+      "sha256": "dc0c6f6a86ec1029fb39c66e14b275726b62d20fe89689753e5704ec56ceb693"
+    },
+    {
+      "id": "basketball_dunk",
+      "version": 1,
+      "duration_ms": 4208,
+      "fallback_label": "DUNK",
+      "loop_policy": "play_once",
+      "relative_path": "a/4aaf4aeb.gif",
+      "byte_length": 239795,
+      "sha256": "1fbc4c25be1db272765b687b7d0cc025148a0cdb310bfc12f90375b8515fcac3"
+    },
+    {
+      "id": "basketball_throw",
+      "version": 1,
+      "duration_ms": 4167,
+      "fallback_label": "BASKETBALL",
+      "loop_policy": "play_once",
+      "relative_path": "a/330ed2ad.gif",
+      "byte_length": 263271,
+      "sha256": "fb127f80cc2fa1f9a02e52e7052d243f6b52e0f85a02b230ce66ea5ad45c0af3"
+    },
+    {
+      "id": "blush",
+      "version": 1,
+      "duration_ms": 4875,
+      "fallback_label": "BLUSH",
+      "loop_policy": "play_once",
+      "relative_path": "a/d36d9279.gif",
+      "byte_length": 193553,
+      "sha256": "058d8bb7c85f3f3f5f9390e226e16dc036a4988d04ab3af7b647d712b4d31cd2"
+    },
+    {
+      "id": "boxing",
+      "version": 1,
+      "duration_ms": 5042,
+      "fallback_label": "BOXING",
+      "loop_policy": "play_once",
+      "relative_path": "a/55156e6e.gif",
+      "byte_length": 197331,
+      "sha256": "3b3e18d9ede34d45d11490577e4b1f5c39a9f877a105be847b64c1b902725d26"
+    },
+    {
+      "id": "break_start",
+      "version": 1,
+      "duration_ms": 6708,
+      "fallback_label": "BREAK",
+      "loop_policy": "play_once",
+      "relative_path": "a/453f80ff.gif",
+      "byte_length": 261408,
+      "sha256": "0dc7ba272d8ce5fb617e374c8e27842bebfb1f1048514a615b822725056a0de1"
+    },
+    {
+      "id": "busy_loop",
+      "version": 1,
+      "duration_ms": 3500,
+      "fallback_label": "BUSY",
+      "loop_policy": "loop",
+      "relative_path": "a/120a9943.gif",
+      "byte_length": 189082,
+      "sha256": "63701ed411fb2f005a5f22d3f42e4ffdbdbd690c1fc5c8eeab601051c5eac79e"
+    },
+    {
+      "id": "calendar_in",
+      "version": 1,
+      "duration_ms": 2083,
+      "fallback_label": "CALENDAR",
+      "loop_policy": "play_once",
+      "relative_path": "a/c55a2fff.gif",
+      "byte_length": 84444,
+      "sha256": "fa9fadae2a33c8407d6378f8deaae67f9f09a4305703dccc1fd2898630d1848f"
+    },
+    {
+      "id": "calendar_loop",
+      "version": 1,
+      "duration_ms": 2042,
+      "fallback_label": "CALENDAR",
+      "loop_policy": "loop",
+      "relative_path": "a/142c3c3e.gif",
+      "byte_length": 6035,
+      "sha256": "72d89af8e962523347a5623000a311bf4f63a70e0dc5d110799e769aefe04b2d"
+    },
+    {
+      "id": "circle",
+      "version": 1,
+      "duration_ms": 2875,
+      "fallback_label": "HOME",
+      "loop_policy": "play_once",
+      "relative_path": "a/28217089.gif",
+      "byte_length": 40514,
+      "sha256": "740d8d5c40602aed68f05d0df20959f4d0ceea5fd4f03bc4c5c3da2b74a29a4a"
+    },
+    {
+      "id": "confirmation",
+      "version": 1,
+      "duration_ms": 1958,
+      "fallback_label": "DONE",
+      "loop_policy": "play_once",
+      "relative_path": "a/72811854.gif",
+      "byte_length": 60958,
+      "sha256": "c7886cf00f6795050713dc20c8c2aeb19627adda322474cce503af404c1b4c46"
+    },
+    {
+      "id": "copy_paste",
+      "version": 1,
+      "duration_ms": 3125,
+      "fallback_label": "SETTINGS",
+      "loop_policy": "play_once",
+      "relative_path": "a/9ba1094c.gif",
+      "byte_length": 58292,
+      "sha256": "30b9ded4be21e86788bee2340e47fcedb65691736347f2f0b1091293e5be587d"
+    },
+    {
+      "id": "creating_task_loop",
+      "version": 1,
+      "duration_ms": 1708,
+      "fallback_label": "CREATING",
+      "loop_policy": "loop",
+      "relative_path": "a/820fb8d5.gif",
+      "byte_length": 61368,
+      "sha256": "144ea58acbc3d93ee3b97ab21dd7384a2452473368c3e1d9d7e9c5b2dd66d3bf"
+    },
+    {
+      "id": "delete_01",
+      "version": 1,
+      "duration_ms": 3542,
+      "fallback_label": "DELETE",
+      "loop_policy": "play_once",
+      "relative_path": "a/8bd97a14.gif",
+      "byte_length": 95425,
+      "sha256": "5615ef27cc7253ef395f5492483744bd548e0a838f06ef334b951b9e1965e9d9"
+    },
+    {
+      "id": "disappointed",
+      "version": 1,
+      "duration_ms": 2792,
+      "fallback_label": "FOCUS",
+      "loop_policy": "play_once",
+      "relative_path": "a/fdf9d899.gif",
+      "byte_length": 58962,
+      "sha256": "465892e9c234a2cbdf91373265eedb70571ae64055a1e6180f365f4ce4dda8cb"
+    },
+    {
+      "id": "drink_water",
+      "version": 1,
+      "duration_ms": 6875,
+      "fallback_label": "WATER",
+      "loop_policy": "play_once",
+      "relative_path": "a/9da16b65.gif",
+      "byte_length": 306212,
+      "sha256": "a952c7f5f1cfc80ce68541ceffe0b2721c27b66e8c106546e76dfad229a10f5b"
+    },
+    {
+      "id": "f1_car",
+      "version": 1,
+      "duration_ms": 8417,
+      "fallback_label": "SPRINT",
+      "loop_policy": "play_once",
+      "relative_path": "a/01516801.gif",
+      "byte_length": 496692,
+      "sha256": "b3daaa708222ca613ebb0c89f249f1bc3440aa142caf303bd431b03e4083318e"
+    },
+    {
+      "id": "fishing_long",
+      "version": 1,
+      "duration_ms": 7875,
+      "fallback_label": "FISHING LONG",
+      "loop_policy": "play_once",
+      "relative_path": "a/76916c58.gif",
+      "byte_length": 152783,
+      "sha256": "97b98a6b3a1930432c7006165838113f0e040c3c1f73b2bb5dd86d4634e01e68"
+    },
+    {
+      "id": "fishing_short",
+      "version": 1,
+      "duration_ms": 5750,
+      "fallback_label": "FISHING SHORT",
+      "loop_policy": "play_once",
+      "relative_path": "a/d83e6b18.gif",
+      "byte_length": 118622,
+      "sha256": "61309b1bbdc50b8ebf88058419ee0260337b483089d8955a7a61498e9972d202"
+    },
+    {
+      "id": "flower_grow",
+      "version": 1,
+      "duration_ms": 8583,
+      "fallback_label": "GROW",
+      "loop_policy": "play_once",
+      "relative_path": "a/c24cfa30.gif",
+      "byte_length": 159546,
+      "sha256": "4d43ee6ca8491b44003d00cab6486485b922b8d7cceb408441ba7ff28d8a1d6b"
+    },
+    {
+      "id": "hello_annoyed",
+      "version": 1,
+      "duration_ms": 8833,
+      "fallback_label": "FOCUS",
+      "loop_policy": "play_once",
+      "relative_path": "a/112e0d2a.gif",
+      "byte_length": 326382,
+      "sha256": "a27a65a573c74b8d91715504a72c580dd2cc9b6414432c93504839efecfc3e77"
+    },
+    {
+      "id": "idle_01_loop",
+      "version": 1,
+      "duration_ms": 9042,
+      "fallback_label": "IDLE",
+      "loop_policy": "loop",
+      "relative_path": "a/5e63dbe6.gif",
+      "byte_length": 108585,
+      "sha256": "b11cae58a6973f7f3ef9c373d5d894fa7f5c981785e0311db2a117155ec28f18"
+    },
+    {
+      "id": "calm_idle_01_f000",
+      "version": 1,
+      "duration_ms": 1000,
+      "fallback_label": "IDLE",
+      "loop_policy": "loop",
+      "relative_path": "a/684df770.gif",
+      "byte_length": 2485,
+      "sha256": "8c1f47d3e90074f41eebba875f545c9489ebe14cccea3a6eb571bedcc86c75e4"
+    },
+    {
+      "id": "calm_idle_01_to_f137",
+      "version": 1,
+      "duration_ms": 5708,
+      "fallback_label": "IDLE",
+      "loop_policy": "play_once",
+      "relative_path": "a/6e98b1e7.gif",
+      "byte_length": 61903,
+      "sha256": "317f14057b071dddb96343b4b0f8d3ccaae98e731a5720291d24d5b4da89d11f"
+    },
+    {
+      "id": "calm_idle_01_f137",
+      "version": 1,
+      "duration_ms": 1000,
+      "fallback_label": "IDLE",
+      "loop_policy": "loop",
+      "relative_path": "a/5bddc705.gif",
+      "byte_length": 2489,
+      "sha256": "f5fa3b5ef6ed29060453deae24cac865e899d93db71759696b0a39a97f65e337"
+    },
+    {
+      "id": "calm_idle_01_f137_to_f177",
+      "version": 1,
+      "duration_ms": 1667,
+      "fallback_label": "IDLE",
+      "loop_policy": "play_once",
+      "relative_path": "a/78606a43.gif",
+      "byte_length": 15191,
+      "sha256": "ccbc47b84a27b73ef74d9d4dce61049e8c9512d35600326c8d43c1f9a9c47128"
+    },
+    {
+      "id": "calm_idle_01_f177",
+      "version": 1,
+      "duration_ms": 1000,
+      "fallback_label": "IDLE",
+      "loop_policy": "loop",
+      "relative_path": "a/ebe7a411.gif",
+      "byte_length": 2349,
+      "sha256": "b056689f0f91b8e2549c5b4e66d15e73c26cc930f8ab0672c83a94e6be11d101"
+    },
+    {
+      "id": "calm_idle_01_f177_to_f216",
+      "version": 1,
+      "duration_ms": 1625,
+      "fallback_label": "IDLE",
+      "loop_policy": "play_once",
+      "relative_path": "a/a68aca9f.gif",
+      "byte_length": 18200,
+      "sha256": "8f4635e7e6904fb26ea76bf894f45fe778fb027c06678c2a0967a46a5e7d9dc0"
+    },
+    {
+      "id": "calm_idle_01_f216",
+      "version": 1,
+      "duration_ms": 1000,
+      "fallback_label": "IDLE",
+      "loop_policy": "loop",
+      "relative_path": "a/c97f9fc9.gif",
+      "byte_length": 2568,
+      "sha256": "64ea67f7db34aa27ef853cf6de60b62f24c5d5f3481a3f96524d082940681772"
+    },
+    {
+      "id": "calm_work_low_f000",
+      "version": 1,
+      "duration_ms": 1000,
+      "fallback_label": "WORKING",
+      "loop_policy": "loop",
+      "relative_path": "a/5b0de03a.gif",
+      "byte_length": 15014,
+      "sha256": "386e3ddbbcaa76938f33ecb17593c8fc74c09e1234ff0314e9c512e50e4fa97b"
+    },
+    {
+      "id": "calm_work_medium_f000",
+      "version": 1,
+      "duration_ms": 1000,
+      "fallback_label": "WORKING",
+      "loop_policy": "loop",
+      "relative_path": "a/d18417a7.gif",
+      "byte_length": 15070,
+      "sha256": "6bb3fc0c5570f407fe6f29df72916a2ddaa71cd5124526d345db4126dea52150"
+    },
+    {
+      "id": "calm_work_high_f000",
+      "version": 1,
+      "duration_ms": 1000,
+      "fallback_label": "WORKING",
+      "loop_policy": "loop",
+      "relative_path": "a/ddde01ce.gif",
+      "byte_length": 16001,
+      "sha256": "f297f54c301ca04f344c1c7e5169a04ca6d19ff6d0898a55e0d089f4dabbcd10"
+    },
+    {
+      "id": "idle_02_loop",
+      "version": 1,
+      "duration_ms": 7875,
+      "fallback_label": "IDLE",
+      "loop_policy": "loop",
+      "relative_path": "a/523e19a5.gif",
+      "byte_length": 51351,
+      "sha256": "53ff11c489482ee9183dd9078064787e07230a723c25b1130ea151f9895b0707"
+    },
+    {
+      "id": "idle_variation_loop",
+      "version": 1,
+      "duration_ms": 1667,
+      "fallback_label": "IDLE",
+      "loop_policy": "loop",
+      "relative_path": "a/6d1a57d8.gif",
+      "byte_length": 77292,
+      "sha256": "f972b8852302df3a370a2f91be3141dd1430030bcfe888c97be39f16d0e265b0"
+    },
+    {
+      "id": "listening_in",
+      "version": 1,
+      "duration_ms": 2000,
+      "fallback_label": "LISTENING",
+      "loop_policy": "play_once",
+      "relative_path": "a/344f0094.gif",
+      "byte_length": 60625,
+      "sha256": "58bc7409175fcc59ae8fb171de40a38f99679fec372bee80633c6e2d724c3d7b"
+    },
+    {
+      "id": "listening_loop",
+      "version": 1,
+      "duration_ms": 2667,
+      "fallback_label": "LISTENING",
+      "loop_policy": "loop",
+      "relative_path": "a/56203d05.gif",
+      "byte_length": 114476,
+      "sha256": "0da4d711afd52ea161e29863e070bf22f37b2e1db8eb0e100394d27c5675c922"
+    },
+    {
+      "id": "listening_music_loop",
+      "version": 1,
+      "duration_ms": 5333,
+      "fallback_label": "MUSIC",
+      "loop_policy": "loop",
+      "relative_path": "a/5ea6c03d.gif",
+      "byte_length": 457250,
+      "sha256": "0d39441a8625d7daa6ad56f4ea809b1d9667f8a99dde959d9511ba36beb73032"
+    },
+    {
+      "id": "lockin",
+      "version": 1,
+      "duration_ms": 3958,
+      "fallback_label": "LOCK IN",
+      "loop_policy": "play_once",
+      "relative_path": "a/f821100d.gif",
+      "byte_length": 87458,
+      "sha256": "c078230ca8a7db8f61b6d861b185c039caff5d875ea8bede991ea89fb1d51256"
+    },
+    {
+      "id": "love_01",
+      "version": 1,
+      "duration_ms": 6333,
+      "fallback_label": "LOVE",
+      "loop_policy": "play_once",
+      "relative_path": "a/7f1c7a6d.gif",
+      "byte_length": 137506,
+      "sha256": "892828beb91d8cf1c7cb887db6096f0f9b5434b4ac1d9ca0a223237861000c5e"
+    },
+    {
+      "id": "perfect_day_01",
+      "version": 1,
+      "duration_ms": 7125,
+      "fallback_label": "PERFECT DAY",
+      "loop_policy": "play_once",
+      "relative_path": "a/ad8326e3.gif",
+      "byte_length": 253565,
+      "sha256": "92fed101b8645fbbb7c98c81fcb60486c881a20db09880a13c70c4c758e89954"
+    },
+    {
+      "id": "perfect_day_01_simple",
+      "version": 1,
+      "duration_ms": 7167,
+      "fallback_label": "PERFECT DAY",
+      "loop_policy": "play_once",
+      "relative_path": "a/1fdab856.gif",
+      "byte_length": 239527,
+      "sha256": "59dc9d5c5a2bd82d0fb06d9fb6d72a8a055992ca3797e26ed61f78f82129a92a"
+    },
+    {
+      "id": "perfect_day_02",
+      "version": 1,
+      "duration_ms": 5500,
+      "fallback_label": "PERFECT DAY",
+      "loop_policy": "play_once",
+      "relative_path": "a/ae832876.gif",
+      "byte_length": 197097,
+      "sha256": "2b3027fef46cd3d0a7ca39515e294a651a983f077d720740288f9456a0629224"
+    },
+    {
+      "id": "perfect_day_03",
+      "version": 1,
+      "duration_ms": 6375,
+      "fallback_label": "PERFECT DAY",
+      "loop_policy": "play_once",
+      "relative_path": "a/af832a09.gif",
+      "byte_length": 328537,
+      "sha256": "b1d05ec15061ad2cb0c17ae74076c1b0369a77b9732d7e57f8a1d4960fdd22df"
+    },
+    {
+      "id": "posture_check",
+      "version": 1,
+      "duration_ms": 6125,
+      "fallback_label": "POSTURE",
+      "loop_policy": "play_once",
+      "relative_path": "a/cab8bb54.gif",
+      "byte_length": 224314,
+      "sha256": "1cb955e4773847bcd7a964c34884e36620eefe6c70492b45e4c0f0dc39da9213"
+    },
+    {
+      "id": "relaxing_01_loop",
+      "version": 1,
+      "duration_ms": 3458,
+      "fallback_label": "BREAK",
+      "loop_policy": "loop",
+      "relative_path": "a/055ed02e.gif",
+      "byte_length": 33004,
+      "sha256": "68b66275eaba349ae00c4ae09516d7448776f92af2759c8b1f41c2e4de64b77f"
+    },
+    {
+      "id": "relaxing_couch_in",
+      "version": 1,
+      "duration_ms": 1333,
+      "fallback_label": "RELAX",
+      "loop_policy": "play_once",
+      "relative_path": "a/93338d4c.gif",
+      "byte_length": 68830,
+      "sha256": "d05f874a9dd56faf749a38ff0a31b0db58774681e1cbe0d08fcde2b504520e0b"
+    },
+    {
+      "id": "relaxing_couch_loop",
+      "version": 1,
+      "duration_ms": 2000,
+      "fallback_label": "RELAX",
+      "loop_policy": "loop",
+      "relative_path": "a/f30dc7ed.gif",
+      "byte_length": 82630,
+      "sha256": "eb4335f72c81729d6e2f2d01a1c13bb01821d8f18721768874c2090487c982f2"
+    },
+    {
+      "id": "sleeping_loop",
+      "version": 1,
+      "duration_ms": 3250,
+      "fallback_label": "AWAY",
+      "loop_policy": "loop",
+      "relative_path": "a/c2433a43.gif",
+      "byte_length": 23158,
+      "sha256": "8bc246c4d2efec8e00396954a36f35fd3efccb820cb474007ea01821f71d58a5"
+    },
+    {
+      "id": "square",
+      "version": 1,
+      "duration_ms": 3458,
+      "fallback_label": "HABITS",
+      "loop_policy": "play_once",
+      "relative_path": "a/b4b61246.gif",
+      "byte_length": 78191,
+      "sha256": "0158e9d8add2f9ad304fb7ba615421e8843a653a1ab9fee1179751cff2445229"
+    },
+    {
+      "id": "startup",
+      "version": 1,
+      "duration_ms": 7667,
+      "fallback_label": "STARTUP",
+      "loop_policy": "play_once",
+      "relative_path": "a/94326baa.gif",
+      "byte_length": 61093,
+      "sha256": "68f0a661920e049251d7fb0bd9e9e0f2c99decfdf88a1b5b8549bcf25bfb60f7"
+    },
+    {
+      "id": "stretching",
+      "version": 1,
+      "duration_ms": 6250,
+      "fallback_label": "STRETCHING",
+      "loop_policy": "play_once",
+      "relative_path": "a/51374816.gif",
+      "byte_length": 256756,
+      "sha256": "dd4c5f85dd1a9f2d691b6084c3f4abb048986b5123aa5d0f397a89fa429d9a3d"
+    },
+    {
+      "id": "talking_default_loop",
+      "version": 1,
+      "duration_ms": 5333,
+      "fallback_label": "TALKING",
+      "loop_policy": "loop",
+      "relative_path": "a/9725f4ae.gif",
+      "byte_length": 129837,
+      "sha256": "4e8f1cde02163513757e33fd0b2964210d0bfc61a7e7fa45393d73a6a33db675"
+    },
+    {
+      "id": "task_completed",
+      "version": 1,
+      "duration_ms": 3125,
+      "fallback_label": "DONE",
+      "loop_policy": "play_once",
+      "relative_path": "a/2a3d7c56.gif",
+      "byte_length": 81531,
+      "sha256": "f4d1fcb5056d385fba7e79525ff74d041f0bd1a35124e4ee20664f0bdb5cd7e3"
+    },
+    {
+      "id": "task_created",
+      "version": 1,
+      "duration_ms": 5208,
+      "fallback_label": "CREATED",
+      "loop_policy": "play_once",
+      "relative_path": "a/545a9747.gif",
+      "byte_length": 110821,
+      "sha256": "5dcfc7e46a8e2a968dfd8222b999c63001e574cc321147cb343439160fcc22d5"
+    },
+    {
+      "id": "task_page",
+      "version": 1,
+      "duration_ms": 3583,
+      "fallback_label": "TASKS",
+      "loop_policy": "play_once",
+      "relative_path": "a/3cb8ff8a.gif",
+      "byte_length": 18368,
+      "sha256": "0ac8f6441c62a7287786e9df265c3d8d34c1594aa171b0f70d27a794b630af30"
+    },
+    {
+      "id": "thumbs_up",
+      "version": 1,
+      "duration_ms": 3167,
+      "fallback_label": "YES",
+      "loop_policy": "play_once",
+      "relative_path": "a/2620c9f8.gif",
+      "byte_length": 73021,
+      "sha256": "8f1fd3fd2d934ba14c0a0c0f823720c86aa7c290f8f10d9ba31334c9de39044e"
+    },
+    {
+      "id": "trophy",
+      "version": 1,
+      "duration_ms": 7208,
+      "fallback_label": "TROPHY",
+      "loop_policy": "play_once",
+      "relative_path": "a/3bbde2ff.gif",
+      "byte_length": 169711,
+      "sha256": "a251cdc3784ef75eb0e853094f097477771d3f248fc32b5ae8c9dd49fe7ab4f2"
+    },
+    {
+      "id": "turn_off_reddit",
+      "version": 1,
+      "duration_ms": 6583,
+      "fallback_label": "FOCUS",
+      "loop_policy": "play_once",
+      "relative_path": "a/aa90b429.gif",
+      "byte_length": 248794,
+      "sha256": "775bd4c3cccf9301293211b79bd9b768557cc9143bbb4944763650279a2da58e"
+    },
+    {
+      "id": "turn_off_scroll",
+      "version": 1,
+      "duration_ms": 6500,
+      "fallback_label": "FOCUS",
+      "loop_policy": "play_once",
+      "relative_path": "a/0de3a548.gif",
+      "byte_length": 256449,
+      "sha256": "d4b46da07fcc01fcc5b33d668d52281d23320e8e3dc2d6d82a837a3178b8e3f6"
+    },
+    {
+      "id": "turn_off_tv",
+      "version": 1,
+      "duration_ms": 6583,
+      "fallback_label": "FOCUS",
+      "loop_policy": "play_once",
+      "relative_path": "a/64680343.gif",
+      "byte_length": 285872,
+      "sha256": "99cc60a4928910ddde35022f3b27cbd23c69965200c14c2677bb579509a7d5da"
+    },
+    {
+      "id": "waiting_01",
+      "version": 1,
+      "duration_ms": 12917,
+      "fallback_label": "WAITING",
+      "loop_policy": "play_once",
+      "relative_path": "a/afd018ca.gif",
+      "byte_length": 418664,
+      "sha256": "2bb5038bee37c320306918ec4fd15abb5bddbc5ab96b84e11fc08244fbeb31ce"
+    },
+    {
+      "id": "working_in",
+      "version": 1,
+      "duration_ms": 2000,
+      "fallback_label": "WORKING",
+      "loop_policy": "play_once",
+      "relative_path": "a/967e5b2e.gif",
+      "byte_length": 160246,
+      "sha256": "5ede530fcfec50fa91831a32bb3bfb3f69955f54a3a9def4646e0e5f218ecba9"
+    },
+    {
+      "id": "working_loop",
+      "version": 1,
+      "duration_ms": 1333,
+      "fallback_label": "WORKING",
+      "loop_policy": "loop",
+      "relative_path": "a/ff09215b.gif",
+      "byte_length": 128989,
+      "sha256": "b8ef5b85ef9445b38f65512635c2e849ba33ae00bdb2e1f74e802e6ff1bfbca9"
+    },
+    {
+      "id": "working_laptop_in",
+      "version": 1,
+      "duration_ms": 1625,
+      "fallback_label": "WORKING",
+      "loop_policy": "play_once",
+      "relative_path": "a/abbf00c9.gif",
+      "byte_length": 73469,
+      "sha256": "070d9055ac2bb48038ce3db65f0ea8b0a308f3b22bd28a4983cd12f1cc898085"
+    },
+    {
+      "id": "working_laptop_loop",
+      "version": 1,
+      "duration_ms": 2667,
+      "fallback_label": "WORKING",
+      "loop_policy": "loop",
+      "relative_path": "a/cdd1dbdc.gif",
+      "byte_length": 26566,
+      "sha256": "3b99a0ea2826c6edf2295655016e843a8bcd20a2f224cb5f59679c01e08a2110"
+    },
+    {
+      "id": "working_laptop_bored_loop",
+      "version": 1,
+      "duration_ms": 1667,
+      "fallback_label": "WORKING",
+      "loop_policy": "loop",
+      "relative_path": "a/89a7efbb.gif",
+      "byte_length": 36973,
+      "sha256": "00139458db1ae2b936569f42f5465924d5bcb8889b52bc5b338a2af0b3ea5eeb"
+    },
+    {
+      "id": "working_laptop_excited_loop",
+      "version": 1,
+      "duration_ms": 1667,
+      "fallback_label": "WORKING",
+      "loop_policy": "loop",
+      "relative_path": "a/8d8c83cf.gif",
+      "byte_length": 42982,
+      "sha256": "428292c534da4d2f4b500554a9f84cb2f2f1e9f13848836b229d9a23efd30576"
+    },
+    {
+      "id": "working_laptop_normal_loop",
+      "version": 1,
+      "duration_ms": 1667,
+      "fallback_label": "WORKING",
+      "loop_policy": "loop",
+      "relative_path": "a/ae5cd9c4.gif",
+      "byte_length": 37149,
+      "sha256": "7e7ae97937baf50f98d3406e1f255e226b76976dd48662c317aac6b32fe97918"
+    },
+    {
+      "id": "workspaces_in",
+      "version": 1,
+      "duration_ms": 2250,
+      "fallback_label": "FOLDER",
+      "loop_policy": "play_once",
+      "relative_path": "a/2b60f7ff.gif",
+      "byte_length": 40758,
+      "sha256": "27ebf31554fb088aac683ec85949a97ffaf8b157bd34dbb4988f5e5c6bea3326"
+    },
+    {
+      "id": "workspaces_loop",
+      "version": 1,
+      "duration_ms": 4375,
+      "fallback_label": "FOLDER",
+      "loop_policy": "loop",
+      "relative_path": "a/b844443e.gif",
+      "byte_length": 36981,
+      "sha256": "7d129f534b8a048de520e07bac1a072d0da59ff0d7c5b0e2bc9f99f096c84d96"
+    },
+    {
+      "id": "wow",
+      "version": 1,
+      "duration_ms": 2583,
+      "fallback_label": "WOW",
+      "loop_policy": "play_once",
+      "relative_path": "a/22e8e504.gif",
+      "byte_length": 59155,
+      "sha256": "68b7dcc27529c9003c714d25feee412d4058a5250bbeef7f785d21e3fe7a01f6"
+    },
+    {
+      "id": "codex_in",
+      "version": 1,
+      "duration_ms": 2042,
+      "fallback_label": "CODEX",
+      "loop_policy": "play_once",
+      "relative_path": "a/323ff7c2.gif",
+      "byte_length": 78732,
+      "sha256": "36bfe7ca6a1ecefb73ac69e24e3a704df7e533bc93ee5c37dda1db642a5bc7fc"
+    },
+    {
+      "id": "codex_loop",
+      "version": 1,
+      "duration_ms": 1667,
+      "fallback_label": "CODEX",
+      "loop_policy": "loop",
+      "relative_path": "a/be0baa0f.gif",
+      "byte_length": 47430,
+      "sha256": "612968d89cbf7af3d60c7cd63877edd54738480c7556c5253521bde9c248e88d"
+    },
+    {
+      "id": "day_planned",
+      "version": 1,
+      "duration_ms": 6250,
+      "fallback_label": "PLANNED",
+      "loop_policy": "play_once",
+      "relative_path": "a/ac6f32d0.gif",
+      "byte_length": 365581,
+      "sha256": "fa8d716ed20ef09e9fb0575529b0b1e3f0eb78bc0dc9644331d68db19775dc33"
+    },
+    {
+      "id": "hello_disappointed",
+      "version": 1,
+      "duration_ms": 4250,
+      "fallback_label": "HELLO",
+      "loop_policy": "play_once",
+      "relative_path": "a/867ad27c.gif",
+      "byte_length": 90670,
+      "sha256": "f08dfe377cb95d2253ea22767c7128dc2ebf2e368183d1d797fd9631e59643f7"
+    },
+    {
+      "id": "claude_in",
+      "version": 1,
+      "duration_ms": 3708,
+      "fallback_label": "CLAUDE",
+      "loop_policy": "play_once",
+      "relative_path": "a/547c0037.gif",
+      "byte_length": 97640,
+      "sha256": "71b4b50de072974f9c2e72c63f4b4552f29a11fc3b818d64db858234ec8d52e2"
+    },
+    {
+      "id": "claude_loop",
+      "version": 1,
+      "duration_ms": 1667,
+      "fallback_label": "CLAUDE",
+      "loop_policy": "loop",
+      "relative_path": "a/12c5e086.gif",
+      "byte_length": 26424,
+      "sha256": "dbe81e7b1e47e7553ae31992f5f6a5b158ebe14d4d8929f6ceaf73dc429101e3"
+    },
+    {
+      "id": "taby_response_ready_in",
+      "version": 1,
+      "duration_ms": 1083,
+      "fallback_label": "TABY",
+      "loop_policy": "play_once",
+      "relative_path": "a/9d165367.gif",
+      "byte_length": 53734,
+      "sha256": "33e1302152441d1747bdb44c3f946c173b60e7168991ddd26d9dfa183cda5259"
+    },
+    {
+      "id": "taby_response_ready_loop",
+      "version": 1,
+      "duration_ms": 1250,
+      "fallback_label": "TABY",
+      "loop_policy": "loop",
+      "relative_path": "a/d3087456.gif",
+      "byte_length": 74561,
+      "sha256": "4d3530b36913d089960beab5488399eff26a8e34638820a2b47a67379542e179"
+    },
+    {
+      "id": "yeah",
+      "version": 1,
+      "duration_ms": 2333,
+      "fallback_label": "YEAH",
+      "loop_policy": "play_once",
+      "relative_path": "a/a87f43aa.gif",
+      "byte_length": 99398,
+      "sha256": "88cd8c4702555559ce6cdcf11d1f9de7a3f19782d9d39045144f39b8a381ab1b"
+    },
+    {
+      "id": "no",
+      "version": 1,
+      "duration_ms": 4333,
+      "fallback_label": "NO",
+      "loop_policy": "play_once",
+      "relative_path": "a/62366ffa.gif",
+      "byte_length": 253187,
+      "sha256": "e661acc910e308264f9dff093cf7f3602bcdfcafaef9293e853ad8d04f9e647f"
+    },
+    {
+      "id": "review",
+      "version": 1,
+      "duration_ms": 2000,
+      "fallback_label": "REVIEW",
+      "loop_policy": "play_once",
+      "relative_path": "a/225772e1.gif",
+      "byte_length": 117234,
+      "sha256": "ab3b648e4952f1cd06ef988d61ef286b79d6e5be6f0845749deb9ffd23e6510f"
+    },
+    {
+      "id": "searching_loop",
+      "version": 1,
+      "duration_ms": 1000,
+      "fallback_label": "SEARCHING",
+      "loop_policy": "loop",
+      "relative_path": "a/4bbe8926.gif",
+      "byte_length": 92932,
+      "sha256": "5cbe6848c7e18b03966db611fd72a103da57506bf542fc92a31df5e8b0a3c067"
+    }
+  ]
+}
