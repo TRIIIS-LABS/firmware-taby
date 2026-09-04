@@ -16,18 +16,18 @@ def copy_dependency_notices(destination, description):
     paths = description.get("build_component_paths", [])
     for directory in paths:
         component = Path(directory)
-        for source in sorted(component.rglob("*")):
-            if not source.is_file():
-                continue
-            name = source.name.upper()
-            if not name.startswith(("LICENSE", "LICENCE", "COPYING", "NOTICE")):
-                continue
-            # Preserve text license documents, not executable names or pictures.
-            if source.suffix.lower() not in ("", ".txt", ".md", ".rst"):
-                continue
-            target = destination / "licenses" / component.name / source.relative_to(component)
-            target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(source, target)
+        for current, _, names in os.walk(component):
+            for name in sorted(names):
+                upper = name.upper()
+                if not upper.startswith(("LICENSE", "LICENCE", "COPYING", "NOTICE")):
+                    continue
+                source = Path(current) / name
+                # Preserve text license documents, not executable names or pictures.
+                if source.suffix.lower() not in ("", ".txt", ".md", ".rst"):
+                    continue
+                target = destination / "licenses" / component.name / source.relative_to(component)
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(source, target)
     idf_license = Path(os.environ.get("IDF_PATH", "")) / "LICENSE"
     if idf_license.is_file():
         target = destination / "licenses/esp-idf/LICENSE"
