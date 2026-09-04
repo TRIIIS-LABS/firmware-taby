@@ -47,6 +47,30 @@ def check_assets(board):
     print(f"{board}: {len(index)} animations, icons, catalog hashes and partition layout verified")
 
 
+def check_hardware_catalog():
+    catalog = json.loads((ROOT / "hardware/catalog.json").read_text())
+    if catalog.get("schema") != "taby-hardware-v1":
+        raise ValueError("Unsupported hardware catalog schema")
+    targets = {(item.get("board"), item.get("revision")): item
+               for item in catalog.get("targets", [])}
+    if len(targets) != len(catalog.get("targets", [])):
+        raise ValueError("Duplicate hardware catalog target")
+    expected = {(board, profile["revision"]) for board, profile in BOARDS.items()}
+    if set(targets) != expected:
+        raise ValueError("Hardware catalog targets do not match supported boards")
+    for board, profile in BOARDS.items():
+        target = targets[(board, profile["revision"])]
+        display = target.get("display", {})
+        if (display.get("width_px"), display.get("height_px")) != (profile["width"], profile["height"]):
+            raise ValueError(f"{board}: hardware catalog display geometry mismatch")
+        if target.get("status") not in ("planned", "prototype", "verified"):
+            raise ValueError(f"{board}: invalid hardware model status")
+        if not isinstance(target.get("models"), list):
+            raise ValueError(f"{board}: hardware models must be a list")
+    print("hardware: board revisions and display geometry verified")
+
+
 if __name__ == "__main__":
     for board in BOARDS:
         check_assets(board)
+    check_hardware_catalog()

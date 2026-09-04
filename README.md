@@ -47,9 +47,22 @@ Humans can follow the same [installation guide](INSTALL.md). The guide also
 covers missing COM ports, USB drivers, bootloader mode, and recovery.
 
 Prebuilt bundles belong in [GitHub Releases](https://github.com/TRIIIS-LABS/firmware-taby/releases).
-Until the first public release is published, use the documented
-[source-build path](firmware/README.md#build-from-source); do not substitute an
-unrelated ESP32 image or an old factory dump.
+The current binaries are in the [v1.0.8 release](https://github.com/TRIIIS-LABS/firmware-taby/releases/tag/v1.0.8).
+Use the documented [source-build path](firmware/README.md#build-from-source)
+when developing firmware; do not substitute an unrelated ESP32 image or an old
+factory dump.
+
+## Print a case
+
+Cases and other printable parts live under [hardware](hardware/README.md). A
+model is compatible only with the exact board and hardware revision named in
+its catalog entry. Screen shape and opening, PCB outline, USB connector,
+buttons, antenna clearance, and mounting points are all part of that target.
+
+No printable model has been published yet. The hardware catalog says this
+explicitly so a person or agent will not silently use a case for the wrong
+display. Future contributions should include editable CAD, ready-to-print
+files, print settings, and physical fit-test evidence.
 
 ## Contribute
 
@@ -70,6 +83,7 @@ third-party sources and retain their notices.
 
 - `firmware/`: ESP-IDF source and the two hardware targets.
 - `assets/`: the complete runtime animation/icon packs needed to reproduce builds.
+- `hardware/`: board-specific cases and other printable physical parts.
 - `tools/`: serial setup, installation, builds, integrity checks, and release packaging.
 - `tests/`: installation checks that do not touch hardware.
 

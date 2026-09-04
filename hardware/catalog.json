@@ -1,0 +1,27 @@
+{
+  "schema": "taby-hardware-v1",
+  "targets": [
+    {
+      "board": "amoled-1.64",
+      "revision": "V1",
+      "display": {
+        "shape": "rectangle",
+        "width_px": 280,
+        "height_px": 456
+      },
+      "models": [],
+      "status": "planned"
+    },
+    {
+      "board": "round-1.32",
+      "revision": "original",
+      "display": {
+        "shape": "round",
+        "width_px": 466,
+        "height_px": 466
+      },
+      "models": [],
+      "status": "planned"
+    }
+  ]
+}
