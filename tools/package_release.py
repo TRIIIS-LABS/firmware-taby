@@ -15,7 +15,11 @@ def copy_dependency_notices(destination, description):
     """Ship upstream license files alongside statically linked binary images."""
     paths = description.get("build_component_paths", [])
     for directory in paths:
+        if not directory:
+            continue
         component = Path(directory)
+        if not component.is_dir():
+            continue
         for current, _, names in os.walk(component):
             for name in sorted(names):
                 upper = name.upper()
