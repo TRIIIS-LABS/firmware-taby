@@ -43,19 +43,21 @@ You'll need a supported board and a **USB data cable**.
 <h3>Taby 1.64</h3>
 <p>The rectangular one.<br>280 × 456 AMOLED · 84 animations</p>
 <p><strong>Waveshare ESP32-S3-Touch-AMOLED-1.64</strong></p>
-<p><a href="https://www.waveshare.com/product/esp32-s3-touch-amoled-1.64.htm">Get the board ↗</a> &nbsp;·&nbsp; <a href="#a-home-for-your-taby">Print its case</a></p>
+<p><a href="https://www.waveshare.com/esp32-s3-touch-amoled-1.64.htm?&amp;aff_id=134369">Get the board ↗</a> &nbsp;·&nbsp; <a href="#a-home-for-your-taby">Print its case</a></p>
 </td>
 <td width="430" valign="top">
 <h3>Taby Round 1.32</h3>
 <p>The round little one.<br>466 × 466 AMOLED · 27 animations</p>
 <p><strong>Waveshare ESP32-S3-Touch-AMOLED-1.32</strong></p>
-<p><a href="https://www.waveshare.com/product/esp32-s3-touch-amoled-1.32.htm">Get the board ↗</a> &nbsp;·&nbsp; Case coming soon</p>
+<p><a href="https://www.waveshare.com/esp32-s3-touch-amoled-1.32.htm?&amp;aff_id=134369">Get the board ↗</a> &nbsp;·&nbsp; Case coming soon</p>
 </td>
 </tr>
 </table>
 
 **More screens coming soon.** Check [board compatibility](INSTALL.md) before buying.
-<!-- Replace store links with affiliate URLs and disclose the commission when available. -->
+
+**Affiliate disclosure:** The Waveshare board links above are affiliate links.
+Purchases through them may earn us a commission and help support Taby development.
 
 ---
 
@@ -171,3 +173,4 @@ don't rebrand the face or animations as your own different character or product.
 [Third-party credits](firmware/NOTICE).
 
 <p align="center">A little more personality on your desk. <a href="https://www.heytaby.com">Hey Taby ↗</a></p>
+
