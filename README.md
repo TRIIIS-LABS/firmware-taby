@@ -1,19 +1,17 @@
 <a id="start-here"></a>
 
-<p align="center">
-  <a href="https://www.heytaby.com"><img src=".github/confirmation.gif" width="228" alt="Taby celebrating with its confirmation animation"></a>
-</p>
+<a href="https://www.heytaby.com"><img align="right" src=".github/confirmation.gif" width="228" alt="Taby celebrating with its confirmation animation"></a>
 
-<h1 align="center">Physical Taby</h1>
-<p align="center"><strong>A tiny companion for your desk. Made by you.</strong></p>
-<p align="center">
+<h1>Physical Taby</h1>
+<p><strong>A tiny companion for your desk. Made by you.</strong></p>
+<p>
   <a href="https://www.heytaby.com">Meet Taby</a> &nbsp;·&nbsp;
-  <a href="https://www.heytaby.com/setup">Get the desktop app</a> &nbsp;·&nbsp;
+  <a href="https://www.heytaby.com/setup">Get the desktop app</a><br>
   <a href="#bring-taby-to-life">Install firmware</a> &nbsp;·&nbsp;
   <a href="https://github.com/TRIIIS-LABS/firmware-taby/releases/download/prints-1.64-1.0.0/taby-1.64-print-pack-1.0.0.zip">Download 3D print files</a>
 </p>
 
-<br>
+<br clear="right">
 
 **Hello, little desk buddy.** Taby brings a friendly face to your setup. The
 [Taby desktop app](https://www.heytaby.com/setup) is where chat, tasks, habits,
