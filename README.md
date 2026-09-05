@@ -1,109 +1,147 @@
-# Physical Taby
+<a id="start-here"></a>
 
-Put Taby on your desk. This repository contains the ESP32 firmware, animations,
-and **3D-printable cases** for Physical Taby. Use it with the **Taby app**, or control it from your own
-personal projects using the [device commands](firmware/README.md#talk-to-taby).
-We maintain the Taby app integration; community integrations are maintained by
-their authors.
+<p align="center">
+  <a href="https://www.heytaby.com"><img src=".github/taby.svg" width="88" alt="Taby's smiling face"></a>
+</p>
 
-## Start here
+<h1 align="center">Physical Taby</h1>
+<p align="center"><strong>A tiny companion for your desk. Made by you.</strong></p>
+<p align="center">
+  <a href="https://www.heytaby.com">Meet Taby</a> &nbsp;·&nbsp;
+  <a href="https://www.heytaby.com/setup">Get the desktop app</a> &nbsp;·&nbsp;
+  <a href="#bring-taby-to-life">Install firmware</a> &nbsp;·&nbsp;
+  <a href="https://github.com/TRIIIS-LABS/firmware-taby/releases/download/prints-1.64-1.0.0/taby-1.64-print-pack-1.0.0.zip">Download 3D print files</a>
+</p>
 
-| What would you like to do? | Go here |
-| --- | --- |
-| **Install Taby on your device** | [Install firmware with your AI agent](#install-with-your-ai-agent) |
-| **3D print the 1.64-inch case** | **[Download all print files (ZIP)](https://github.com/TRIIIS-LABS/firmware-taby/releases/download/prints-1.64-1.0.0/taby-1.64-print-pack-1.0.0.zip)** · [Printing instructions](hardware/README.md) |
-| **3D print the round 1.32-inch case** | Coming soon |
+<br>
 
-The print ZIP includes **STL parts, the 3MF project, and G-code**.
+**Hello, little desk buddy.** Taby brings a friendly face to your setup. The
+[Taby desktop app](https://www.heytaby.com/setup) is where chat, tasks, habits,
+and focus timers live; the little screen gives your companion a place on your desk.
 
-## Supported displays
+This is the DIY home for Physical Taby: **firmware, animations, and printable
+cases**. Bring a supported Waveshare screen and a USB data cable. Add a case
+if you'd like, then make it your own.
 
-| Display | Supported hardware | Screen | Get the board |
-| --- | --- | --- | --- |
-| **Taby 1.64** | Waveshare ESP32-S3-Touch-AMOLED-1.64 **V1** | Rectangle, 280 × 456 | [Waveshare](https://www.waveshare.com/product/esp32-s3-touch-amoled-1.64.htm) |
-| **Taby Round 1.32** | Waveshare ESP32-S3-Touch-AMOLED-1.32 | Round, 466 × 466 | [Waveshare](https://www.waveshare.com/product/esp32-s3-touch-amoled-1.32.htm) |
+<a id="supported-displays"></a>
 
-Both implementations have been tested on physical boards by the maintainer.
-The firmware source here is **1.0.8**.
-The round board has 8 MB flash and a smaller, 27-animation pack; the 1.64 has
-16 MB flash and an 84-animation pack. They require different firmware bundles.
+## Pick your little screen
 
-**Check the 1.64 revision before buying.** Waveshare's V2 has different pins and
-is not supported by this release. V1's revision marking is at the top of the PCB;
-V2's is beside the right-hand headers. A product link alone does not guarantee
-which revision a seller ships. See [Waveshare's revision guide](https://docs.waveshare.com/ESP32-S3-Touch-AMOLED-1.64).
-<!-- When affiliate URLs are available, replace these product links and add
-a short commission disclosure beside them. Do not invent affiliate URLs. -->
+<table>
+<tr>
+<td width="50%" valign="top">
+<h3>Taby 1.64</h3>
+<p>The rectangular one.<br>280 × 456 AMOLED · 84 animations</p>
+<p><strong>Waveshare ESP32-S3-Touch-AMOLED-1.64, V1</strong></p>
+<p><a href="https://www.waveshare.com/product/esp32-s3-touch-amoled-1.64.htm">Get the board ↗</a> &nbsp;·&nbsp; <a href="#a-home-for-your-taby">Print its case</a></p>
+</td>
+<td width="50%" valign="top">
+<h3>Taby Round 1.32</h3>
+<p>The round little one.<br>466 × 466 AMOLED · 27 animations</p>
+<p><strong>Waveshare ESP32-S3-Touch-AMOLED-1.32</strong></p>
+<p><a href="https://www.waveshare.com/product/esp32-s3-touch-amoled-1.32.htm">Get the board ↗</a> &nbsp;·&nbsp; Case coming soon</p>
+</td>
+</tr>
+</table>
 
-## 3D print your case
+**Buying the 1.64? Choose V1.** The newer V2 needs different firmware and isn't
+supported yet. [How to tell them apart](https://docs.waveshare.com/ESP32-S3-Touch-AMOLED-1.64).
+Already have a board? The install guide reads it first and helps identify it.
+<!-- Replace store links with affiliate URLs and disclose the commission when available. -->
 
-**[Download the Taby 1.64 case - STL, 3MF & G-code (ZIP)](https://github.com/TRIIIS-LABS/firmware-taby/releases/download/prints-1.64-1.0.0/taby-1.64-print-pack-1.0.0.zip)**
+<a id="print-a-case"></a>
+<a id="3d-print-your-case"></a>
 
-<a href="hardware/README.md"><img src="hardware/amoled-1.64/V1/desktop-case/preview.png" alt="Printable Taby 1.64 case: base, back, and handle" width="260"></a>
+## A home for your Taby
 
-Print the base, back, and handle for your **1.64-inch rectangular Taby**.
-[Printing instructions and printer settings](hardware/README.md) ·
-[Individual STL, 3MF, and G-code files](hardware/amoled-1.64/V1/desktop-case)
+<img align="right" src="hardware/amoled-1.64/V1/desktop-case/preview.png" width="190" alt="The printable base, back, and handle for Taby 1.64">
 
-The supplied G-code is for **Bambu P1S, 0.4 mm nozzle**. The 3MF currently selects
-an **A1 mini** profile; choose your actual printer before slicing. V2 case fit
-has not been established.
+A little case, printed in your favorite color. The **1.64-inch print pack**
+includes the base, back, and handle, ready to open in your slicer.
 
-**Round 1.32-inch case: coming soon.** It will have its own print files.
+**[↓ Download the complete print pack](https://github.com/TRIIIS-LABS/firmware-taby/releases/download/prints-1.64-1.0.0/taby-1.64-print-pack-1.0.0.zip)**
 
-## Install with your AI agent
+STL parts · 3MF project · individual and all-parts G-code
 
-Connect the board with a **USB data cable**, then copy this prompt into an agent
-that can run commands on your computer:
+[Printing guide](hardware/README.md) · [Browse individual files](hardware/amoled-1.64/V1/desktop-case)
+
+**Round 1.32 case: coming soon.**
+
+The G-code is for a **Bambu P1S, 0.4 mm nozzle**. The 3MF selects an A1 mini
+profile; choose your actual printer before slicing. V2 case fit isn't established.
+
+<br clear="right">
+
+<a id="install-with-your-ai-agent"></a>
+
+## Bring Taby to life
+
+Connect your screen with a **USB data cable**. Copy this into an AI agent that
+can run commands on your computer:
 
 ```text
-Install Physical Taby on my connected device by following:
+Help me install Physical Taby on my connected device.
+Read and follow this guide:
 https://github.com/TRIIIS-LABS/firmware-taby/blob/main/INSTALL.md
 
-Read the guide first. Identify my operating system, install the ESP32 flashing
-and serial dependencies, and resolve any missing USB driver or serial permission.
-Run the guide's read-only device identification first. Reuse a supported target
-from an already working Taby; ask about the PCB revision only if it remains
-uncertain. Get the matching official firmware and animation bundle,
-validate it, install it, and verify the running device. Guide me through any
-physical button presses. Then help me use it with the Taby app. Do not change
-firmware source just to perform an installation.
+Install any missing USB/ESP32 tools, read the device to identify its board,
+ask me only if its revision remains uncertain, and install the matching
+release. Verify it and play an animation so I can check the screen.
+Then help me connect it to the Taby desktop app.
 ```
 
-Humans can follow the same [installation guide](INSTALL.md). The guide also
-covers missing COM ports, USB drivers, bootloader mode, and recovery.
+Prefer doing it yourself? **[Follow the installation guide →](INSTALL.md)**
 
-Prebuilt bundles belong in [GitHub Releases](https://github.com/TRIIIS-LABS/firmware-taby/releases).
-The current binaries are in the [v1.0.8 release](https://github.com/TRIIIS-LABS/firmware-taby/releases/tag/v1.0.8).
-Use the documented [source-build path](firmware/README.md#build-from-source)
-when developing firmware; do not substitute an unrelated ESP32 image or an old
-factory dump.
+The guide covers setup, USB drivers, board selection, flashing, and recovery.
+Current firmware: **[1.0.8](https://github.com/TRIIIS-LABS/firmware-taby/releases/tag/v1.0.8)**.
+Both supported boards have been tested by the maintainer; each has its own bundle.
 
-## Contribute
+## Better together
 
-People and AI agents use the same workflow: fork, create a branch, make a focused
-change, and open a pull request. Read [firmware/README.md](firmware/README.md)
-before editing. Run `python tools/check.py` and
-`python -m unittest discover -s tests -v`, then build both supported boards.
-State which physical board you tested; a successful build is not a hardware test.
+Use Physical Taby with the **[Taby desktop app](https://www.heytaby.com/setup)**
+for the maintained companion integration. Visit **[heytaby.com](https://www.heytaby.com)**
+to meet Taby, explore the software, and see it on people's desks.
 
-Keep the existing USB/Bluetooth/Wi-Fi command grammar compatible with Taby.
-New boards need their own configuration, asset pack, and hardware test evidence;
-shared device behavior stays shared. See [adding a board](firmware/README.md#add-a-board).
-Never contribute factory records, device secrets, private keys, or personal logs.
-Contributions use the license applicable to the files being changed; disclose
-third-party sources and retain their notices.
+Building your own project? You're welcome to control the device yourself.
+The [device commands](firmware/README.md#talk-to-taby) explain animations,
+text cards, choices, and connections. Community integrations are maintained
+by their authors. App connection details and current MCP availability are in
+[the install guide](INSTALL.md#5-use-it-with-taby).
 
-## What's in the repository?
+## Make something lovely
 
-- `firmware/`: ESP-IDF source and the two hardware targets.
-- `assets/`: the complete runtime animation/icon packs needed to reproduce builds.
-- `hardware/`: board-specific cases and other printable physical parts.
-- `tools/`: serial setup, installation, builds, integrity checks, and release packaging.
-- `tests/`: installation checks that do not touch hardware.
+New animations, cases, supported boards, and thoughtful fixes are welcome.
+Humans and AI agents contribute through the same pull-request workflow.
 
-Code is Apache-2.0, with existing third-party licenses preserved. Taby character
-artwork has separate terms in [LICENSE](LICENSE): use it in your personal
-projects and keep its identity as Taby; do not rebrand the face or animations as
-your own different character or product. Third-party credits are in
-[firmware/NOTICE](firmware/NOTICE).
+[Work on firmware](firmware/README.md) · [Contribute a print](hardware/README.md#for-agents-and-contributors) · [Add a board](firmware/README.md#add-a-board)
+
+<details>
+<summary><strong>Contributor notes & repository map</strong></summary>
+
+Fork, create a branch, make a focused change, and open a pull request. Read the
+firmware guide before editing. For firmware or tooling changes, run
+`python tools/check.py` and `python -m unittest discover -s tests -v`, then build
+both supported boards. State which physical board you tested; a build alone
+is not a hardware test.
+
+Keep existing USB/Bluetooth/Wi-Fi commands compatible. New boards need their
+own configuration, asset pack, and physical test evidence. Keep shared behavior
+shared, preserve third-party credits, and never contribute device secrets,
+factory records, private keys, or personal logs.
+
+- `firmware/` — ESP-IDF source and board configurations.
+- `assets/` — animation and icon packs used by the firmware.
+- `hardware/` — printable cases and other physical parts.
+- `tools/` — USB setup, installation, builds, and integrity checks.
+- `tests/` — checks that don't touch physical hardware.
+
+</details>
+
+<br>
+
+Code and original mechanical designs are **Apache-2.0**. Taby artwork has its
+own [license terms](LICENSE): use it in your personal projects and keep it Taby;
+don't rebrand the face or animations as your own different character or product.
+[Third-party credits](firmware/NOTICE).
+
+<p align="center">A little more personality on your desk. <a href="https://www.heytaby.com">Hey Taby ↗</a></p>
