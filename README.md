@@ -1,7 +1,7 @@
 <a id="start-here"></a>
 
 <p align="center">
-  <a href="https://www.heytaby.com"><img src=".github/taby.svg" width="88" alt="Taby's smiling face"></a>
+  <a href="https://www.heytaby.com"><img src=".github/confirmation.gif" width="228" alt="Taby celebrating with its confirmation animation"></a>
 </p>
 
 <h1 align="center">Physical Taby</h1>
@@ -23,16 +23,18 @@ This is the DIY home for Physical Taby: **firmware, animations, and printable
 cases**. Bring a supported Waveshare screen and a USB data cable. Add a case
 if you'd like, then make it your own.
 
+---
+
 <a id="supported-displays"></a>
 
-## Pick your little screen
+## 🖥️ Supported boards
 
 <table>
 <tr>
 <td width="50%" valign="top">
 <h3>Taby 1.64</h3>
 <p>The rectangular one.<br>280 × 456 AMOLED · 84 animations</p>
-<p><strong>Waveshare ESP32-S3-Touch-AMOLED-1.64, V1</strong></p>
+<p><strong>Waveshare ESP32-S3-Touch-AMOLED-1.64</strong></p>
 <p><a href="https://www.waveshare.com/product/esp32-s3-touch-amoled-1.64.htm">Get the board ↗</a> &nbsp;·&nbsp; <a href="#a-home-for-your-taby">Print its case</a></p>
 </td>
 <td width="50%" valign="top">
@@ -44,15 +46,18 @@ if you'd like, then make it your own.
 </tr>
 </table>
 
-**Buying the 1.64? Choose V1.** The newer V2 needs different firmware and isn't
-supported yet. [How to tell them apart](https://docs.waveshare.com/ESP32-S3-Touch-AMOLED-1.64).
-Already have a board? The install guide reads it first and helps identify it.
+**More screens are coming!** These are our first two supported displays.
+The [installation guide](INSTALL.md) helps your agent identify the board and
+check compatibility before installing. Buying a board? Check that guide first.
 <!-- Replace store links with affiliate URLs and disclose the commission when available. -->
+
+---
 
 <a id="print-a-case"></a>
 <a id="3d-print-your-case"></a>
+<a id="a-home-for-your-taby"></a>
 
-## A home for your Taby
+## 🏡 3D print your case
 
 <img align="right" src="hardware/amoled-1.64/V1/desktop-case/preview.png" width="190" alt="The printable base, back, and handle for Taby 1.64">
 
@@ -68,13 +73,16 @@ STL parts · 3MF project · individual and all-parts G-code
 **Round 1.32 case: coming soon.**
 
 The G-code is for a **Bambu P1S, 0.4 mm nozzle**. The 3MF selects an A1 mini
-profile; choose your actual printer before slicing. V2 case fit isn't established.
+profile; choose your actual printer before slicing. See the printing guide for fit details.
 
 <br clear="right">
 
-<a id="install-with-your-ai-agent"></a>
+---
 
-## Bring Taby to life
+<a id="install-with-your-ai-agent"></a>
+<a id="bring-taby-to-life"></a>
+
+## ✨ How to install
 
 Connect your screen with a **USB data cable**. Copy this into an AI agent that
 can run commands on your computer:
@@ -85,7 +93,7 @@ Read and follow this guide:
 https://github.com/TRIIIS-LABS/firmware-taby/blob/main/INSTALL.md
 
 Install any missing USB/ESP32 tools, read the device to identify its board,
-ask me only if its revision remains uncertain, and install the matching
+ask me only if its identity remains uncertain, and install the matching
 release. Verify it and play an animation so I can check the screen.
 Then help me connect it to the Taby desktop app.
 ```
@@ -96,7 +104,9 @@ The guide covers setup, USB drivers, board selection, flashing, and recovery.
 Current firmware: **[1.0.8](https://github.com/TRIIIS-LABS/firmware-taby/releases/tag/v1.0.8)**.
 Both supported boards have been tested by the maintainer; each has its own bundle.
 
-## Better together
+---
+
+## 💛 Meet the Taby app
 
 Use Physical Taby with the **[Taby desktop app](https://www.heytaby.com/setup)**
 for the maintained companion integration. Visit **[heytaby.com](https://www.heytaby.com)**
@@ -108,7 +118,9 @@ text cards, choices, and connections. Community integrations are maintained
 by their authors. App connection details and current MCP availability are in
 [the install guide](INSTALL.md#5-use-it-with-taby).
 
-## Make something lovely
+---
+
+## 🌱 Contribute
 
 New animations, cases, supported boards, and thoughtful fixes are welcome.
 Humans and AI agents contribute through the same pull-request workflow.
@@ -137,7 +149,7 @@ factory records, private keys, or personal logs.
 
 </details>
 
-<br>
+---
 
 Code and original mechanical designs are **Apache-2.0**. Taby artwork has its
 own [license terms](LICENSE): use it in your personal projects and keep it Taby;
