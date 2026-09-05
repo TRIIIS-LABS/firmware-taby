@@ -18,9 +18,11 @@
 </tr>
 </table>
 
-**Taby is a new kind of personal computer.** The [app](https://www.heytaby.com/setup)
-works on its own. Want a physical Taby on your desk too? Build one with the
-**firmware, animations, and case files** here.
+**Taby is your personal AI assistant and computer buddy.** Chat, manage tasks,
+set reminders, and stay focused with the [Taby app](https://www.heytaby.com/setup).
+
+The app works on its own. Want Taby on your desk too? This repo has the
+**firmware, animations, and case files** to build a physical Taby.
 
 **Let's make one:** [1. Choose your board](#supported-displays) →
 [2. Install the firmware](#bring-taby-to-life) →
