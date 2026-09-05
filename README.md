@@ -110,14 +110,18 @@ Your board needs a case. Choose one for your screen, or design your own.
 <p><strong><a href="https://github.com/TRIIIS-LABS/firmware-taby/releases/download/prints-1.64-1.0.0/taby-1.64-print-pack-1.0.0.zip">↓ Download the print pack</a></strong></p>
 <p><a href="hardware/README.md">Printing guide</a> &nbsp;·&nbsp; <a href="hardware/amoled-1.64/V1/desktop-case">Individual files</a></p>
 <hr>
-<p>🌼 More 1.64 case designs coming soon.</p>
+<p>– Star variation (coming soon)<br>
+– Flower variation (coming soon)<br>
+– Spaceship variation (coming soon)</p>
 </td>
 <td width="430" valign="top">
 <h3>Taby Round 1.32 cases</h3>
 <h4>Round case · Coming soon</h4>
 <p>Print files aren't available yet.</p>
 <hr>
-<p>🌼 More round case designs coming soon.</p>
+<p>– Star variation (coming soon)<br>
+– Flower variation (coming soon)<br>
+– Spaceship variation (coming soon)</p>
 </td>
 </tr>
 </table>
