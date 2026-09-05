@@ -1,0 +1,100 @@
+{
+  "schema": "taby-print-v1",
+  "id": "desktop-case",
+  "version": "1.0.0",
+  "board": "amoled-1.64",
+  "revision": "V1",
+  "status": "prototype",
+  "availability": "available",
+  "compatibility_notes": "Supplied by the maintainer for the 1.64-inch Taby. Filed under the current V1 target; exact PCB revision fit has not been independently recorded. V2 fit is not established. Not for round-1.32.",
+  "fit_test": {
+    "status": "not_recorded"
+  },
+  "source_archive_sha256": "63919ee3e142721b78ebc9abbe118d42cbc06ef3cf7b91d2dcb7093ce5052574",
+  "units": "mm",
+  "printer_profiles": {
+    "bambu-p1s-0.4": {
+      "printer": "Bambu Lab P1S",
+      "nozzle_mm": 0.4,
+      "material": "PLA",
+      "nominal_layer_height_mm": 0.2,
+      "variable_layer_heights": true,
+      "infill": "15%",
+      "supports": "manual tree supports enabled",
+      "slicer": "Bambu Studio 02.05.00.66",
+      "source": "G-code configuration headers"
+    },
+    "bambu-a1-mini-0.4": {
+      "printer": "Bambu Lab A1 mini",
+      "nozzle_mm": 0.4,
+      "material": "PLA",
+      "nominal_layer_height_mm": 0.2,
+      "infill": "25%",
+      "supports": "manual tree supports enabled",
+      "source": "3MF project settings"
+    }
+  },
+  "assembly_notes": "Contains base, back and handle. Assembly instructions and required additional hardware have not been supplied.",
+  "cad_notes": "The 3MF contains editable mesh placement and a subtractive cylinder modifier. Native parametric CAD/STEP was not supplied; STLs do not carry project modifiers.",
+  "files": [
+    {
+      "file": "base.stl",
+      "source_file": "base_stl.stl",
+      "size": 415084,
+      "sha256": "ff85a37cfac96d31ace5d715164c11aaa26a75c02fbfc24679b26773978c362e"
+    },
+    {
+      "file": "back.stl",
+      "source_file": "back.stl",
+      "size": 366484,
+      "sha256": "9895587b17161e9b83473810740437cd9d9c232e1c447c364c47b741a1d5b3d5"
+    },
+    {
+      "file": "handle.stl",
+      "source_file": "hand_stl.stl",
+      "size": 176884,
+      "sha256": "dae9ad345ef98c330da4caab6e2882ca0b04ecd7fab8b1f7b2cd4aba8910cebe"
+    },
+    {
+      "file": "case.3mf",
+      "source_file": "print all.3mf",
+      "size": 296012,
+      "sha256": "78381fbc4bbd169f98ed92ed77046b9019f500131c1e131acbc0a139ee64f119",
+      "printer_profile": "bambu-a1-mini-0.4"
+    },
+    {
+      "file": "gcode/bambu-p1s-0.4/base.gcode",
+      "source_file": "bae.gcode",
+      "size": 2486209,
+      "sha256": "e70d03ff76566b74f07e4e9e9bcf7676bf3ceacbfcf79d40984249ff2bb6fc53",
+      "printer_profile": "bambu-p1s-0.4"
+    },
+    {
+      "file": "gcode/bambu-p1s-0.4/back.gcode",
+      "source_file": "back_print.gcode",
+      "size": 675560,
+      "sha256": "20c944137878197591aa43744cb4533c7094f46ab7665e4717be7354f2828bae",
+      "printer_profile": "bambu-p1s-0.4"
+    },
+    {
+      "file": "gcode/bambu-p1s-0.4/handle.gcode",
+      "source_file": "hand_print.gcode",
+      "size": 705566,
+      "sha256": "be312e91e08f565e8f7145f2096201a1d5d0e34aff32cd20ab2910c09b91f9ef",
+      "printer_profile": "bambu-p1s-0.4"
+    },
+    {
+      "file": "gcode/bambu-p1s-0.4/all-parts.gcode",
+      "source_file": "print_all_gcode.gcode",
+      "size": 3809674,
+      "sha256": "d7cbe3ae86d97b674636a983b6f41ed239b4c05038e1d653178709882927d0e3",
+      "printer_profile": "bambu-p1s-0.4"
+    },
+    {
+      "file": "preview.png",
+      "source_file": "print all.3mf:Metadata/plate_1.png",
+      "size": 11886,
+      "sha256": "4e2bddb9a68b0da89395e91a506dcb060a09857711e1b9b2144425f04f2a1182"
+    }
+  ]
+}

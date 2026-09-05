@@ -67,6 +67,20 @@ def check_hardware_catalog():
             raise ValueError(f"{board}: invalid hardware model status")
         if not isinstance(target.get("models"), list):
             raise ValueError(f"{board}: hardware models must be a list")
+        for model in target["models"]:
+            manifest_path = inside(ROOT / "hardware", model["manifest"])
+            manifest = json.loads(manifest_path.read_text())
+            if (manifest.get("schema"), manifest.get("board"), manifest.get("revision")) != (
+                    "taby-print-v1", board, profile["revision"]):
+                raise ValueError(f"{board}: print manifest target mismatch")
+            if manifest.get("id") != model["id"] or manifest.get("version") != model["version"]:
+                raise ValueError(f"{board}: print catalog/manifest mismatch")
+            if not manifest.get("files"):
+                raise ValueError(f"{board}: empty print pack")
+            for entry in manifest["files"]:
+                path = inside(manifest_path.parent, entry["file"])
+                if path.stat().st_size != entry["size"] or sha256(path) != entry["sha256"]:
+                    raise ValueError(f"{board}: print file integrity failed: {entry['file']}")
     print("hardware: board revisions and display geometry verified")
 
 

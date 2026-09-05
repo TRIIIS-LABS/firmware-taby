@@ -9,8 +9,16 @@
         "width_px": 280,
         "height_px": 456
       },
-      "models": [],
-      "status": "planned"
+      "models": [
+        {
+          "id": "desktop-case",
+          "name": "Taby 1.64 case",
+          "version": "1.0.0",
+          "manifest": "amoled-1.64/V1/desktop-case/print.json",
+          "availability": "available"
+        }
+      ],
+      "status": "prototype"
     },
     {
       "board": "round-1.32",
@@ -21,7 +29,8 @@
         "height_px": 466
       },
       "models": [],
-      "status": "planned"
+      "status": "planned",
+      "availability": "coming_soon"
     }
   ]
 }

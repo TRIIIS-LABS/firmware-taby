@@ -6,3 +6,7 @@
 *.gif binary
 *.a4 binary
 *.bin binary
+*.stl binary
+*.3mf binary
+*.png binary
+*.gcode -text

@@ -60,10 +60,13 @@ model is compatible only with the exact board and hardware revision named in
 its catalog entry. Screen shape and opening, PCB outline, USB connector,
 buttons, antenna clearance, and mounting points are all part of that target.
 
-No printable model has been published yet. The hardware catalog says this
-explicitly so a person or agent will not silently use a case for the wrong
-display. Future contributions should include editable CAD, ready-to-print
-files, print settings, and physical fit-test evidence.
+**Taby 1.64:** [download the print pack](https://github.com/TRIIIS-LABS/firmware-taby/releases/download/prints-1.64-1.0.0/taby-1.64-print-pack-1.0.0.zip)
+or [browse the files](hardware/amoled-1.64/V1/desktop-case). Includes base, back,
+and handle STLs, a 3MF project, and Bambu P1S 0.4 mm G-code. The 3MF currently
+selects an A1 mini profile: choose your actual printer before slicing.
+
+**Taby Round 1.32:** coming soon. The 1.64 case is not for the round display.
+See the [print guide](hardware/README.md) for settings and revision fit notes.
 
 ## Contribute
 

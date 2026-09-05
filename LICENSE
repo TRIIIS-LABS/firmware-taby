@@ -1,10 +1,11 @@
 Physical Taby licensing
 Copyright 2026 TRIIIS LABS and contributors
 
-1. Code and documentation
+1. Code, documentation, and mechanical designs
 
 Except for the artwork and third-party materials identified below, the firmware,
-host tools, tests, and documentation are licensed under the Apache License,
+host tools, tests, documentation, and original mechanical designs under hardware/
+are licensed under the Apache License,
 Version 2.0, reproduced below. Contributions to those files are submitted under
 that license. Existing third-party copyright and license notices remain in force;
 see firmware/NOTICE. This file does not relicense third-party materials.
