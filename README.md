@@ -1,10 +1,20 @@
 # Physical Taby
 
-Put Taby on your desk. This repository contains the ESP32 firmware and animations
-for Physical Taby. Use it with the **Taby app**, or control it from your own
+Put Taby on your desk. This repository contains the ESP32 firmware, animations,
+and **3D-printable cases** for Physical Taby. Use it with the **Taby app**, or control it from your own
 personal projects using the [device commands](firmware/README.md#talk-to-taby).
 We maintain the Taby app integration; community integrations are maintained by
 their authors.
+
+## Start here
+
+| What would you like to do? | Go here |
+| --- | --- |
+| **Install Taby on your device** | [Install firmware with your AI agent](#install-with-your-ai-agent) |
+| **3D print the 1.64-inch case** | **[Download all print files (ZIP)](https://github.com/TRIIIS-LABS/firmware-taby/releases/download/prints-1.64-1.0.0/taby-1.64-print-pack-1.0.0.zip)** · [Printing instructions](hardware/README.md) |
+| **3D print the round 1.32-inch case** | Coming soon |
+
+The print ZIP includes **STL parts, the 3MF project, and G-code**.
 
 ## Supported displays
 
@@ -24,6 +34,22 @@ V2's is beside the right-hand headers. A product link alone does not guarantee
 which revision a seller ships. See [Waveshare's revision guide](https://docs.waveshare.com/ESP32-S3-Touch-AMOLED-1.64).
 <!-- When affiliate URLs are available, replace these product links and add
 a short commission disclosure beside them. Do not invent affiliate URLs. -->
+
+## 3D print your case
+
+**[Download the Taby 1.64 case - STL, 3MF & G-code (ZIP)](https://github.com/TRIIIS-LABS/firmware-taby/releases/download/prints-1.64-1.0.0/taby-1.64-print-pack-1.0.0.zip)**
+
+<a href="hardware/README.md"><img src="hardware/amoled-1.64/V1/desktop-case/preview.png" alt="Printable Taby 1.64 case: base, back, and handle" width="260"></a>
+
+Print the base, back, and handle for your **1.64-inch rectangular Taby**.
+[Printing instructions and printer settings](hardware/README.md) ·
+[Individual STL, 3MF, and G-code files](hardware/amoled-1.64/V1/desktop-case)
+
+The supplied G-code is for **Bambu P1S, 0.4 mm nozzle**. The 3MF currently selects
+an **A1 mini** profile; choose your actual printer before slicing. V2 case fit
+has not been established.
+
+**Round 1.32-inch case: coming soon.** It will have its own print files.
 
 ## Install with your AI agent
 
@@ -52,21 +78,6 @@ The current binaries are in the [v1.0.8 release](https://github.com/TRIIIS-LABS/
 Use the documented [source-build path](firmware/README.md#build-from-source)
 when developing firmware; do not substitute an unrelated ESP32 image or an old
 factory dump.
-
-## Print a case
-
-Cases and other printable parts live under [hardware](hardware/README.md). A
-model is compatible only with the exact board and hardware revision named in
-its catalog entry. Screen shape and opening, PCB outline, USB connector,
-buttons, antenna clearance, and mounting points are all part of that target.
-
-**Taby 1.64:** [download the print pack](https://github.com/TRIIIS-LABS/firmware-taby/releases/download/prints-1.64-1.0.0/taby-1.64-print-pack-1.0.0.zip)
-or [browse the files](hardware/amoled-1.64/V1/desktop-case). Includes base, back,
-and handle STLs, a 3MF project, and Bambu P1S 0.4 mm G-code. The 3MF currently
-selects an A1 mini profile: choose your actual printer before slicing.
-
-**Taby Round 1.32:** coming soon. The 1.64 case is not for the round display.
-See the [print guide](hardware/README.md) for settings and revision fit notes.
 
 ## Contribute
 
