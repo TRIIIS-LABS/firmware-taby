@@ -18,19 +18,14 @@
 </tr>
 </table>
 
-**Hey, meet Taby.** A new kind of personal computer, starting with the
-[Taby app](https://www.heytaby.com/setup). You can use Taby entirely digitally;
-you don't need to build or buy anything here.
-
-But if you want Taby hanging out on your desk in physical form, just for fun,
-you can make that happen! This repo has the **firmware, animations, and 3D print
-files**. Grab a supported screen and a USB data cable, install the firmware,
-and give your Taby a little home if you feel like printing one.
+**Taby is a new kind of personal computer.** The [app](https://www.heytaby.com/setup)
+works on its own. Want a physical Taby on your desk too? Build one with the
+**firmware, animations, and case files** here.
 
 **Let's make one:** [1. Choose your board](#supported-displays) →
 [2. Install the firmware](#bring-taby-to-life) →
 [3. Connect to Taby](#connect-to-taby) →
-[4. Print a case (optional)](#a-home-for-your-taby)
+[4. Print a case](#a-home-for-your-taby)
 
 ---
 
@@ -38,8 +33,7 @@ and give your Taby a little home if you feel like printing one.
 
 ## 1. 🖥️ Choose your board
 
-Pick one of the supported boards below, plus a **USB data cable**. Already have
-one? Keep it handy—your agent will help identify it during installation.
+You'll need a supported board and a **USB data cable**.
 
 <table>
 <tr>
@@ -58,9 +52,7 @@ one? Keep it handy—your agent will help identify it during installation.
 </tr>
 </table>
 
-**More screens are coming!** These are our first two supported displays.
-The [installation guide](INSTALL.md) helps your agent identify the board and
-check compatibility before installing. Buying a board? Check that guide first.
+**More screens coming soon.** Check [board compatibility](INSTALL.md) before buying.
 <!-- Replace store links with affiliate URLs and disclose the commission when available. -->
 
 ---
@@ -85,9 +77,7 @@ Then help me connect it to the Taby desktop app.
 
 Prefer doing it yourself? **[Follow the installation guide →](INSTALL.md)**
 
-The guide covers setup, USB drivers, board selection, flashing, and recovery.
 Current firmware: **[1.0.8](https://github.com/TRIIIS-LABS/firmware-taby/releases/tag/v1.0.8)**.
-Both supported boards have been tested by the maintainer; each has its own bundle.
 
 ---
 
@@ -97,44 +87,37 @@ Both supported boards have been tested by the maintainer; each has its own bundl
 
 Once the animation plays correctly, **[get the Taby app](https://www.heytaby.com/setup)**
 and follow the [app connection guide](INSTALL.md#5-use-it-with-taby).
-Your agent can help with this too—it's included in the prompt above.
 
-The app works on its own; your physical Taby is a fun extra for your desk.
-This is the connection we build and maintain, so it's the easiest place to start.
-Curious about Taby itself? **[Come say hey →](https://www.heytaby.com)**
-
-Building your own project? You're welcome to control the device yourself.
-The [device commands](firmware/README.md#talk-to-taby) explain animations,
-text cards, choices, and connections. Community integrations are maintained
-by their authors. App connection details and current MCP availability are in
-[the install guide](INSTALL.md#5-use-it-with-taby).
+We maintain the app connection. For your own integration, use the
+[device commands](firmware/README.md#talk-to-taby).
+See the guide for [current MCP support](INSTALL.md#5-use-it-with-taby).
 
 ---
 
 <a id="print-a-case"></a><a id="3d-print-your-case"></a><a id="a-home-for-your-taby"></a>
 
-## 4. 🏡 Print a case (optional)
+## 4. 🏡 Print a case
 
-Pick a home for your Taby and print it in your favorite color. Cases are optional,
-and each design is made for a particular screen.
+Your board needs a case. Choose one for your screen, or design your own.
 
 <table>
 <tr>
 <td width="430" valign="top">
-<h3>Desktop case · Taby 1.64</h3>
-<p><strong>Available now</strong> · For the rectangular 1.64-inch screen</p>
+<h3>Taby 1.64 cases</h3>
+<h4>Desktop case · Available now</h4>
 <p align="center"><img src="hardware/amoled-1.64/V1/desktop-case/preview.png" width="170" alt="The printable base, back, and handle for Taby 1.64"></p>
-<p>The base, back, and handle, all in one pack.<br>STL parts · 3MF project · G-code</p>
+<p>Base, back, and handle.<br>STL · 3MF · G-code</p>
 <p><strong><a href="https://github.com/TRIIIS-LABS/firmware-taby/releases/download/prints-1.64-1.0.0/taby-1.64-print-pack-1.0.0.zip">↓ Download the print pack</a></strong></p>
 <p><a href="hardware/README.md">Printing guide</a> &nbsp;·&nbsp; <a href="hardware/amoled-1.64/V1/desktop-case">Individual files</a></p>
+<hr>
+<p>🌼 More 1.64 case designs coming soon.</p>
 </td>
 <td width="430" valign="top">
-<h3>Round case · Taby 1.32</h3>
-<p><strong>Coming soon</strong> · For the round 1.32-inch screen</p>
-<p>A little home for round Taby. Print files will appear here when they're ready.</p>
+<h3>Taby Round 1.32 cases</h3>
+<h4>Round case · Coming soon</h4>
+<p>Print files aren't available yet.</p>
 <hr>
-<h3>🌼 More ways to make it yours</h3>
-<p>More case designs are coming too, including a flower! Each will have its own preview, supported screen, and download here.</p>
+<p>🌼 More round case designs coming soon.</p>
 </td>
 </tr>
 </table>
