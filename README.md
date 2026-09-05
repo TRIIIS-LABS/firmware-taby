@@ -1,25 +1,31 @@
 <a id="start-here"></a>
 
-<a href="https://www.heytaby.com"><img align="right" src=".github/confirmation.gif" width="228" alt="Taby celebrating with its confirmation animation"></a>
-
+<table>
+<tr>
+<td width="620" valign="middle">
 <h1>Physical Taby</h1>
-<p><strong>A tiny companion for your desk. Made by you.</strong></p>
+<p><strong>Your Taby, with a little place on your desk.</strong></p>
 <p>
   <a href="https://www.heytaby.com">Meet Taby</a> &nbsp;·&nbsp;
   <a href="https://www.heytaby.com/setup">Get the desktop app</a><br>
   <a href="#bring-taby-to-life">Install firmware</a> &nbsp;·&nbsp;
   <a href="https://github.com/TRIIIS-LABS/firmware-taby/releases/download/prints-1.64-1.0.0/taby-1.64-print-pack-1.0.0.zip">Download 3D print files</a>
 </p>
+</td>
+<td width="240" align="center" valign="middle">
+<a href="https://www.heytaby.com"><img src=".github/confirmation.gif" width="200" alt="Taby celebrating with its confirmation animation"></a>
+</td>
+</tr>
+</table>
 
-<br clear="right">
+**Hey, meet Taby.** A new kind of personal computer, starting with the
+[Taby app](https://www.heytaby.com/setup). You can use Taby entirely digitally;
+you don't need to build or buy anything here.
 
-**Hello, little desk buddy.** Taby brings a friendly face to your setup. The
-[Taby desktop app](https://www.heytaby.com/setup) is where chat, tasks, habits,
-and focus timers live; the little screen gives your companion a place on your desk.
-
-This is the DIY home for Physical Taby: **firmware, animations, and printable
-cases**. Bring a supported Waveshare screen and a USB data cable. Add a case
-if you'd like, then make it your own.
+But if you want Taby hanging out on your desk in physical form, just for fun,
+you can make that happen! This repo has the **firmware, animations, and 3D print
+files**. Grab a supported screen and a USB data cable, install the firmware,
+and give your Taby a little home if you feel like printing one.
 
 ---
 
@@ -29,13 +35,13 @@ if you'd like, then make it your own.
 
 <table>
 <tr>
-<td width="50%" valign="top">
+<td width="430" valign="top">
 <h3>Taby 1.64</h3>
 <p>The rectangular one.<br>280 × 456 AMOLED · 84 animations</p>
 <p><strong>Waveshare ESP32-S3-Touch-AMOLED-1.64</strong></p>
 <p><a href="https://www.waveshare.com/product/esp32-s3-touch-amoled-1.64.htm">Get the board ↗</a> &nbsp;·&nbsp; <a href="#a-home-for-your-taby">Print its case</a></p>
 </td>
-<td width="50%" valign="top">
+<td width="430" valign="top">
 <h3>Taby Round 1.32</h3>
 <p>The round little one.<br>466 × 466 AMOLED · 27 animations</p>
 <p><strong>Waveshare ESP32-S3-Touch-AMOLED-1.32</strong></p>
@@ -51,34 +57,7 @@ check compatibility before installing. Buying a board? Check that guide first.
 
 ---
 
-<a id="print-a-case"></a>
-<a id="3d-print-your-case"></a>
-<a id="a-home-for-your-taby"></a>
-
-## 🏡 3D print your case
-
-<img align="right" src="hardware/amoled-1.64/V1/desktop-case/preview.png" width="190" alt="The printable base, back, and handle for Taby 1.64">
-
-A little case, printed in your favorite color. The **1.64-inch print pack**
-includes the base, back, and handle, ready to open in your slicer.
-
-**[↓ Download the complete print pack](https://github.com/TRIIIS-LABS/firmware-taby/releases/download/prints-1.64-1.0.0/taby-1.64-print-pack-1.0.0.zip)**
-
-STL parts · 3MF project · individual and all-parts G-code
-
-[Printing guide](hardware/README.md) · [Browse individual files](hardware/amoled-1.64/V1/desktop-case)
-
-**Round 1.32 case: coming soon.**
-
-The G-code is for a **Bambu P1S, 0.4 mm nozzle**. The 3MF selects an A1 mini
-profile; choose your actual printer before slicing. See the printing guide for fit details.
-
-<br clear="right">
-
----
-
-<a id="install-with-your-ai-agent"></a>
-<a id="bring-taby-to-life"></a>
+<a id="install-with-your-ai-agent"></a><a id="bring-taby-to-life"></a>
 
 ## ✨ How to install
 
@@ -104,11 +83,47 @@ Both supported boards have been tested by the maintainer; each has its own bundl
 
 ---
 
+<a id="print-a-case"></a><a id="3d-print-your-case"></a><a id="a-home-for-your-taby"></a>
+
+## 🏡 3D print your case
+
+Pick a home for your Taby and print it in your favorite color. Cases are optional,
+and each design is made for a particular screen.
+
+<table>
+<tr>
+<td width="430" valign="top">
+<h3>Desktop case · Taby 1.64</h3>
+<p><strong>Available now</strong> · For the rectangular 1.64-inch screen</p>
+<p align="center"><img src="hardware/amoled-1.64/V1/desktop-case/preview.png" width="170" alt="The printable base, back, and handle for Taby 1.64"></p>
+<p>The base, back, and handle, all in one pack.<br>STL parts · 3MF project · G-code</p>
+<p><strong><a href="https://github.com/TRIIIS-LABS/firmware-taby/releases/download/prints-1.64-1.0.0/taby-1.64-print-pack-1.0.0.zip">↓ Download the print pack</a></strong></p>
+<p><a href="hardware/README.md">Printing guide</a> &nbsp;·&nbsp; <a href="hardware/amoled-1.64/V1/desktop-case">Individual files</a></p>
+</td>
+<td width="430" valign="top">
+<h3>Round case · Taby 1.32</h3>
+<p><strong>Coming soon</strong> · For the round 1.32-inch screen</p>
+<p>A little home for round Taby. Print files will appear here when they're ready.</p>
+<hr>
+<h3>🌼 More ways to make it yours</h3>
+<p>More case designs are coming too, including a flower! Each will have its own preview, supported screen, and download here.</p>
+</td>
+</tr>
+</table>
+
+Before printing, check the [printer settings and fit notes](hardware/README.md).
+The included G-code is for a **Bambu P1S, 0.4 mm nozzle**; the 3MF uses an
+**A1 mini** profile. Using a different printer? Slice the STL or 3MF for yours.
+
+---
+
 ## 💛 Meet the Taby app
 
-Use Physical Taby with the **[Taby desktop app](https://www.heytaby.com/setup)**
-for the maintained companion integration. Visit **[heytaby.com](https://www.heytaby.com)**
-to meet Taby, explore the software, and see it on people's desks.
+The **[Taby app](https://www.heytaby.com/setup)** works on its own. Your physical
+Taby is an optional, fun way to bring it onto your desk. This is the connection
+we build and maintain, so it's the easiest place to start.
+
+Curious about Taby itself? **[Come say hey →](https://www.heytaby.com)**
 
 Building your own project? You're welcome to control the device yourself.
 The [device commands](firmware/README.md#talk-to-taby) explain animations,
