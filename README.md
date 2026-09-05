@@ -27,11 +27,19 @@ you can make that happen! This repo has the **firmware, animations, and 3D print
 files**. Grab a supported screen and a USB data cable, install the firmware,
 and give your Taby a little home if you feel like printing one.
 
+**Let's make one:** [1. Choose your board](#supported-displays) →
+[2. Install the firmware](#bring-taby-to-life) →
+[3. Connect to Taby](#connect-to-taby) →
+[4. Print a case (optional)](#a-home-for-your-taby)
+
 ---
 
 <a id="supported-displays"></a>
 
-## 🖥️ Supported boards
+## 1. 🖥️ Choose your board
+
+Pick one of the supported boards below, plus a **USB data cable**. Already have
+one? Keep it handy—your agent will help identify it during installation.
 
 <table>
 <tr>
@@ -59,10 +67,10 @@ check compatibility before installing. Buying a board? Check that guide first.
 
 <a id="install-with-your-ai-agent"></a><a id="bring-taby-to-life"></a>
 
-## ✨ How to install
+## 2. ✨ Install the firmware
 
-Connect your screen with a **USB data cable**. Copy this into an AI agent that
-can run commands on your computer:
+Plug your board into your computer with the USB data cable. Open an AI agent
+that can run commands on that computer, then copy and send this prompt:
 
 ```text
 Help me install Physical Taby on my connected device.
@@ -83,9 +91,29 @@ Both supported boards have been tested by the maintainer; each has its own bundl
 
 ---
 
+<a id="connect-to-taby"></a>
+
+## 3. 💛 Connect to the Taby app
+
+Once the animation plays correctly, **[get the Taby app](https://www.heytaby.com/setup)**
+and follow the [app connection guide](INSTALL.md#5-use-it-with-taby).
+Your agent can help with this too—it's included in the prompt above.
+
+The app works on its own; your physical Taby is a fun extra for your desk.
+This is the connection we build and maintain, so it's the easiest place to start.
+Curious about Taby itself? **[Come say hey →](https://www.heytaby.com)**
+
+Building your own project? You're welcome to control the device yourself.
+The [device commands](firmware/README.md#talk-to-taby) explain animations,
+text cards, choices, and connections. Community integrations are maintained
+by their authors. App connection details and current MCP availability are in
+[the install guide](INSTALL.md#5-use-it-with-taby).
+
+---
+
 <a id="print-a-case"></a><a id="3d-print-your-case"></a><a id="a-home-for-your-taby"></a>
 
-## 🏡 3D print your case
+## 4. 🏡 Print a case (optional)
 
 Pick a home for your Taby and print it in your favorite color. Cases are optional,
 and each design is made for a particular screen.
@@ -114,22 +142,6 @@ and each design is made for a particular screen.
 Before printing, check the [printer settings and fit notes](hardware/README.md).
 The included G-code is for a **Bambu P1S, 0.4 mm nozzle**; the 3MF uses an
 **A1 mini** profile. Using a different printer? Slice the STL or 3MF for yours.
-
----
-
-## 💛 Meet the Taby app
-
-The **[Taby app](https://www.heytaby.com/setup)** works on its own. Your physical
-Taby is an optional, fun way to bring it onto your desk. This is the connection
-we build and maintain, so it's the easiest place to start.
-
-Curious about Taby itself? **[Come say hey →](https://www.heytaby.com)**
-
-Building your own project? You're welcome to control the device yourself.
-The [device commands](firmware/README.md#talk-to-taby) explain animations,
-text cards, choices, and connections. Community integrations are maintained
-by their authors. App connection details and current MCP availability are in
-[the install guide](INSTALL.md#5-use-it-with-taby).
 
 ---
 
