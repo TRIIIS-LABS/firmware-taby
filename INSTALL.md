@@ -6,11 +6,18 @@ flash a board attached to another computer. Install released firmware without
 editing source. Use USB-C for installation; Bluetooth and Wi-Fi are device
 control options, not firmware-update paths here.
 
-## 1. Connect the device; read it before asking about the board
+## 1. Connect the device and establish the board
 
 Read the [supported displays](README.md#supported-displays). First install the
-serial tools in step 2 and query the connected device. Do not require the user
-to know the model/revision before this read-only discovery.
+serial tools in step 2 and list the connected ports. If Taby is already running,
+query it before asking the user to identify the model/revision. For a first
+installation on a blank board or vendor demo, establish the exact board and
+revision from its PCB marking or purchase record instead.
+
+**You do not need Taby firmware installed to flash Taby.** `device.py identify`
+reads metadata from running Taby firmware; it is not a bootloader detector or a
+prerequisite for installation. `install.py flash` uses the ESP32 ROM bootloader
+and can install the complete release directly on a supported new board.
 
 | Board argument | Exact hardware | Flash |
 | --- | --- | --- |
@@ -66,7 +73,7 @@ it is a placeholder, not a command to install.
 
 ### Read the connected device and select its target
 
-Select the connected port from `ports`, then run:
+Select the connected port from `ports`. If Taby is already installed, run:
 
 ```text
 PYTHON tools/device.py identify --port PORT
@@ -75,6 +82,13 @@ PYTHON tools/device.py identify --port PORT
 This sends the read-only `INFO` command without intentionally resetting the
 device. It filters private fields and compares the reported target and display
 dimensions with `firmware/boards.json`.
+
+For a known blank board or vendor demo, skip this command. If an attempted
+identification times out with `No Taby response`, that does not prevent a first
+installation: establish the board from its marking or purchase record and
+continue to steps 3 and 4. Do not flash an intermediate firmware just to make
+`identify` work. If the port itself cannot be opened, resolve the connection
+problem using the USB section below.
 
 - **`firmware_target`:** use the returned `board` and `revision` for an update
   when the existing display works correctly. Do not ask the user to read a PCB
@@ -155,13 +169,13 @@ Replace `BOARD`, `BUNDLE_DIRECTORY`, and `PORT` with the identified values:
 
 ```text
 PYTHON tools/install.py inspect --board BOARD --bundle BUNDLE_DIRECTORY
-PYTHON tools/device.py identify --port PORT
 ```
 
 `inspect` opens no serial port. It checks the board, revision, every binary's
-size/hash, and permitted flash offsets. `identify` reads a running Taby without
-intentionally resetting it. A blank/vendor board may not answer `INFO`.
-If it does answer, check that its hardware target agrees with the selected board.
+size/hash, and permitted flash offsets. For an update, use the identification
+from step 2 to check that the working target agrees with the selected board.
+For a first installation, use the board/revision established from physical
+identification; no successful `INFO` or `identify` response is required.
 
 Explain the selected board and version. The user's installation request and
 established board target identify the intended target; do not repeatedly ask for the
@@ -170,6 +184,11 @@ same permission. Then run:
 ```text
 PYTHON tools/install.py flash --board BOARD --bundle BUNDLE_DIRECTORY --port PORT --confirmed-board
 ```
+
+`--confirmed-board` means the selected hardware target has been established;
+it does not mean `identify` must have succeeded. If esptool cannot connect to a
+new board, use the BOOT instructions below, list ports again, and retry this
+same command with the bootloader port. An ESP Web Tools pre-flash is not needed.
 
 The installer first checks the ESP32-S3 and flash capacity through esptool. It
 writes only the five reviewed image regions, preserving the NVS settings and
@@ -210,6 +229,23 @@ calling a tool on the Taby app's maintained MCP interface and checking its resul
   not start, release BOOT and reset/power-cycle normally, then run `verify`.
 - If a port is busy, close only the application holding that port. If no port
   appears even in bootloader mode, return to cable/driver checks.
+
+### If a manual flash finishes but the display stays blank
+
+A successful `identify` reply proves that Taby can answer over USB, not that
+its display or animation filesystem works. The release requires all five
+images, including the animation filesystem and OTA-selection data, at the
+offsets printed by `install.py inspect`; writing only the application is not a
+complete installation. Do not guess offsets or mix files from different bundles.
+
+Release BOOT, reset normally, and run `install.py verify` with the current port.
+If the manual installation was incomplete, use the complete matching bundle
+with `install.py flash` above. If verification passes but the animation remains
+blank, recheck the physical board/revision and report the display failure;
+repeated flashing or a successful `identify` is not visual verification.
+
+Thanks to [@gmelfe](https://github.com/gmelfe) for reporting the first-install
+confusion and sharing the recovery steps that helped improve this guide.
 
 ## 5. Use it with Taby
 

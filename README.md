@@ -73,9 +73,12 @@ Help me install Physical Taby on my connected device.
 Read and follow this guide:
 https://github.com/TRIIIS-LABS/firmware-taby/blob/main/INSTALL.md
 
-Install any missing USB/ESP32 tools, read the device to identify its board,
-ask me only if its identity remains uncertain, and install the matching
-release. Verify it and play an animation so I can check the screen.
+Install any missing USB/ESP32 tools and list the connected ports. If Taby is
+already running, read its board metadata. For a blank board or vendor demo,
+identify the exact board/revision from its marking or ask me when uncertain;
+do not require device identify to succeed before the first flash. Install
+the complete matching release, verify it, and play an animation so I can
+check the screen.
 Then help me connect it to the Taby desktop app.
 ```
 
