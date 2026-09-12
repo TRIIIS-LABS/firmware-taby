@@ -36,6 +36,15 @@ names, checksums, and printer profiles. Native parametric CAD/STEP and assembly
 instructions were not supplied. A physical fit-test record, including exact PCB
 revision and any additional hardware needed, is still to be added.
 
+## Magnet and non-slip covering
+
+For the Taby 1.64 desktop case, get an **extra-strong neodymium block magnet,
+20 × 10 × 2 mm**, and some **self-adhesive rubber grip tape** or a similar
+non-slip rubber sheet.
+
+Cut the rubber to size and place it over the exposed face of the magnet,
+covering it fully to provide grip and help protect the contact surface.
+
 ## For agents and contributors
 
 Read [`catalog.json`](catalog.json) to select the matching board/revision, then
