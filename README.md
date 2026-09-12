@@ -133,6 +133,11 @@ Your board needs a case. Choose one for your screen, or design your own.
 </tr>
 </table>
 
+For the Taby 1.64 desktop case, also get an **extra-strong neodymium block
+magnet, 20 × 10 × 2 mm**, and **self-adhesive rubber grip tape** or a similar
+non-slip rubber sheet to cover the exposed magnet face. See the
+[magnet and non-slip covering notes](hardware/README.md#magnet-and-non-slip-covering).
+
 Before printing, check the [printer settings and fit notes](hardware/README.md).
 The included G-code is for a **Bambu P1S, 0.4 mm nozzle**; the 3MF uses an
 **A1 mini** profile. Using a different printer? Slice the STL or 3MF for yours.
@@ -176,4 +181,3 @@ don't rebrand the face or animations as your own different character or product.
 [Third-party credits](firmware/NOTICE).
 
 <p align="center">A little more personality on your desk. <a href="https://www.heytaby.com">Hey Taby ↗</a></p>
-
