@@ -480,6 +480,11 @@ static void add_usb_capabilities(cJSON *root) {
     }
     cJSON_AddItemToArray(capabilities, cJSON_CreateString("transport_default"));
     cJSON_AddItemToArray(capabilities, cJSON_CreateString("reusable_ui"));
+    /* Touch has worked since before anything asked for it, and was missing
+       from this list; gesture is new. The desktop reads this rather than
+       probing and remembering a rejection. */
+    cJSON_AddItemToArray(capabilities, cJSON_CreateString("touch"));
+    cJSON_AddItemToArray(capabilities, cJSON_CreateString("gesture"));
     cJSON_AddItemToArray(capabilities, cJSON_CreateString("wifi_setup"));
     cJSON_AddItemToObject(root, "capabilities", capabilities);
 }
@@ -843,6 +848,27 @@ static void handle_usb_line(char *line) {
             "TABY:CHOICE_SIGNAL {\"signal\":%u,\"selection\":\"%s\"}",
             (unsigned int)signal.signal,
             taby_reusable_ui_choice_selection_name(signal.selection));
+        usb_write_line(response);
+        return;
+    }
+
+    if (strcmp(line, "GESTURE_SIGNAL") == 0) {
+        board_amoled_1_64_gesture_state_t state = {0};
+        board_amoled_1_64_gesture_signal(&state);
+        static const char *const names[] = {
+            "none", "tap", "hold_start", "hold_end",
+        };
+        const char *name =
+            state.gesture < (sizeof(names) / sizeof(names[0]))
+                ? names[state.gesture]
+                : "none";
+        char response[96];
+        snprintf(
+            response,
+            sizeof(response),
+            "TABY:GESTURE_SIGNAL {\"signal\":%u,\"gesture\":\"%s\"}",
+            (unsigned int)state.signal,
+            name);
         usb_write_line(response);
         return;
     }

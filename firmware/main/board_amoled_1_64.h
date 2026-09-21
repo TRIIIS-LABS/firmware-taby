@@ -75,6 +75,29 @@ void board_amoled_1_64_unlock(void);
 lv_disp_t *board_amoled_1_64_display(void);
 void board_amoled_1_64_last_touch(board_amoled_1_64_touch_sample_t *sample);
 uint32_t board_amoled_1_64_touch_signal(void);
+
+/**
+ * What the face last did.
+ *
+ * TOUCH_SIGNAL counts short taps and throws everything else away, so a hold
+ * was invisible to the desktop. A gesture says which one it was, and a hold
+ * arrives as two of them — HOLD_START while the finger is still down, so
+ * listening can begin at once, and HOLD_END on release.
+ */
+typedef enum {
+    BOARD_AMOLED_1_64_GESTURE_NONE = 0,
+    BOARD_AMOLED_1_64_GESTURE_TAP,
+    BOARD_AMOLED_1_64_GESTURE_HOLD_START,
+    BOARD_AMOLED_1_64_GESTURE_HOLD_END,
+} board_amoled_1_64_gesture_t;
+
+typedef struct {
+    /** Moves only when a new gesture happens; the desktop baselines it. */
+    uint32_t signal;
+    board_amoled_1_64_gesture_t gesture;
+} board_amoled_1_64_gesture_state_t;
+
+void board_amoled_1_64_gesture_signal(board_amoled_1_64_gesture_state_t *state);
 uint16_t board_amoled_1_64_width(void);
 uint16_t board_amoled_1_64_height(void);
 esp_err_t board_amoled_1_64_set_brightness_percent(uint8_t percent);
