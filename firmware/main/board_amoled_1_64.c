@@ -74,6 +74,11 @@ static const char *TAG = "board_1_64";
 #define TOUCH_TAP_MIN_US (60 * 1000LL)
 #define TOUCH_TAP_MAX_US (700 * 1000LL)
 #define TOUCH_TAP_REARM_US (180 * 1000LL)
+/* A press held this long is a hold, not a tap. It sits above TOUCH_TAP_MAX_US
+   so the two can never both describe one press. Holding the face is how you
+   talk to Taby: the desktop starts listening at hold_start and sends what it
+   heard at hold_end. */
+#define TOUCH_HOLD_US (700 * 1000LL)
 #define LCD_CMD_MEMORY_ACCESS_CONTROL 0x36U
 #define LCD_CMD_SET_BRIGHTNESS 0x51U
 #define LCD_DEFAULT_BRIGHTNESS_PERCENT 100
@@ -136,6 +141,16 @@ static int64_t s_touch_press_start_us = 0;
 static int64_t s_touch_last_tap_us = 0;
 static uint32_t s_touch_signal = 0;
 static portMUX_TYPE s_touch_signal_lock = portMUX_INITIALIZER_UNLOCKED;
+/* The gesture the face last made, and a counter that only moves when a new
+   one happens. The desktop remembers the counter and treats anything higher
+   as new, which survives a dropped poll without the device queueing
+   anything. A hold is two gestures, so a release is never mistaken for a
+   second press. */
+static board_amoled_1_64_gesture_t s_gesture = BOARD_AMOLED_1_64_GESTURE_NONE;
+static uint32_t s_gesture_signal = 0;
+static bool s_hold_reported = false;
+/* Defined beside the reader, below; the touch callback above it records. */
+static void board_record_gesture(board_amoled_1_64_gesture_t gesture);
 static uint8_t s_brightness_percent = LCD_DEFAULT_BRIGHTNESS_PERCENT;
 static uint8_t s_resume_brightness_percent = LCD_DEFAULT_BRIGHTNESS_PERCENT;
 static uint8_t s_brightness_raw = 0xFF;
@@ -950,13 +965,19 @@ static void lvgl_touch_read_cb(lv_indev_drv_t *drv, lv_indev_data_t *data) {
             const int64_t press_us = now_us - s_touch_press_start_us;
             const int64_t since_last_tap_us = now_us - s_touch_last_tap_us;
             s_touch_press_active = false;
-            if (press_us >= TOUCH_TAP_MIN_US
+            if (s_hold_reported) {
+                /* The hold ends here whatever its length: the desktop is
+                   listening and has to be told to stop. */
+                s_hold_reported = false;
+                board_record_gesture(BOARD_AMOLED_1_64_GESTURE_HOLD_END);
+            } else if (press_us >= TOUCH_TAP_MIN_US
                 && press_us <= TOUCH_TAP_MAX_US
                 && since_last_tap_us >= TOUCH_TAP_REARM_US) {
                 s_touch_last_tap_us = now_us;
                 taskENTER_CRITICAL(&s_touch_signal_lock);
                 s_touch_signal += 1U;
                 taskEXIT_CRITICAL(&s_touch_signal_lock);
+                board_record_gesture(BOARD_AMOLED_1_64_GESTURE_TAP);
             }
         }
         s_last_touch.pressed = false;
@@ -969,6 +990,10 @@ static void lvgl_touch_read_cb(lv_indev_drv_t *drv, lv_indev_data_t *data) {
     suppress_touch = s_touch_suppress_until_release;
     taskEXIT_CRITICAL(&s_orientation_state_lock);
     if (suppress_touch) {
+        if (s_hold_reported) {
+            s_hold_reported = false;
+            board_record_gesture(BOARD_AMOLED_1_64_GESTURE_HOLD_END);
+        }
         s_touch_press_active = false;
         s_last_touch.pressed = false;
         data->state = LV_INDEV_STATE_RELEASED;
@@ -978,6 +1003,13 @@ static void lvgl_touch_read_cb(lv_indev_drv_t *drv, lv_indev_data_t *data) {
     if (!s_touch_press_active) {
       s_touch_press_active = true;
       s_touch_press_start_us = esp_timer_get_time();
+      s_hold_reported = false;
+    } else if (!s_hold_reported
+               && esp_timer_get_time() - s_touch_press_start_us >= TOUCH_HOLD_US) {
+      /* Reported while the finger is still down, so the desktop can start
+         listening at the moment the hold begins rather than after it ends. */
+      s_hold_reported = true;
+      board_record_gesture(BOARD_AMOLED_1_64_GESTURE_HOLD_START);
     }
 
 #if TABY_HARDWARE_ROUND_1_32
@@ -1065,6 +1097,23 @@ void board_amoled_1_64_last_touch(board_amoled_1_64_touch_sample_t *sample) {
         return;
     }
     *sample = s_last_touch;
+}
+
+static void board_record_gesture(board_amoled_1_64_gesture_t gesture) {
+    taskENTER_CRITICAL(&s_touch_signal_lock);
+    s_gesture = gesture;
+    s_gesture_signal += 1U;
+    taskEXIT_CRITICAL(&s_touch_signal_lock);
+}
+
+void board_amoled_1_64_gesture_signal(board_amoled_1_64_gesture_state_t *state) {
+    if (!state) {
+        return;
+    }
+    taskENTER_CRITICAL(&s_touch_signal_lock);
+    state->signal = s_gesture_signal;
+    state->gesture = s_gesture;
+    taskEXIT_CRITICAL(&s_touch_signal_lock);
 }
 
 uint32_t board_amoled_1_64_touch_signal(void) {
