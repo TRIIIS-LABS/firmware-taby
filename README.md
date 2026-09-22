@@ -84,7 +84,7 @@ Then help me connect it to the Taby desktop app.
 
 Prefer doing it yourself? **[Follow the installation guide →](INSTALL.md)**
 
-Current firmware: **[1.0.8](https://github.com/TRIIIS-LABS/firmware-taby/releases/tag/v1.0.8)**.
+Current firmware: **[1.1.0](https://github.com/TRIIIS-LABS/firmware-taby/releases/tag/v1.1.0)**.
 
 ---
 
