@@ -14,6 +14,8 @@ bool taby_runtime_apply_transport_resolution(const taby_transport_resolution_t *
 bool taby_runtime_render_reusable_card(const taby_reusable_card_t *card, const char *transport_state_name);
 // Must be called from the LVGL/display task while the board display lock is held.
 void taby_runtime_dismiss_reusable_card_locked(void);
+// Dismisses the active reusable card, if any, and redraws the current state.
+bool taby_runtime_clear_reusable_card(void);
 void taby_runtime_show_transport_banner(const char *title, const char *subtitle, uint32_t duration_ms);
 bool taby_runtime_refresh_current_state(void);
 void taby_runtime_invalidate_render_cache(void);

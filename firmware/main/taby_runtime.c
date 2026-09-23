@@ -329,16 +329,19 @@ bool taby_runtime_apply_transport_resolution(const taby_transport_resolution_t *
         return false;
     }
 
-    if (resolution->command == TABY_COMMAND_CUSTOM_ANIMATION &&
-        (!taby_display_animation_available(resolution->animation_id) ||
-         (resolution->next_animation_id[0] != '\0' &&
-          !taby_display_animation_available(resolution->next_animation_id)))) {
-        ESP_LOGW(
-            TAG,
-            "reject_resolution reason=animation_missing animation_id=%s next_animation_id=%s",
-            resolution->animation_id,
-            resolution->next_animation_id);
+    /* Checked before anything changes: a clip this board's pack lacks must
+       leave the state machine and the face exactly as they were. */
+    if (resolution->command == TABY_COMMAND_CUSTOM_ANIMATION && resolution->animation_id[0] == '\0') {
+        ESP_LOGW(TAG, "reject_resolution reason=animation_missing animation_id=");
         return false;
+    }
+    const char *required[2] = {0};
+    size_t required_count = taby_transport_required_animations(resolution, required);
+    for (size_t i = 0; i < required_count; ++i) {
+        if (!taby_display_animation_available(required[i])) {
+            ESP_LOGW(TAG, "reject_resolution reason=animation_missing animation_id=%s", required[i]);
+            return false;
+        }
     }
 
     if (!board_amoled_1_64_lock(1000)) {
@@ -445,6 +448,25 @@ void taby_runtime_dismiss_reusable_card_locked(void) {
     deactivate_custom_ui_state_locked();
     s_last_render_valid = false;
     render_current_state_locked();
+}
+
+bool taby_runtime_clear_reusable_card(void) {
+    if (!s_runtime_started) {
+        return false;
+    }
+
+    if (!s_custom_ui_active) {
+        return true;
+    }
+
+    if (!board_amoled_1_64_lock(1000)) {
+        ESP_LOGW(TAG, "failed to acquire LVGL lock for clear");
+        return false;
+    }
+
+    taby_runtime_dismiss_reusable_card_locked();
+    board_amoled_1_64_unlock();
+    return true;
 }
 
 bool taby_runtime_render_reusable_card(const taby_reusable_card_t *card, const char *transport_state_name) {

@@ -1,6 +1,7 @@
 #include "taby_reusable_preview.h"
 
 #include <ctype.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -19,6 +20,14 @@ typedef struct {
 } taby_reusable_preview_strings_t;
 
 static const char *TAG = "taby_reusable_preview";
+
+/* Each effect, replay and visibility duration becomes `seconds * 1000U`
+   milliseconds for an LVGL timer. Past a day that product wraps, down to a
+   0 ms timer that fires on every tick. */
+#define TABY_REUSABLE_MAX_EFFECT_SECONDS 86400U
+/* 99:59:59, the widest time the timer face draws, and small enough that its
+   progress arithmetic cannot wrap. */
+#define TABY_REUSABLE_MAX_COUNTDOWN_SECONDS 359999U
 
 static const char *card_kind_name(taby_reusable_card_kind_t kind) {
     switch (kind) {
@@ -384,12 +393,29 @@ static bool parse_decor_effect(const char *text, taby_reusable_decor_effect_t *o
     return false;
 }
 
+static uint32_t clamp_seconds(uint32_t seconds, uint32_t maximum) {
+    return seconds > maximum ? maximum : seconds;
+}
+
 static void apply_card_defaults(
     taby_reusable_card_t *card,
     taby_reusable_preview_strings_t *strings) {
     if (!card || !strings) {
         return;
     }
+
+    card->countdown_total_seconds =
+        clamp_seconds(card->countdown_total_seconds, TABY_REUSABLE_MAX_COUNTDOWN_SECONDS);
+    card->countdown_remaining_seconds =
+        clamp_seconds(card->countdown_remaining_seconds, TABY_REUSABLE_MAX_COUNTDOWN_SECONDS);
+    card->behavior.text_effect_seconds =
+        clamp_seconds(card->behavior.text_effect_seconds, TABY_REUSABLE_MAX_EFFECT_SECONDS);
+    card->behavior.decor_effect_seconds =
+        clamp_seconds(card->behavior.decor_effect_seconds, TABY_REUSABLE_MAX_EFFECT_SECONDS);
+    card->behavior.animation_replay_seconds =
+        clamp_seconds(card->behavior.animation_replay_seconds, TABY_REUSABLE_MAX_EFFECT_SECONDS);
+    card->behavior.countdown_visible_seconds =
+        clamp_seconds(card->behavior.countdown_visible_seconds, TABY_REUSABLE_MAX_EFFECT_SECONDS);
 
     switch (card->kind) {
         case TABY_REUSABLE_CARD_HEADLINE:
@@ -525,7 +551,9 @@ static bool parse_uint32_text(const char *text, uint32_t *out_value) {
         if (!isdigit((unsigned char)text[i])) {
             return false;
         }
-        value = value * 10U + (uint32_t)(text[i] - '0');
+        uint32_t digit = (uint32_t)(text[i] - '0');
+        /* Saturate rather than wrap; callers clamp to their own range. */
+        value = value > (UINT32_MAX - digit) / 10U ? UINT32_MAX : value * 10U + digit;
     }
 
     *out_value = value;

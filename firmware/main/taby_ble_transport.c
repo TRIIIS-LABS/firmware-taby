@@ -27,6 +27,7 @@
 #include "taby_mqtt.h"
 #include "taby_power.h"
 #include "taby_build_info.h"
+#include "taby_display.h"
 #include "taby_reusable_preview.h"
 #include "taby_reusable_ui.h"
 #include "taby_runtime.h"
@@ -90,7 +91,6 @@ typedef struct {
     bool is_display_orientation_command;
     uint8_t brightness_percent;
     taby_display_orientation_mode_t display_orientation_mode;
-    taby_transport_resolution_t resolution;
     TaskHandle_t requester;
     uint8_t att_error;
     char command_text[TABY_BLE_COMMAND_BUFFER_SIZE];
@@ -289,7 +289,6 @@ static uint8_t queue_command_job(
     bool is_display_orientation_command,
     uint8_t brightness_percent,
     taby_display_orientation_mode_t display_orientation_mode,
-    const taby_transport_resolution_t *resolution,
     const char *command_text,
     char *event_payload,
     size_t event_payload_size) {
@@ -309,9 +308,6 @@ static uint8_t queue_command_job(
     job->is_display_orientation_command = is_display_orientation_command;
     job->brightness_percent = brightness_percent;
     job->display_orientation_mode = display_orientation_mode;
-    if (resolution) {
-        job->resolution = *resolution;
-    }
     job->requester = xTaskGetCurrentTaskHandle();
     snprintf(job->command_text, sizeof(job->command_text), "%s", command_text);
 
@@ -364,7 +360,6 @@ static int command_characteristic_access(
             false,
             0,
             TABY_DISPLAY_ORIENTATION_MODE_LEFT,
-            NULL,
             reusable_ui_command,
             event_payload,
             sizeof(event_payload));
@@ -388,7 +383,6 @@ static int command_characteristic_access(
             false,
             brightness_percent,
             TABY_DISPLAY_ORIENTATION_MODE_LEFT,
-            NULL,
             command_buffer,
             event_payload,
             sizeof(event_payload));
@@ -435,21 +429,11 @@ static int command_characteristic_access(
             true,
             0,
             display_orientation_mode,
-            NULL,
             command_buffer,
             event_payload,
             sizeof(event_payload));
         publish_event_payload(event_payload, true);
         return att_error;
-    }
-
-    taby_transport_resolution_t resolution = {0};
-    if (!taby_transport_resolve_text(command_buffer, &resolution)) {
-        char event_payload[TABY_BLE_EVENT_PAYLOAD_SIZE] = {0};
-        snprintf(event_payload, sizeof(event_payload), "ERR unsupported_command");
-        publish_event_payload(event_payload, true);
-        ESP_LOGW(TAG, "unsupported BLE command: %s", command_buffer);
-        return BLE_ATT_ERR_VALUE_NOT_ALLOWED;
     }
 
     char event_payload[TABY_BLE_EVENT_PAYLOAD_SIZE] = {0};
@@ -459,7 +443,6 @@ static int command_characteristic_access(
         false,
         0,
         TABY_DISPLAY_ORIENTATION_MODE_LEFT,
-        &resolution,
         command_buffer,
         event_payload,
         sizeof(event_payload));
@@ -745,6 +728,17 @@ static void ble_host_task(void *param) {
     nimble_port_freertos_deinit();
 }
 
+static const char *current_transport_state_name(void) {
+    return taby_transport_state_name(taby_runtime_current_state());
+}
+
+static const taby_transport_display_hooks_t k_ble_display_hooks = {
+    .animation_available = taby_display_animation_available,
+    .apply = taby_runtime_apply_transport_resolution,
+    .state_name = current_transport_state_name,
+    .clear = taby_runtime_clear_reusable_card,
+};
+
 static void ble_command_task(void *param) {
     (void)param;
 
@@ -805,18 +799,33 @@ static void ble_command_task(void *param) {
                     job->command_text,
                     (unsigned int)board_amoled_1_64_display_rotation_degrees());
             }
-        } else if (!taby_runtime_apply_transport_resolution(&job->resolution)) {
-            snprintf(job->event_payload, sizeof(job->event_payload), "%s", "ERR runtime_unavailable");
-            job->att_error = BLE_ATT_ERR_UNLIKELY;
         } else {
-            taby_mqtt_notify_state_changed("ble_command");
-            snprintf(
+            switch (taby_transport_handle_display_command(
+                job->command_text,
+                &k_ble_display_hooks,
+                "",
+                false,
                 job->event_payload,
-                sizeof(job->event_payload),
-                "OK %s",
-                taby_transport_state_name(taby_runtime_current_state()));
-            job->att_error = 0;
-            ESP_LOGI(TAG, "ble command applied raw=%s mapped=%s", job->command_text, job->event_payload);
+                sizeof(job->event_payload))) {
+                case TABY_DISPLAY_COMMAND_APPLIED:
+                    taby_mqtt_notify_state_changed("ble_command");
+                    job->att_error = 0;
+                    ESP_LOGI(TAG, "ble command applied raw=%s mapped=%s", job->command_text, job->event_payload);
+                    break;
+                case TABY_DISPLAY_COMMAND_UNSUPPORTED_ANIMATION:
+                    /* A write the desktop sees fail is a lost device to it. */
+                    job->att_error = 0;
+                    ESP_LOGW(TAG, "ble animation ignored raw=%s reply=%s", job->command_text, job->event_payload);
+                    break;
+                case TABY_DISPLAY_COMMAND_UNSUPPORTED_COMMAND:
+                    job->att_error = BLE_ATT_ERR_VALUE_NOT_ALLOWED;
+                    ESP_LOGW(TAG, "unsupported BLE command: %s", job->command_text);
+                    break;
+                case TABY_DISPLAY_COMMAND_RUNTIME_UNAVAILABLE:
+                default:
+                    job->att_error = BLE_ATT_ERR_UNLIKELY;
+                    break;
+            }
         }
 
         xTaskNotifyGive(job->requester);
