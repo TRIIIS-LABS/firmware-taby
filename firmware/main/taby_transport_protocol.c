@@ -73,6 +73,22 @@ static void set_animation_resolution(
     resolution->next_animation_id[0] = '\0';
 }
 
+bool taby_transport_is_animation_id(const char *text) {
+    if (!text || text[0] == '\0') {
+        return false;
+    }
+
+    size_t length = 0;
+    for (; text[length] != '\0'; ++length) {
+        unsigned char ch = (unsigned char)text[length];
+        if (length >= TABY_TRANSPORT_ANIMATION_ID_MAX_LEN ||
+            !((ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9') || ch == '_')) {
+            return false;
+        }
+    }
+    return true;
+}
+
 static bool set_resolution_from_animation_id(
     taby_transport_resolution_t *resolution,
     const char *animation_id,
@@ -318,67 +334,96 @@ static void set_resolution_from_command_text(
     }
 }
 
+static taby_transport_resolve_status_t unknown_animation(
+    const char *animation_id,
+    char *out_animation_id,
+    size_t out_animation_id_size) {
+    copy_text(out_animation_id, out_animation_id_size, animation_id);
+    return TABY_TRANSPORT_UNKNOWN_ANIMATION;
+}
+
+static taby_transport_resolve_status_t resolve_animation_id(
+    taby_transport_resolution_t *resolution,
+    const char *animation_id,
+    const char *fallback_title,
+    char *out_animation_id,
+    size_t out_animation_id_size) {
+    if (set_resolution_from_animation_id(resolution, animation_id, fallback_title)) {
+        return TABY_TRANSPORT_RESOLVED;
+    }
+    return unknown_animation(animation_id, out_animation_id, out_animation_id_size);
+}
+
 bool taby_transport_resolve_text(const char *text, taby_transport_resolution_t *out_resolution) {
+    return taby_transport_resolve_text_status(text, out_resolution, NULL, 0) == TABY_TRANSPORT_RESOLVED;
+}
+
+taby_transport_resolve_status_t taby_transport_resolve_text_status(
+    const char *text,
+    taby_transport_resolution_t *out_resolution,
+    char *out_animation_id,
+    size_t out_animation_id_size) {
+    copy_text(out_animation_id, out_animation_id_size, NULL);
     if (!text || !out_resolution) {
-        return false;
+        return TABY_TRANSPORT_UNKNOWN_COMMAND;
     }
 
     memset(out_resolution, 0, sizeof(*out_resolution));
 
     if (strcmp(text, "S") == 0) {
         set_resolution(out_resolution, TABY_COMMAND_STOP, "IDLE", "Ambient loop");
-        return true;
+        return TABY_TRANSPORT_RESOLVED;
     }
     if (strcmp(text, "VL") == 0) {
         set_resolution(out_resolution, TABY_COMMAND_VOICE_LISTENING, "LISTENING", "Voice animation");
-        return true;
+        return TABY_TRANSPORT_RESOLVED;
     }
     if (strcmp(text, "VT") == 0) {
         set_resolution(out_resolution, TABY_COMMAND_VOICE_TALKING, "TALKING", "Voice animation");
-        return true;
+        return TABY_TRANSPORT_RESOLVED;
     }
     if (strcmp(text, "U") == 0) {
         set_resolution(out_resolution, TABY_COMMAND_TOOL_USE, "WORKING", "Tool animation");
-        return true;
+        return TABY_TRANSPORT_RESOLVED;
     }
     if (strcmp(text, "D") == 0) {
         set_resolution(out_resolution, TABY_COMMAND_TASK_DELETE, "DELETE", "Delete animation");
-        return true;
+        return TABY_TRANSPORT_RESOLVED;
     }
     if (strcmp(text, "TBY") == 0) {
         set_busy_resolution(out_resolution, NULL, NULL);
-        return true;
+        return TABY_TRANSPORT_RESOLVED;
     }
     if (strncmp(text, "TBY#", 4) == 0 || strncmp(text, "TBY@", 4) == 0 || strncmp(text, "TBY!", 4) == 0) {
         char metadata[TABY_TRANSPORT_SUBTITLE_SIZE] = {0};
         const char *busy_text = NULL;
         if (!parse_busy_metadata(text + 3, metadata, sizeof(metadata), &busy_text)) {
-            return false;
+            return TABY_TRANSPORT_UNKNOWN_COMMAND;
         }
         set_busy_resolution(out_resolution, busy_text, metadata);
-        return true;
+        return TABY_TRANSPORT_RESOLVED;
     }
     if (strncmp(text, "TBY:", 4) == 0 || strncmp(text, "TBY/", 4) == 0 || strncmp(text, "TBY ", 4) == 0) {
         set_busy_resolution(out_resolution, text + 4, NULL);
-        return true;
+        return TABY_TRANSPORT_RESOLVED;
     }
     if (strcmp(text, "F") == 0 || strcmp(text, "0") == 0 || strcmp(text, "1") == 0) {
         const char *title = strcmp(text, "0") == 0 ? "POMODORO 0" : strcmp(text, "1") == 0 ? "POMODORO 1" : "FOCUS";
         set_resolution(out_resolution, TABY_COMMAND_FOCUS_TIMER, title, "Timer text");
-        return true;
+        return TABY_TRANSPORT_RESOLVED;
     }
     if (strcmp(text, "P2") == 0) {
         const char *title = "POMODORO DONE";
         set_resolution(out_resolution, TABY_COMMAND_BREAK_START, title, "Break text");
-        return true;
+        return TABY_TRANSPORT_RESOLVED;
     }
     if (strcmp(text, "updating") == 0 || strcmp(text, "UPDATING") == 0 || strcmp(text, "UPDATE") == 0) {
         set_resolution(out_resolution, TABY_COMMAND_MISSING_FEATURE, "UPDATING", "Do not unplug");
-        return true;
+        return TABY_TRANSPORT_RESOLVED;
     }
     if (strncmp(text, "NAV:", 4) == 0) {
         set_resolution(out_resolution, TABY_COMMAND_AMBIENT_IDLE, "AMBIENT", "Idle animation");
-        return true;
+        return TABY_TRANSPORT_RESOLVED;
     }
 
     char animation_id[TABY_TRANSPORT_ANIMATION_ID_SIZE] = {0};
@@ -389,29 +434,36 @@ bool taby_transport_resolve_text(const char *text, taby_transport_resolution_t *
             sizeof(animation_id),
             next_animation_id,
             sizeof(next_animation_id))) {
-        return set_resolution_from_animation_sequence(out_resolution, animation_id, next_animation_id, NULL);
+        if (set_resolution_from_animation_sequence(out_resolution, animation_id, next_animation_id, NULL)) {
+            return TABY_TRANSPORT_RESOLVED;
+        }
+        taby_animation_asset_t asset = {0};
+        return unknown_animation(
+            taby_animation_asset_for_id(animation_id, &asset) ? next_animation_id : animation_id,
+            out_animation_id,
+            out_animation_id_size);
     }
 
     if (strcmp(text, "L") == 0) {
-        return set_resolution_from_animation_id(out_resolution, "love_01", "LOVE");
+        return resolve_animation_id(out_resolution, "love_01", "LOVE", out_animation_id, out_animation_id_size);
     }
     if (strcmp(text, "B") == 0) {
-        return set_resolution_from_animation_id(out_resolution, "blush", "BLUSH");
+        return resolve_animation_id(out_resolution, "blush", "BLUSH", out_animation_id, out_animation_id_size);
     }
     if (strcmp(text, "K") == 0) {
-        return set_resolution_from_animation_id(out_resolution, "task_completed", "FINISHED");
+        return resolve_animation_id(out_resolution, "task_completed", "FINISHED", out_animation_id, out_animation_id_size);
     }
     if (strcmp(text, "A") == 0) {
-        return set_resolution_from_animation_id(out_resolution, "trophy", "ACHIEVEMENT");
+        return resolve_animation_id(out_resolution, "trophy", "ACHIEVEMENT", out_animation_id, out_animation_id_size);
     }
     if (strcmp(text, "R") == 0) {
-        return set_resolution_from_animation_id(out_resolution, "relaxing_01_loop", "RELAXING");
+        return resolve_animation_id(out_resolution, "relaxing_01_loop", "RELAXING", out_animation_id, out_animation_id_size);
     }
     if (strcmp(text, "V") == 0 || strncmp(text, "V", 1) == 0) {
-        return set_resolution_from_animation_id(out_resolution, "listening_loop", "VOICE");
+        return resolve_animation_id(out_resolution, "listening_loop", "VOICE", out_animation_id, out_animation_id_size);
     }
     if (strcmp(text, "W") == 0) {
-        return set_resolution_from_animation_id(out_resolution, "drink_water", "DRINK WATER");
+        return resolve_animation_id(out_resolution, "drink_water", "DRINK WATER", out_animation_id, out_animation_id_size);
     }
     if (strncmp(text, "PD", 2) == 0) {
         char animation_id[32] = "perfect_day_01";
@@ -422,20 +474,32 @@ bool taby_transport_resolve_text(const char *text, taby_transport_resolution_t *
         }
         char title[TABY_TRANSPORT_LABEL_SIZE];
         snprintf(title, sizeof(title), "PERFECT DAY %c", text[2] ? text[2] : '1');
-        return set_resolution_from_animation_id(out_resolution, animation_id, title);
+        return resolve_animation_id(out_resolution, animation_id, title, out_animation_id, out_animation_id_size);
     }
 
     taby_command_t command = TABY_COMMAND_NONE;
     if (taby_command_from_string(text, &command)) {
         if (command == TABY_COMMAND_BREAK_START) {
-            return set_resolution_from_animation_id(out_resolution, "break_start", "BREAK");
+            return resolve_animation_id(out_resolution, "break_start", "BREAK", out_animation_id, out_animation_id_size);
+        }
+
+        if (command == TABY_COMMAND_CUSTOM_ANIMATION) {
+            /* "animation" on its own names no clip. */
+            return unknown_animation(text, out_animation_id, out_animation_id_size);
         }
 
         set_resolution_from_command_text(out_resolution, command, text);
-        return true;
+        return TABY_TRANSPORT_RESOLVED;
     }
 
-    return set_resolution_from_animation_id(out_resolution, text, NULL);
+    if (set_resolution_from_animation_id(out_resolution, text, NULL)) {
+        return TABY_TRANSPORT_RESOLVED;
+    }
+    memset(out_resolution, 0, sizeof(*out_resolution));
+    if (taby_transport_is_animation_id(text)) {
+        return unknown_animation(text, out_animation_id, out_animation_id_size);
+    }
+    return TABY_TRANSPORT_UNKNOWN_COMMAND;
 }
 
 bool taby_transport_command_from_text(const char *text, taby_command_t *out_command) {
@@ -450,6 +514,135 @@ bool taby_transport_command_from_text(const char *text, taby_command_t *out_comm
 
     *out_command = resolution.command;
     return true;
+}
+
+static const char *busy_replay_animation_id(const char *metadata, char *buffer, size_t buffer_size) {
+    const char *marker = metadata ? strchr(metadata, '!') : NULL;
+    if (!marker) {
+        return NULL;
+    }
+
+    size_t length = 0;
+    while (length + 1 < buffer_size &&
+           (isalnum((unsigned char)marker[length + 1]) || marker[length + 1] == '_')) {
+        buffer[length] = marker[length + 1];
+        length++;
+    }
+    buffer[length] = '\0';
+    return length > 0 ? buffer : NULL;
+}
+
+size_t taby_transport_required_animations(
+    const taby_transport_resolution_t *resolution,
+    const char *out_ids[2]) {
+    if (!resolution || !out_ids) {
+        return 0;
+    }
+
+    out_ids[0] = NULL;
+    out_ids[1] = NULL;
+
+    if (resolution->command == TABY_COMMAND_CUSTOM_ANIMATION) {
+        size_t count = 0;
+        if (resolution->animation_id[0] != '\0') {
+            out_ids[count++] = resolution->animation_id;
+        }
+        if (resolution->next_animation_id[0] != '\0') {
+            out_ids[count++] = resolution->next_animation_id;
+        }
+        return count;
+    }
+
+    taby_state_t state = taby_state_for_command(resolution->command);
+    taby_animation_asset_t asset = {0};
+    if (state == TABY_STATE_AMBIENT_BUSY_ANIMATION) {
+        /* The renderer prefers a replay clip named in the busy metadata when
+           the asset table knows it, as the display does. */
+        char replay_id[TABY_TRANSPORT_SUBTITLE_SIZE] = {0};
+        const char *replay = busy_replay_animation_id(resolution->subtitle, replay_id, sizeof(replay_id));
+        if (replay && taby_animation_asset_for_id(replay, &asset)) {
+            out_ids[0] = asset.animation_id;
+            return 1;
+        }
+    }
+
+    if (!taby_state_has_animation(state) ||
+        !taby_animation_asset_for_state(state, &asset) ||
+        !asset.asset_pack_path) {
+        return 0;
+    }
+    out_ids[0] = asset.animation_id;
+    return 1;
+}
+
+taby_display_command_result_t taby_transport_handle_display_command(
+    const char *text,
+    const taby_transport_display_hooks_t *hooks,
+    const char *reply_prefix,
+    bool echo_unsupported_command,
+    char *reply,
+    size_t reply_size) {
+    char scratch[8];
+    if (!reply || reply_size == 0) {
+        reply = scratch;
+        reply_size = sizeof(scratch);
+    }
+    const char *prefix = reply_prefix ? reply_prefix : "";
+    const char *state = hooks && hooks->state_name ? hooks->state_name() : NULL;
+    state = state && state[0] ? state : "UNKNOWN";
+
+    if (text && strcmp(text, "CLEAR") == 0) {
+        if (!hooks || !hooks->clear || !hooks->clear()) {
+            snprintf(reply, reply_size, "%sERR runtime_unavailable", prefix);
+            return TABY_DISPLAY_COMMAND_RUNTIME_UNAVAILABLE;
+        }
+        state = hooks->state_name ? hooks->state_name() : NULL;
+        snprintf(reply, reply_size, "%sOK %s", prefix, state && state[0] ? state : "UNKNOWN");
+        return TABY_DISPLAY_COMMAND_APPLIED;
+    }
+
+    taby_transport_resolution_t resolution = {0};
+    char unsupported_id[TABY_TRANSPORT_ANIMATION_ID_MAX_LEN + 1] = {0};
+    taby_transport_resolve_status_t status = taby_transport_resolve_text_status(
+        text,
+        &resolution,
+        unsupported_id,
+        sizeof(unsupported_id));
+
+    if (status == TABY_TRANSPORT_UNKNOWN_COMMAND) {
+        if (echo_unsupported_command && text) {
+            snprintf(reply, reply_size, "%sERR unsupported_command %.64s", prefix, text);
+        } else {
+            snprintf(reply, reply_size, "%sERR unsupported_command", prefix);
+        }
+        return TABY_DISPLAY_COMMAND_UNSUPPORTED_COMMAND;
+    }
+
+    if (status == TABY_TRANSPORT_RESOLVED) {
+        const char *required[2] = {0};
+        size_t required_count = taby_transport_required_animations(&resolution, required);
+        for (size_t i = 0; i < required_count; ++i) {
+            if (!hooks || !hooks->animation_available || !hooks->animation_available(required[i])) {
+                copy_text(unsupported_id, sizeof(unsupported_id), required[i]);
+                status = TABY_TRANSPORT_UNKNOWN_ANIMATION;
+                break;
+            }
+        }
+    }
+
+    if (status == TABY_TRANSPORT_UNKNOWN_ANIMATION) {
+        snprintf(reply, reply_size, "%sOK %s unsupported_animation %s", prefix, state, unsupported_id);
+        return TABY_DISPLAY_COMMAND_UNSUPPORTED_ANIMATION;
+    }
+
+    if (!hooks || !hooks->apply || !hooks->apply(&resolution)) {
+        snprintf(reply, reply_size, "%sERR runtime_unavailable", prefix);
+        return TABY_DISPLAY_COMMAND_RUNTIME_UNAVAILABLE;
+    }
+
+    state = hooks->state_name ? hooks->state_name() : NULL;
+    snprintf(reply, reply_size, "%sOK %s", prefix, state && state[0] ? state : "UNKNOWN");
+    return TABY_DISPLAY_COMMAND_APPLIED;
 }
 
 const char *taby_transport_state_name(taby_state_t state) {

@@ -24,7 +24,7 @@ static const taby_command_binding_t k_command_bindings[] = {
     {"missing_feature", TABY_COMMAND_MISSING_FEATURE},
 };
 
-static taby_state_t state_for_command(taby_command_t command) {
+taby_state_t taby_state_for_command(taby_command_t command) {
     switch (command) {
         case TABY_COMMAND_AMBIENT_STARTUP:
             return TABY_STATE_AMBIENT_STARTUP;
@@ -103,7 +103,7 @@ taby_state_t taby_state_machine_apply_command(taby_state_machine_t *machine, tab
         return machine ? machine->current_state : TABY_STATE_AMBIENT_IDLE;
     }
 
-    machine->current_state = state_for_command(command);
+    machine->current_state = taby_state_for_command(command);
     return machine->current_state;
 }
 

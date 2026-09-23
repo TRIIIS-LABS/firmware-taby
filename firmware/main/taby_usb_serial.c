@@ -15,7 +15,9 @@
 #include "freertos/task.h"
 #include "taby_ble_transport.h"
 #include "taby_build_info.h"
+#include "taby_display.h"
 #include "taby_identity.h"
+#include "taby_line_reader.h"
 #include "taby_mqtt.h"
 #include "taby_onboarding.h"
 #include "taby_power.h"
@@ -187,6 +189,16 @@ static const char *reset_reason_name(esp_reset_reason_t reason) {
             return "brownout";
         case ESP_RST_SDIO:
             return "sdio";
+        case ESP_RST_USB:
+            return "usb";
+        case ESP_RST_JTAG:
+            return "jtag";
+        case ESP_RST_EFUSE:
+            return "efuse";
+        case ESP_RST_PWR_GLITCH:
+            return "power_glitch";
+        case ESP_RST_CPU_LOCKUP:
+            return "cpu_lockup";
         case ESP_RST_UNKNOWN:
         default:
             return "unknown";
@@ -486,6 +498,10 @@ static void add_usb_capabilities(cJSON *root) {
     cJSON_AddItemToArray(capabilities, cJSON_CreateString("touch"));
     cJSON_AddItemToArray(capabilities, cJSON_CreateString("gesture"));
     cJSON_AddItemToArray(capabilities, cJSON_CreateString("wifi_setup"));
+    /* An animation this board lacks is ignored and answered
+       "TABY:OK <STATE> unsupported_animation <id>", and CLEAR dismisses a card. */
+    cJSON_AddItemToArray(capabilities, cJSON_CreateString("unsupported_animation"));
+    cJSON_AddItemToArray(capabilities, cJSON_CreateString("clear"));
     cJSON_AddItemToObject(root, "capabilities", capabilities);
 }
 
@@ -642,6 +658,17 @@ static void trim_ascii_spaces(char *text) {
         len--;
     }
 }
+
+static const char *current_transport_state_name(void) {
+    return taby_transport_state_name(taby_runtime_current_state());
+}
+
+static const taby_transport_display_hooks_t k_usb_display_hooks = {
+    .animation_available = taby_display_animation_available,
+    .apply = taby_runtime_apply_transport_resolution,
+    .state_name = current_transport_state_name,
+    .clear = taby_runtime_clear_reusable_card,
+};
 
 static void handle_usb_line(char *line) {
     trim_ascii_spaces(line);
@@ -924,37 +951,37 @@ static void handle_usb_line(char *line) {
         return;
     }
 
-    taby_transport_resolution_t resolution = {0};
-    if (!taby_transport_resolve_text(command_text, &resolution)) {
-        char response[128];
-        usb_set_last_reject_reason("unsupported_command");
-        snprintf(response, sizeof(response), "TABY:ERR unsupported_command %.64s", command_text);
-        usb_write_line(response);
-        return;
-    }
-
-    if (!taby_runtime_apply_transport_resolution(&resolution)) {
-        usb_write_error_reason("runtime_unavailable");
-        return;
-    }
-
-    taby_mqtt_notify_state_changed("usb_command");
-
-    char response[96];
-    snprintf(
+    char response[192];
+    taby_display_command_result_t result = taby_transport_handle_display_command(
+        command_text,
+        &k_usb_display_hooks,
+        "TABY:",
+        true,
         response,
-        sizeof(response),
-        "TABY:OK %s",
-        taby_transport_state_name(taby_runtime_current_state()));
+        sizeof(response));
+    switch (result) {
+        case TABY_DISPLAY_COMMAND_APPLIED:
+            taby_mqtt_notify_state_changed("usb_command");
+            break;
+        case TABY_DISPLAY_COMMAND_UNSUPPORTED_ANIMATION:
+            usb_set_last_reject_reason("unsupported_animation");
+            break;
+        case TABY_DISPLAY_COMMAND_UNSUPPORTED_COMMAND:
+            usb_set_last_reject_reason("unsupported_command");
+            break;
+        case TABY_DISPLAY_COMMAND_RUNTIME_UNAVAILABLE:
+        default:
+            usb_set_last_reject_reason("runtime_unavailable");
+            break;
+    }
     usb_write_line(response);
 }
 
 static void usb_serial_task(void *arg) {
     (void)arg;
 
-    char *buffer = s_usb_line_buffer;
-    memset(buffer, 0, TABY_USB_LINE_BUFFER_SIZE);
-    size_t length = 0;
+    taby_line_reader_t reader;
+    taby_line_reader_init(&reader, s_usb_line_buffer, TABY_USB_LINE_BUFFER_SIZE);
 
     while (true) {
         uint8_t byte = 0;
@@ -963,27 +990,16 @@ static void usb_serial_task(void *arg) {
             continue;
         }
 
-        if (byte == '\r' || byte == '\n') {
-            if (length > 0) {
-                buffer[length] = '\0';
-                handle_usb_line(buffer);
-                length = 0;
-                buffer[0] = '\0';
-            }
-            continue;
-        }
-
-        if (byte < 0x20 || byte > 0x7E) {
-            continue;
-        }
-
-        if (length + 1 < TABY_USB_LINE_BUFFER_SIZE) {
-            buffer[length++] = (char)byte;
-            buffer[length] = '\0';
-        } else {
-            length = 0;
-            buffer[0] = '\0';
-            usb_write_error_reason("line_too_long");
+        switch (taby_line_reader_push(&reader, byte)) {
+            case TABY_LINE_READER_LINE:
+                handle_usb_line(reader.buffer);
+                break;
+            case TABY_LINE_READER_TOO_LONG:
+                usb_write_error_reason("line_too_long");
+                break;
+            case TABY_LINE_READER_NONE:
+            default:
+                break;
         }
     }
 }
@@ -999,10 +1015,11 @@ esp_err_t taby_usb_serial_init(void) {
     };
     ESP_ERROR_CHECK(usb_serial_jtag_driver_install(&config));
 
-    xTaskCreate(usb_serial_task, "taby_usb_serial", TABY_USB_TASK_STACK_SIZE, NULL, 4, &s_usb_task_handle);
+    /* Before the task starts: it can answer a queued INFO at once. */
     s_usb_boot_count++;
     s_usb_bridge_ready = true;
     usb_record_event("ready", TABY_USB_MODE_NAME);
+    xTaskCreate(usb_serial_task, "taby_usb_serial", TABY_USB_TASK_STACK_SIZE, NULL, 4, &s_usb_task_handle);
     ESP_LOGI(TAG, "usb serial command bridge ready");
     return ESP_OK;
 }

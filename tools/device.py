@@ -53,6 +53,17 @@ def info(port):
     return {key: raw[key] for key in SAFE_INFO if key in raw}
 
 
+def play_animation(port, animation_id):
+    """Ask for one animation; firmware 1.1.1 and later say when the board lacks it."""
+    if not re.fullmatch(r"[a-z][a-z0-9_]{0,62}", animation_id):
+        raise ValueError("Use an animation ID from this board's asset manifest")
+    reply = exchange(port, animation_id, "TABY:OK ")
+    if " unsupported_animation " in f" {reply} ":
+        raise ValueError("This board does not have that animation. Use an ID from its asset manifest")
+    return {"accepted": True, "animation": animation_id,
+            "visual_verification": "Ask the user to confirm the screen"}
+
+
 def identify(actual):
     """Interpret firmware metadata without pretending it measures PCB wiring."""
     actual = {key: actual[key] for key in SAFE_INFO if key in actual}
@@ -108,11 +119,7 @@ def main():
         print(json.dumps({"reset_requested": True,
                           "next_step": "Wait for boot, list ports, then run install.py verify."}))
     else:
-        if not re.fullmatch(r"[a-z][a-z0-9_]{0,62}", args.id):
-            raise ValueError("Use an animation ID from this board's asset manifest")
-        exchange(args.port, args.id, "TABY:OK ")
-        print(json.dumps({"accepted": True, "animation": args.id,
-                          "visual_verification": "Ask the user to confirm the screen"}))
+        print(json.dumps(play_animation(args.port, args.id)))
 
 
 if __name__ == "__main__":

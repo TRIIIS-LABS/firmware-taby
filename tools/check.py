@@ -3,6 +3,35 @@ import json
 import re
 from common import BOARDS, ROOT, inside, partitions, sha256
 
+ASSET_TABLE = ROOT / "firmware/main/taby_animation_assets.c"
+
+
+def fnv1a_32(text):
+    digest = 0x811C9DC5
+    for byte in text.encode():
+        digest = ((digest ^ byte) * 0x01000193) & 0xFFFFFFFF
+    return digest
+
+
+def firmware_animation_table():
+    """The clips the firmware can name, from its compiled asset table."""
+    rows = re.findall(r'\{"([a-z0-9_]+)", "/assets/animations/[^"]+", NULL, 0, (\d+)U, (true|false)\}',
+                      ASSET_TABLE.read_text())
+    return {name: (int(duration), loop == "true") for name, duration, loop in rows}
+
+
+def check_firmware_names_every_clip(board, catalog, table):
+    """A clip on flash that the table lacks can never play: the device answers
+    an ID it physically has as unsupported (taby_response_ready_in, 1.1.0)."""
+    for item in catalog["animations"]:
+        if item["id"] not in table:
+            raise ValueError(f"{board}: {item['id']} is in the asset pack but not in {ASSET_TABLE.name}")
+        duration, loop = table[item["id"]]
+        if (duration, loop) != (item["duration_ms"], item["loop_policy"] != "play_once"):
+            raise ValueError(f"{board}: {item['id']} duration/loop differ between the pack and {ASSET_TABLE.name}")
+        if item["relative_path"] != f"a/{fnv1a_32(item['id']):08x}.gif":
+            raise ValueError(f"{board}: {item['id']} is stored where the firmware will not look")
+
 
 def check_assets(board):
     root = ROOT / "assets" / board
@@ -31,6 +60,7 @@ def check_assets(board):
         path = inside(root, item["relative_path"])
         if path.stat().st_size != item["byte_length"] or sha256(path) != item["sha256"]:
             raise ValueError(f"{board}: animation integrity failed: {item['id']}")
+    check_firmware_names_every_clip(board, catalog, firmware_animation_table())
     icon_source = (ROOT / "firmware/main/generated/taby_reusable_icons.c").read_text()
     for icon, width, height in re.findall(r'"/assets/(icons/[^\"]+)"\s*,\s*(\d+)\s*,\s*(\d+)', icon_source):
         if inside(root, icon).stat().st_size != (int(width) * int(height) + 1) // 2:
@@ -85,6 +115,8 @@ def check_hardware_catalog():
 
 
 if __name__ == "__main__":
+    if len(firmware_animation_table()) < 80:
+        raise ValueError(f"Could not read the animation table in {ASSET_TABLE.name}")
     for board in BOARDS:
         check_assets(board)
     check_hardware_catalog()

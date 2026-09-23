@@ -42,6 +42,7 @@ typedef struct {
 void taby_state_machine_init(taby_state_machine_t *machine);
 taby_state_t taby_state_machine_on_animation_complete(taby_state_machine_t *machine);
 taby_state_t taby_state_machine_apply_command(taby_state_machine_t *machine, taby_command_t command);
+taby_state_t taby_state_for_command(taby_command_t command);
 bool taby_state_has_animation(taby_state_t state);
 const char *taby_state_name(taby_state_t state);
 const char *taby_state_label(taby_state_t state);

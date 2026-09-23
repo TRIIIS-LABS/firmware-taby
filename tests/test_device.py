@@ -76,6 +76,19 @@ class DeviceTests(unittest.TestCase):
                 device.info("test-port")
         self.assertTrue(port.closed)
 
+    def test_animation_the_board_lacks_is_reported_not_claimed(self):
+        port = FakePort([b"TABY:OK IDLE unsupported_animation dizzy_loop\n"])
+        with patch.object(device.serial, "Serial", return_value=port):
+            with self.assertRaisesRegex(ValueError, "does not have that animation"):
+                device.play_animation("test-port", "dizzy_loop")
+        self.assertEqual(port.sent, b"dizzy_loop\n")
+        self.assertTrue(port.closed)
+
+    def test_animation_played(self):
+        port = FakePort([b"TABY:OK ANIMATION\n"])
+        with patch.object(device.serial, "Serial", return_value=port):
+            self.assertTrue(device.play_animation("test-port", "confirmation")["accepted"])
+
 
 if __name__ == "__main__":
     unittest.main()

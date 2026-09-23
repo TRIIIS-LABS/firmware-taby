@@ -11,6 +11,7 @@ idf_component_register(
         "generated/taby_reusable_icons.c"
         "taby_http_server.c"
         "taby_identity.c"
+        "taby_line_reader.c"
         "taby_mqtt.c"
         "taby_onboarding.c"
         "taby_power.c"

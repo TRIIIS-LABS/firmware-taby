@@ -56,12 +56,13 @@ prefix, with a bounded timeout. `tools/device.py` shows a working Python example
 | --- | --- |
 | `PING` | `TABY:PONG` |
 | `INFO` | `TABY:INFO { ... }`, including `hardware_target`, `firmware_version`, `assets_version` |
-| `confirmation` | Play that animation; `TABY:OK ...` on acceptance |
+| `confirmation` | Play that animation; `TABY:OK <STATE>` on acceptance |
+| `dizzy_loop` (an ID this board has no clip for) | Nothing changes; `TABY:OK <STATE> unsupported_animation dizzy_loop` |
 | `UI/title_subtitle?demo:HELLO\|FROM MY PROJECT` | Show a text card |
 | `UI/choice_2?demo:TAKE A BREAK?\|YES\|LATER` | Show a two-choice prompt |
 | `CHOICE_SIGNAL` | `TABY:CHOICE_SIGNAL {"signal":N,"selection":"..."}` |
 | `UI/timer?demo:FOCUS\|60\|60\|\|run\|0` | Show a running timer |
-| `CLEAR` | Clear the active presentation |
+| `CLEAR` | Clear the active presentation; `TABY:OK <STATE>` |
 
 The backslashes before table pipes are Markdown escaping only; commands contain
 literal `|` separators, never `\|`. For example:
@@ -73,7 +74,12 @@ UI/title_subtitle?demo:HELLO|FROM MY PROJECT
 Animation IDs are listed in `assets/BOARD/manifest.json`. Round and rectangle
 packs differ; inspect the selected pack before choosing an ID. `TABY:OK` means
 the protocol accepted the command, not that a person verified the image.
-Unsupported commands return `TABY:ERR ...`. Keep control strings in English;
+An animation ID (`a-z`, `0-9`, `_`, up to 80 characters, alone or as
+`intro>loop`) that this board has no clip for is ignored: the face keeps what it
+was showing and the reply is `TABY:OK <STATE> unsupported_animation <ID>`, so a
+client that treats `TABY:ERR` as a lost device stays connected. Since 1.1.1,
+`INFO` lists `unsupported_animation` and `clear` in `capabilities`. Other
+unsupported commands return `TABY:ERR ...`. Keep control strings in English;
 display text can differ, subject to the fonts' supported glyphs. Avoid protocol
 delimiters/newlines in user-provided text and keep labels short.
 
@@ -95,7 +101,9 @@ command as one characteristic value (without the USB newline) to the
 characteristic ending in `0002`; subscribe to events on `0003` before writing.
 `0004` is readable state, and `0005` is readable power information. The firmware
 supports one controller at a time and does not use BLE bonding. BLE event payloads
-use their own `READY`/`OK`/`ERR` messages rather than USB's `TABY:` prefix.
+use their own `READY`/`OK`/`ERR` messages rather than USB's `TABY:` prefix; an
+animation the board lacks is a successful write answered
+`OK <STATE> unsupported_animation <ID>`.
 For payload details and limits, see `main/taby_ble_transport.c`.
 
 After explicitly setting up Wi-Fi on the device, local HTTP supports `GET /ping`,

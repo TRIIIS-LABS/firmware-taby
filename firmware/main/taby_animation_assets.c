@@ -80,6 +80,7 @@ static const taby_animation_asset_t k_animation_assets[] = {
     {"startup", "/assets/animations/startup.gif", NULL, 0, 7667U, false},
     {"stretching", "/assets/animations/stretching.gif", NULL, 0, 6250U, false},
     {"talking_default_loop", "/assets/animations/talking_default_loop.gif", NULL, 0, 5333U, true},
+    {"taby_response_ready_in", "/assets/animations/taby_response_ready_in.gif", NULL, 0, 1083U, false},
     {"taby_response_ready_loop", "/assets/animations/taby_response_ready_loop.gif", NULL, 0, 1250U, true},
     {"task_completed", "/assets/animations/task_completed.gif", NULL, 0, 3125U, false},
     {"task_created", "/assets/animations/task_created.gif", NULL, 0, 5208U, false},
