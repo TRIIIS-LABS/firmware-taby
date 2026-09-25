@@ -89,6 +89,21 @@ class DeviceTests(unittest.TestCase):
         with patch.object(device.serial, "Serial", return_value=port):
             self.assertTrue(device.play_animation("test-port", "confirmation")["accepted"])
 
+    def test_eye_motion_is_set_and_read_back(self):
+        port = FakePort([b'TABY:EYE_MOTION {"mode":"calm","modes":["normal","calm","still"]}\n'])
+        with patch.object(device.serial, "Serial", return_value=port):
+            self.assertEqual(device.eye_motion("test-port", "calm"), {"eye_motion": "calm"})
+        self.assertEqual(port.sent, b"EYE_MOTION calm\n")
+
+    def test_eye_motion_on_older_firmware_says_what_to_install(self):
+        port = FakePort([b"TABY:ERR unsupported_command EYE_MOTION?\n"])
+        with patch.object(device.serial, "Serial", return_value=port):
+            with self.assertRaisesRegex(ValueError, "install 1.2.0"):
+                device.eye_motion("test-port")
+        self.assertEqual(port.sent, b"EYE_MOTION?\n")
+        with self.assertRaisesRegex(ValueError, "normal, calm or still"):
+            device.eye_motion("test-port", "sleepy")
+
 
 if __name__ == "__main__":
     unittest.main()

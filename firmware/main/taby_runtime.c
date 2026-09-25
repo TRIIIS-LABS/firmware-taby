@@ -8,6 +8,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "taby_display.h"
+#include "taby_idle_eyes.h"
 #include "taby_onboarding.h"
 #include "taby_reusable_ui.h"
 
@@ -638,4 +639,40 @@ bool taby_runtime_reset_display_orientation(void) {
     }
 
     return true;
+}
+
+taby_eye_motion_t taby_runtime_eye_motion(void) {
+    return taby_idle_eyes_mode();
+}
+
+static bool apply_eye_motion(esp_err_t stored) {
+    if (stored != ESP_OK) {
+        ESP_LOGW(TAG, "failed to save eye motion: %s", esp_err_to_name(stored));
+        return false;
+    }
+
+    if (!s_runtime_started) {
+        return true;
+    }
+
+    /* Saved already: a face drawn after this uses the new choice even if the
+       one on screen cannot be reached now. */
+    if (!board_amoled_1_64_lock(1000)) {
+        ESP_LOGW(TAG, "failed to acquire LVGL lock for eye motion");
+        return true;
+    }
+
+    taby_idle_eyes_apply();
+    board_amoled_1_64_unlock();
+    return true;
+}
+
+bool taby_runtime_set_eye_motion(taby_eye_motion_t mode) {
+    bool applied = apply_eye_motion(taby_idle_eyes_store(mode));
+    ESP_LOGI(TAG, "eye motion mode=%s applied=%d", taby_eye_motion_name(mode), applied ? 1 : 0);
+    return applied;
+}
+
+bool taby_runtime_reset_eye_motion(void) {
+    return apply_eye_motion(taby_idle_eyes_erase());
 }

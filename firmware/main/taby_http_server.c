@@ -1004,10 +1004,12 @@ static esp_err_t factory_reset_handler(httpd_req_t *req) {
     esp_err_t claim_err = taby_identity_clear_claim();
     esp_err_t transport_err = taby_transport_clear_onboarding();
     bool display_orientation_ok = taby_runtime_reset_display_orientation();
+    bool eye_motion_ok = taby_runtime_reset_eye_motion();
     if (wifi_err != ESP_OK ||
         claim_err != ESP_OK ||
         transport_err != ESP_OK ||
-        !display_orientation_ok) {
+        !display_orientation_ok ||
+        !eye_motion_ok) {
         return send_json(req, "500 Internal Server Error", "{\"ok\":false,\"error\":\"factory reset failed\"}");
     }
 

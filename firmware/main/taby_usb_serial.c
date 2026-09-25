@@ -16,6 +16,7 @@
 #include "taby_ble_transport.h"
 #include "taby_build_info.h"
 #include "taby_display.h"
+#include "taby_eye_motion.h"
 #include "taby_identity.h"
 #include "taby_line_reader.h"
 #include "taby_mqtt.h"
@@ -335,6 +336,7 @@ static void add_common_info_fields(cJSON *root, bool include_setup_ap_password) 
     cJSON_AddNumberToObject(root, "brightness_percent", board_amoled_1_64_brightness_percent());
     cJSON_AddNumberToObject(root, "brightness_raw", board_amoled_1_64_brightness_raw());
     add_display_orientation_fields(root, true);
+    add_string_or_empty(root, "eye_motion", taby_eye_motion_name(taby_runtime_eye_motion()));
     cJSON_AddNumberToObject(root, "free_heap_bytes", esp_get_free_heap_size());
     cJSON_AddNumberToObject(root, "minimum_free_heap_bytes", esp_get_minimum_free_heap_size());
 }
@@ -502,6 +504,8 @@ static void add_usb_capabilities(cJSON *root) {
        "TABY:OK <STATE> unsupported_animation <id>", and CLEAR dismisses a card. */
     cJSON_AddItemToArray(capabilities, cJSON_CreateString("unsupported_animation"));
     cJSON_AddItemToArray(capabilities, cJSON_CreateString("clear"));
+    /* EYE_MOTION normal|calm|still, kept across restarts (1.2.0). */
+    cJSON_AddItemToArray(capabilities, cJSON_CreateString("eye_motion"));
     cJSON_AddItemToObject(root, "capabilities", capabilities);
 }
 
@@ -636,6 +640,49 @@ static bool handle_display_orientation_command(const char *command_text) {
 
     write_display_orientation_json();
     return true;
+}
+
+static void write_eye_motion_json(void) {
+    cJSON *root = cJSON_CreateObject();
+    cJSON *modes = cJSON_CreateArray();
+    if (!root || !modes) {
+        cJSON_Delete(root);
+        cJSON_Delete(modes);
+        usb_write_error_reason("eye_motion_encode_failed");
+        return;
+    }
+
+    add_string_or_empty(root, "mode", taby_eye_motion_name(taby_runtime_eye_motion()));
+    cJSON_AddItemToArray(modes, cJSON_CreateString(taby_eye_motion_name(TABY_EYE_MOTION_NORMAL)));
+    cJSON_AddItemToArray(modes, cJSON_CreateString(taby_eye_motion_name(TABY_EYE_MOTION_CALM)));
+    cJSON_AddItemToArray(modes, cJSON_CreateString(taby_eye_motion_name(TABY_EYE_MOTION_STILL)));
+    cJSON_AddItemToObject(root, "modes", modes);
+    usb_write_prefixed_json("TABY:EYE_MOTION ", root, "TABY:ERR eye_motion_encode_failed");
+    cJSON_Delete(root);
+}
+
+/* EYE_MOTION? reads the choice; EYE_MOTION <normal|calm|still> saves it and
+   answers with what the device now holds. */
+static bool handle_eye_motion_command(const char *command_text) {
+    taby_eye_motion_t mode = TABY_EYE_MOTION_DEFAULT;
+    switch (taby_eye_motion_parse_command(command_text, &mode)) {
+        case TABY_EYE_MOTION_COMMAND_QUERY:
+            write_eye_motion_json();
+            return true;
+        case TABY_EYE_MOTION_COMMAND_SET:
+            if (!taby_runtime_set_eye_motion(mode)) {
+                usb_write_error_reason("eye_motion_set_failed");
+                return true;
+            }
+            write_eye_motion_json();
+            return true;
+        case TABY_EYE_MOTION_COMMAND_INVALID:
+            usb_write_error_reason("eye_motion_invalid_value");
+            return true;
+        case TABY_EYE_MOTION_COMMAND_NONE:
+        default:
+            return false;
+    }
 }
 
 static void trim_ascii_spaces(char *text) {
@@ -852,10 +899,12 @@ static void handle_usb_line(char *line) {
         esp_err_t claim_err = taby_identity_clear_claim();
         esp_err_t transport_err = taby_transport_clear_onboarding();
         bool display_orientation_ok = taby_runtime_reset_display_orientation();
+        bool eye_motion_ok = taby_runtime_reset_eye_motion();
         if (wifi_err != ESP_OK ||
             claim_err != ESP_OK ||
             transport_err != ESP_OK ||
-            !display_orientation_ok) {
+            !display_orientation_ok ||
+            !eye_motion_ok) {
             usb_write_error_reason("factory_reset_failed");
             return;
         }
@@ -921,6 +970,10 @@ static void handle_usb_line(char *line) {
     }
 
     if (handle_display_orientation_command(command_text)) {
+        return;
+    }
+
+    if (handle_eye_motion_command(command_text)) {
         return;
     }
 
