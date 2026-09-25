@@ -10,6 +10,7 @@
 #include "lvgl.h"
 #include "taby_animation_assets.h"
 #include "taby_asset_store.h"
+#include "taby_idle_eyes.h"
 #include "taby_reusable_ui.h"
 
 static const char *TAG = "taby_display";
@@ -81,6 +82,8 @@ static const taby_busy_text_layout_t k_busy_text_layouts[] = {
 
 static void reset_scene(void) {
     lv_obj_t *screen = lv_scr_act();
+
+    taby_idle_eyes_forget();
 
     if (s_animation_completion_timer) {
         lv_timer_del(s_animation_completion_timer);
@@ -192,6 +195,7 @@ static bool apply_animation_asset_to_object(
     s_animation_dsc.data_size = next_data_size;
     s_animation_dsc.data = next_data;
     lv_gif_set_src(animation_obj, &s_animation_dsc);
+    taby_idle_eyes_follow(animation_obj, asset->animation_id);
 
     if (previous_asset_data) {
         taby_asset_store_free_file(previous_asset_data);

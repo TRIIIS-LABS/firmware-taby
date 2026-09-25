@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #include "board_amoled_1_64.h"
+#include "taby_eye_motion.h"
 #include "taby_reusable_ui.h"
 #include "taby_state_machine.h"
 #include "taby_transport_protocol.h"
@@ -28,3 +29,7 @@ taby_display_orientation_t taby_runtime_display_orientation(void);
 taby_display_orientation_mode_t taby_runtime_display_orientation_mode(void);
 bool taby_runtime_set_display_orientation_mode(taby_display_orientation_mode_t mode);
 bool taby_runtime_reset_display_orientation(void);
+taby_eye_motion_t taby_runtime_eye_motion(void);
+// Saves the choice, then applies it to a rest face already on screen.
+bool taby_runtime_set_eye_motion(taby_eye_motion_t mode);
+bool taby_runtime_reset_eye_motion(void);

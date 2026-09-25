@@ -63,6 +63,8 @@ prefix, with a bounded timeout. `tools/device.py` shows a working Python example
 | `CHOICE_SIGNAL` | `TABY:CHOICE_SIGNAL {"signal":N,"selection":"..."}` |
 | `UI/timer?demo:FOCUS\|60\|60\|\|run\|0` | Show a running timer |
 | `CLEAR` | Clear the active presentation; `TABY:OK <STATE>` |
+| `EYE_MOTION calm` (or `normal`, `still`) | Set how much the resting face's eyes move; `TABY:EYE_MOTION {"mode":"calm",...}` |
+| `EYE_MOTION?` | `TABY:EYE_MOTION {"mode":"normal","modes":["normal","calm","still"]}` |
 
 The backslashes before table pipes are Markdown escaping only; commands contain
 literal `|` separators, never `\|`. For example:
@@ -82,6 +84,26 @@ client that treats `TABY:ERR` as a lost device stays connected. Since 1.1.1,
 unsupported commands return `TABY:ERR ...`. Keep control strings in English;
 display text can differ, subject to the fonts' supported glyphs. Avoid protocol
 delimiters/newlines in user-provided text and keep labels short.
+
+### Calmer eyes
+
+Since 1.2.0, `INFO` lists `eye_motion` in `capabilities` and reports the
+current `eye_motion`. The setting changes only the resting face (`idle_01_loop`,
+what the idle state shows); every other animation plays as drawn.
+
+- `normal` plays the resting face as drawn: frequent blinks, a small tilt, and a
+  long look to each side, every nine seconds.
+- `calm` holds the eyes centred for 3 to 7 seconds between blinks and adds the
+  small tilt every 20 to 60 seconds. It never plays the long looks.
+- `still` keeps the eyes centred, with one gentle blink every 4 to 9 seconds.
+
+The device keeps the choice across restarts, and `FACTORY_RESET` returns it to
+`normal`. An unknown mode is `TABY:ERR eye_motion_invalid_value` and changes
+nothing; older firmware answers `TABY:ERR unsupported_command`. The setting is
+USB only. `python tools/device.py eye-motion --port PORT [--mode calm]` reads
+or sets it. The firmware plays the resting face's own frames in a different
+order, so nothing new is added to the asset packs. The frames it uses are
+listed in `main/taby_eye_motion.h` and checked by `tests/test_eye_motion.py`.
 
 Read the initial choice signal before displaying a new prompt, then handle a
 changed signal once. The wire protocol has no application-level session or

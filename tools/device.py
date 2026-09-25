@@ -15,7 +15,9 @@ SAFE_INFO = (
     "firmware_version", "assets_version", "hardware_target", "display_shape",
     "display_width", "display_height", "preferred_transport",
     "transport_onboarding_complete", "usb_bridge_ready", "identity_source",
+    "eye_motion",
 )
+EYE_MOTIONS = ("normal", "calm", "still")
 
 
 def exchange(port, command, prefix, timeout=6):
@@ -64,6 +66,20 @@ def play_animation(port, animation_id):
             "visual_verification": "Ask the user to confirm the screen"}
 
 
+def eye_motion(port, mode=None):
+    """Read, or set and read back, how much the resting face's eyes move (1.2.0+)."""
+    if mode is not None and mode not in EYE_MOTIONS:
+        raise ValueError("Use normal, calm or still")
+    command = "EYE_MOTION?" if mode is None else f"EYE_MOTION {mode}"
+    try:
+        reply = json.loads(exchange(port, command, "TABY:EYE_MOTION "))
+    except ValueError as error:
+        if str(error) == "Device rejected the command":
+            raise ValueError("This firmware has no eye-motion setting; install 1.2.0 or later") from None
+        raise
+    return {"eye_motion": reply.get("mode")}
+
+
 def identify(actual):
     """Interpret firmware metadata without pretending it measures PCB wiring."""
     actual = {key: actual[key] for key in SAFE_INFO if key in actual}
@@ -91,11 +107,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="action", required=True)
     sub.add_parser("ports", help="List ports without opening or resetting them")
-    for action in ("info", "identify", "animation", "reset"):
+    for action in ("info", "identify", "animation", "eye-motion", "reset"):
         command = sub.add_parser(action)
         command.add_argument("--port", required=True)
         if action == "animation":
             command.add_argument("--id", required=True)
+        if action == "eye-motion":
+            command.add_argument("--mode", choices=EYE_MOTIONS,
+                                 help="Omit to read the current setting")
     args = parser.parse_args()
     if args.action == "ports":
         print(json.dumps([{"port": p.device, "description": p.description,
@@ -105,6 +124,8 @@ def main():
         print(json.dumps(info(args.port), indent=2))
     elif args.action == "identify":
         print(json.dumps(identify(info(args.port)), indent=2))
+    elif args.action == "eye-motion":
+        print(json.dumps(eye_motion(args.port, args.mode)))
     elif args.action == "reset":
         from esptool.reset import HardReset
         connection = serial.Serial(port=None, baudrate=115200, timeout=0.2)
