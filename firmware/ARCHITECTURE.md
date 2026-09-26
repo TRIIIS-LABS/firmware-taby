@@ -16,42 +16,12 @@ Four transports feed one command core, which drives one screen. The Taby app
 normally owns USB. The HTTP endpoints exist only after Wi-Fi setup and have no
 request authentication (see [Bluetooth and local Wi-Fi](README.md#bluetooth-and-local-wi-fi)).
 
-```mermaid
-flowchart LR
-  subgraph outside["Outside the device"]
-    app["Taby app"]
-    tools["tools/device.py, install.py"]
-    ble_client["BLE central"]
-    lan["LAN client"]
-    broker["mqtt.heytaby.com:8883"]
-  end
-  subgraph doors["Transports"]
-    usb["USB Serial/JTAG<br/>115200, TABY: lines"]
-    ble["BLE GATT<br/>write 0002, notify 0003"]
-    http["HTTP<br/>/cmd, /v1/command"]
-    mqtt["MQTT<br/>devices/id/cmd"]
-  end
-  core["Command core<br/>transport_protocol, reusable_preview,<br/>state_machine, runtime, display, reusable_ui"]
-  subgraph hw["Hardware"]
-    panel["AMOLED panel<br/>SH8601 over QSPI"]
-    touch["Touch, I2C 0x38"]
-    imu["QMI8658 IMU, I2C 0x6B"]
-    flash["Flash assets + PSRAM"]
-  end
-  app --> usb
-  tools --> usb
-  ble_client --> ble
-  lan --> http
-  broker -->|commands| mqtt
-  usb --> core
-  ble --> core
-  http --> core
-  mqtt --> core
-  core -->|draws| panel
-  touch -->|taps| core
-  imu -->|orientation| core
-  flash -->|GIFs| core
-```
+<details>
+<summary>Diagram: the whole system</summary>
+
+![Clients reach the firmware over USB, Bluetooth, HTTP or MQTT; all four feed one command core that drives the panel and reads touch, IMU, flash and battery.](architecture/system.png)
+
+</details>
 
 MQTT starts only on a board with factory credentials and saved Wi-Fi
 (`taby_mqtt.c`).
@@ -78,34 +48,34 @@ or setup is unfinished, then onboarding.
 `dns_server.c` is compiled but `start_dns_server` has no caller.
 `taby_visual_smoke.c` is not listed in `main/CMakeLists.txt`.
 
+<details>
+<summary>Diagram: modules by layer</summary>
+
+![Firmware modules in six layers with line counts; dns_server is compiled but never started and taby_visual_smoke is not built.](architecture/modules.png)
+
+</details>
+
+Boot timing, measured from one boot log on a 1.64 V1: the USB command bridge is ready about 2.9 s after reset. More than a second of that is the board waiting for a stable orientation before its first frame.
+
+<details>
+<summary>Diagram: boot, to scale</summary>
+
+![Boot timeline from 0 to 3000 ms: bootloader, IDF and PSRAM init, identity and IMU, a 1.3 s wait for stable orientation, panel, assets, then the startup clip and USB bridge at 2907 ms.](architecture/boot.png)
+
+</details>
+
 ## One command, end to end
 
 This is `confirmation` over USB. Everything up to the reply runs on the USB
 task, including the first frame, which is drawn while the task holds the
 LVGL lock. The LVGL task plays the remaining frames.
 
-```mermaid
-sequenceDiagram
-  participant H as Host
-  participant U as USB task (prio 4)
-  participant P as transport_protocol
-  participant R as runtime
-  participant D as display and asset_store
-  participant L as LVGL task (prio 2)
-  H->>U: confirmation + newline
-  U->>P: resolve text
-  P-->>U: CUSTOM_ANIMATION, clip confirmation
-  U->>D: clip on flash? (stat)
-  U->>R: apply, take the LVGL lock (1 s timeout)
-  R->>D: render state
-  D->>D: read the whole GIF into PSRAM
-  D->>D: lv_refr_now draws frame 1
-  R-->>U: lock released
-  U-->>H: TABY:OK ANIMATION
-  L->>D: remaining frames
-  L->>R: clip finished, state becomes IDLE
-  R->>D: idle_01_loop
-```
+<details>
+<summary>Diagram: one command, end to end</summary>
+
+![Sequence of a USB animation command from the host through the USB task, protocol, runtime and display to the panel, then the LVGL task returning to idle.](architecture/command-journey.png)
+
+</details>
 
 - Entry: `usb_serial_task`, then `handle_usb_line`, then
   `taby_transport_handle_display_command`.
@@ -120,15 +90,12 @@ sequenceDiagram
 USB and Bluetooth share the handler that checks the clip exists and builds
 the reply. HTTP and MQTT call the resolver and the runtime directly.
 
-```mermaid
-flowchart TD
-  usb["USB: handle_usb_line"] --> shared
-  ble["BLE: ble_command_task"] --> shared
-  shared["taby_transport_handle_display_command<br/>checks the clip, writes the reply"] --> apply
-  http["HTTP: /cmd, /v1/command"] -->|taby_transport_resolve_text| apply
-  mqtt["MQTT: devices/id/cmd"] -->|taby_transport_resolve_text| apply
-  apply["taby_runtime_apply_transport_resolution<br/>LVGL lock, state machine, render"]
-```
+<details>
+<summary>Diagram: two paths inside</summary>
+
+![USB and BLE go through taby_transport_handle_display_command; HTTP and MQTT go straight to resolve_text and the runtime.](architecture/transports.png)
+
+</details>
 
 | Transport | Reply to a display command |
 | --- | --- |
@@ -142,28 +109,12 @@ flowchart TD
 Any command sets its state directly, from any state. Without a command, only
 a clip ending moves the machine.
 
-```mermaid
-stateDiagram-v2
-  [*] --> STARTUP
-  STARTUP --> IDLE: clip ends
-  IDLE --> IDLE: idle_01_loop replays
-  state OneClipThenIdle {
-    WAITING
-    VOICE_LISTENING
-    VOICE_TALKING
-    TOOL_USE
-    TASK_DELETE
-    CUSTOM_ANIMATION
-  }
-  OneClipThenIdle --> IDLE: clip ends
-  BUSY_ANIMATION --> BUSY_TEXT: alternate
-  BUSY_TEXT --> BUSY_ANIMATION: alternate
-  state TextOnlyNoClip {
-    FOCUS_TIMER
-    BREAK_START
-    MISSING_FEATURE
-  }
-```
+<details>
+<summary>Diagram: state machine</summary>
+
+![Without commands, STARTUP and one-clip states return to IDLE when their clip ends; busy states alternate; text-only states stay.](architecture/state-machine.png)
+
+</details>
 
 - `taby_state_machine_on_animation_complete` holds the rules. `taby_runtime.c`
   replays IDLE, and plays the second clip of an `a>b` command before those
@@ -197,15 +148,12 @@ choice signal (`s_choice_signal_lock`), the tap and gesture counters
 
 ## Touch to choice signal
 
-```mermaid
-flowchart LR
-  ic["Touch IC, I2C 0x38"] -->|x, y| cb["LVGL read callback<br/>taby_lvgl task"]
-  cb -->|last sample| task["taby_reusable_touch<br/>polls every 20 ms"]
-  task -->|release| filter["tap: 20 to 700 ms press<br/>120 ms re-arm"]
-  filter -->|hit test| sig["choice signal<br/>signal + 1, selection"]
-  sig --> usbread["USB: CHOICE_SIGNAL"]
-  sig --> httpread["HTTP: /v1/reusable/choice-signal"]
-```
+<details>
+<summary>Diagram: touch to choice signal</summary>
+
+![Touch IC to LVGL read callback to the touch task, a tap filter and the choice signal read over USB and HTTP.](architecture/touch-choice-signal.png)
+
+</details>
 
 The counter does not reset between cards, so a client reads it before
 showing a prompt and compares afterwards. Board-level taps are counted
@@ -213,15 +161,12 @@ separately in `TOUCH_SIGNAL` (60 ms minimum, 180 ms re-arm).
 
 ## From animation id to pixels
 
-```mermaid
-flowchart LR
-  id["animation id<br/>confirmation"] -->|aliases, then table| table["taby_animation_assets.c<br/>duration, loop policy"]
-  table -->|FNV-1a 32-bit| path["/assets/a/72811854.gif"]
-  path -->|stat, read| spiffs["SPIFFS partition assets"]
-  spiffs -->|whole file| psram["PSRAM, lv_gif decodes"]
-  psram --> panel["280 x 456 panel"]
-  check["tools/check.py at build time"] -.->|catalog length, SHA-256, table, names| table
-```
+<details>
+<summary>Diagram: animation id to pixels</summary>
+
+![An animation id is looked up in the clip table, hashed with FNV-1a to a file name, read from SPIFFS into PSRAM and decoded by lv_gif.](architecture/animation-id.png)
+
+</details>
 
 The GIF is read into PSRAM in one piece; it is not streamed from flash.
 Icons are separate 4-bit alpha files under `/assets/icons/`.
@@ -244,6 +189,13 @@ On a 1.64 V1 running 1.2.0, the boot log showed the asset pack using
 11,286,466 of 11,317,841 bytes, about 31 KB free. The app used 1.74 MB of its
 4 MB. A new clip on this board currently needs space made for it.
 
+<details>
+<summary>Diagram: flash map, to scale</summary>
+
+![Flash layouts of both boards drawn to the same scale, with the first 256 KB zoomed in.](architecture/flash-map.png)
+
+</details>
+
 ## First boot and settings
 
 The chooser shows a single USB-C button, and any tap selects USB. Bluetooth
@@ -251,6 +203,13 @@ and Wi-Fi setup screens are reached through commands such as
 `TRANSPORT_MODE` and `SETUP_START`. A board with factory data is marked as
 USB-onboarded at first boot. If setup was left unfinished, the preference is
 reset to unknown at the next boot.
+
+<details>
+<summary>Diagram: first boot</summary>
+
+![On boot, unfinished setup is reset; an onboarded board goes to the runtime, otherwise a chooser with one USB-C button appears and any tap selects USB.](architecture/first-boot.png)
+
+</details>
 
 | NVS namespace | Keys | Holds |
 | --- | --- | --- |
@@ -261,17 +220,12 @@ reset to unknown at the next boot.
 
 ## Tools and CI
 
-```mermaid
-flowchart LR
-  check["check.py"] --> build["build.py BOARD<br/>ESP-IDF v5.4.2"]
-  build --> pkg["package_release.py<br/>dist/taby-BOARD.zip"]
-  pkg --> inst["install.py<br/>inspect, flash, verify"]
-  inst --> dev["device.py<br/>info, animation, eye-motion"]
-  subgraph ci["build.yml"]
-    cjob["check job"] -->|needs| fjob["firmware job<br/>amoled-1.64, round-1.32"]
-    fjob --> art["bundle artifacts"]
-  end
-```
+<details>
+<summary>Diagram: tools and CI</summary>
+
+![check.py, build.py, package_release.py, install.py and device.py in order; CI runs a check job then a firmware job for both boards.](architecture/tools-ci.png)
+
+</details>
 
 `install.py verify` compares the version fields in `INFO`. To confirm the
 images on the chip, compare flash digests with `esptool verify_flash`.
