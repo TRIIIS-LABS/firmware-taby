@@ -47,7 +47,9 @@ publishes automatically and never connects to a physical device.
 ## Talk to Taby
 
 USB uses newline-terminated UTF-8 commands at 115200 baud. Open only the chosen
-port, keep DTR/RTS deasserted for normal control, and close it afterward. Do not
+port, keep DTR/RTS deasserted for normal control, and close it afterward. On
+macOS and Linux, deassert them after opening, RTS before DTR: RTS asserted
+with DTR deasserted resets the board, even for a moment. Do not
 run another client while the Taby app owns the device. Responses can arrive in
 chunks alongside logs: assemble complete lines and match the expected `TABY:`
 prefix, with a bounded timeout. `tools/device.py` shows a working Python example.
