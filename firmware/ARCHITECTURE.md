@@ -16,12 +16,7 @@ Four transports feed one command core, which drives one screen. The Taby app
 normally owns USB. The HTTP endpoints exist only after Wi-Fi setup and have no
 request authentication (see [Bluetooth and local Wi-Fi](README.md#bluetooth-and-local-wi-fi)).
 
-<details>
-<summary>Diagram: the whole system</summary>
-
 ![Clients reach the firmware over USB, Bluetooth, HTTP or MQTT; all four feed one command core that drives the panel and reads touch, IMU, flash and battery.](architecture/system.png)
-
-</details>
 
 MQTT starts only on a board with factory credentials and saved Wi-Fi
 (`taby_mqtt.c`).
@@ -48,21 +43,11 @@ or setup is unfinished, then onboarding.
 `dns_server.c` is compiled but `start_dns_server` has no caller.
 `taby_visual_smoke.c` is not listed in `main/CMakeLists.txt`.
 
-<details>
-<summary>Diagram: modules by layer</summary>
-
 ![Firmware modules in six layers with line counts; dns_server is compiled but never started and taby_visual_smoke is not built.](architecture/modules.png)
-
-</details>
 
 Boot timing, measured from one boot log on a 1.64 V1: the USB command bridge is ready about 2.9 s after reset. More than a second of that is the board waiting for a stable orientation before its first frame.
 
-<details>
-<summary>Diagram: boot, to scale</summary>
-
 ![Boot timeline from 0 to 3000 ms: bootloader, IDF and PSRAM init, identity and IMU, a 1.3 s wait for stable orientation, panel, assets, then the startup clip and USB bridge at 2907 ms.](architecture/boot.png)
-
-</details>
 
 ## One command, end to end
 
@@ -70,12 +55,7 @@ This is `confirmation` over USB. Everything up to the reply runs on the USB
 task, including the first frame, which is drawn while the task holds the
 LVGL lock. The LVGL task plays the remaining frames.
 
-<details>
-<summary>Diagram: one command, end to end</summary>
-
 ![Sequence of a USB animation command from the host through the USB task, protocol, runtime and display to the panel, then the LVGL task returning to idle.](architecture/command-journey.png)
-
-</details>
 
 - Entry: `usb_serial_task`, then `handle_usb_line`, then
   `taby_transport_handle_display_command`.
@@ -90,12 +70,7 @@ LVGL lock. The LVGL task plays the remaining frames.
 USB and Bluetooth share the handler that checks the clip exists and builds
 the reply. HTTP and MQTT call the resolver and the runtime directly.
 
-<details>
-<summary>Diagram: two paths inside</summary>
-
 ![USB and BLE go through taby_transport_handle_display_command; HTTP and MQTT go straight to resolve_text and the runtime.](architecture/transports.png)
-
-</details>
 
 | Transport | Reply to a display command |
 | --- | --- |
@@ -109,12 +84,7 @@ the reply. HTTP and MQTT call the resolver and the runtime directly.
 Any command sets its state directly, from any state. Without a command, only
 a clip ending moves the machine.
 
-<details>
-<summary>Diagram: state machine</summary>
-
 ![Without commands, STARTUP and one-clip states return to IDLE when their clip ends; busy states alternate; text-only states stay.](architecture/state-machine.png)
-
-</details>
 
 - `taby_state_machine_on_animation_complete` holds the rules. `taby_runtime.c`
   replays IDLE, and plays the second clip of an `a>b` command before those
@@ -148,12 +118,7 @@ choice signal (`s_choice_signal_lock`), the tap and gesture counters
 
 ## Touch to choice signal
 
-<details>
-<summary>Diagram: touch to choice signal</summary>
-
 ![Touch IC to LVGL read callback to the touch task, a tap filter and the choice signal read over USB and HTTP.](architecture/touch-choice-signal.png)
-
-</details>
 
 The counter does not reset between cards, so a client reads it before
 showing a prompt and compares afterwards. Board-level taps are counted
@@ -161,12 +126,7 @@ separately in `TOUCH_SIGNAL` (60 ms minimum, 180 ms re-arm).
 
 ## From animation id to pixels
 
-<details>
-<summary>Diagram: animation id to pixels</summary>
-
 ![An animation id is looked up in the clip table, hashed with FNV-1a to a file name, read from SPIFFS into PSRAM and decoded by lv_gif.](architecture/animation-id.png)
-
-</details>
 
 The GIF is read into PSRAM in one piece; it is not streamed from flash.
 Icons are separate 4-bit alpha files under `/assets/icons/`.
@@ -189,12 +149,7 @@ On a 1.64 V1 running 1.2.0, the boot log showed the asset pack using
 11,286,466 of 11,317,841 bytes, about 31 KB free. The app used 1.74 MB of its
 4 MB. A new clip on this board currently needs space made for it.
 
-<details>
-<summary>Diagram: flash map, to scale</summary>
-
 ![Flash layouts of both boards drawn to the same scale, with the first 256 KB zoomed in.](architecture/flash-map.png)
-
-</details>
 
 ## First boot and settings
 
@@ -204,12 +159,7 @@ and Wi-Fi setup screens are reached through commands such as
 USB-onboarded at first boot. If setup was left unfinished, the preference is
 reset to unknown at the next boot.
 
-<details>
-<summary>Diagram: first boot</summary>
-
 ![On boot, unfinished setup is reset; an onboarded board goes to the runtime, otherwise a chooser with one USB-C button appears and any tap selects USB.](architecture/first-boot.png)
-
-</details>
 
 | NVS namespace | Keys | Holds |
 | --- | --- | --- |
@@ -220,12 +170,7 @@ reset to unknown at the next boot.
 
 ## Tools and CI
 
-<details>
-<summary>Diagram: tools and CI</summary>
-
 ![check.py, build.py, package_release.py, install.py and device.py in order; CI runs a check job then a firmware job for both boards.](architecture/tools-ci.png)
-
-</details>
 
 `install.py verify` compares the version fields in `INFO`. To confirm the
 images on the chip, compare flash digests with `esptool verify_flash`.
