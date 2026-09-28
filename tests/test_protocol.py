@@ -46,7 +46,7 @@ class DriverTestCase(unittest.TestCase):
         if built.returncode != 0:
             raise AssertionError(f"host build of the firmware parser failed:\n{built.stderr}")
         cls.boards = {}
-        for board in ("amoled-1.64", "round-1.32"):
+        for board in ("amoled-1.64", "round-1.32", "round-1.75c"):
             path = cls.build / f"{board}.txt"
             path.write_text("".join(item["id"] + "\n" for item in board_catalog(board)["animations"]))
             cls.boards[board] = path

@@ -1,5 +1,11 @@
 #include "taby_power.h"
 
+/* The 1.75C measures battery through its AXP2101 PMIC over I2C. ADC1 channel 3
+   is GPIO4, which this board wires to LCD DATA0, so the inherited divider
+   reading would fight the panel bus. Until an AXP2101 path is added and tested,
+   report power as unavailable on this target. */
+#if !TABY_HARDWARE_ROUND_1_75C
+
 #include <string.h>
 
 #include "esp_adc/adc_cali.h"
@@ -182,3 +188,21 @@ taby_power_status_t taby_power_get_status(void) {
     xSemaphoreGive(s_power_lock);
     return status;
 }
+
+#else  // TABY_HARDWARE_ROUND_1_75C
+
+esp_err_t taby_power_init(void) {
+    return ESP_OK;
+}
+
+taby_power_status_t taby_power_get_status(void) {
+    const taby_power_status_t status = {
+        .valid = false,
+        .power_voltage_mv = 0,
+        .battery_percent = -1,
+        .external_power = false,
+    };
+    return status;
+}
+
+#endif

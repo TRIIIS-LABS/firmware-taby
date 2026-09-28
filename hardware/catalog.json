@@ -31,6 +31,17 @@
       "models": [],
       "status": "planned",
       "availability": "coming_soon"
+    },
+    {
+      "board": "round-1.75c",
+      "revision": "V1.0",
+      "display": {
+        "shape": "round",
+        "width_px": 466,
+        "height_px": 466
+      },
+      "models": [],
+      "status": "prototype"
     }
   ]
 }

@@ -52,6 +52,15 @@ You'll need a supported board and a **USB data cable**.
 <p><a href="https://www.waveshare.com/esp32-s3-touch-amoled-1.32.htm?&amp;aff_id=134369">Get the board ↗</a> &nbsp;·&nbsp; Case coming soon</p>
 </td>
 </tr>
+<tr>
+<td width="430" valign="top">
+<h3>Taby Round 1.75C</h3>
+<p>The round one, in aluminium.<br>466 × 466 AMOLED · 27 animations</p>
+<p><strong>Waveshare ESP32-S3-Touch-AMOLED-1.75C</strong></p>
+<p><a href="https://www.waveshare.com/esp32-s3-touch-amoled-1.75c.htm?&amp;aff_id=134369">Get the board ↗</a> &nbsp;·&nbsp; CNC aluminium case included</p>
+</td>
+<td width="430" valign="top"></td>
+</tr>
 </table>
 
 **More screens coming soon.** Check [board compatibility](INSTALL.md) before buying.
@@ -132,6 +141,9 @@ Your board needs a case. Choose one for your screen, or design your own.
 </td>
 </tr>
 </table>
+
+The **Taby Round 1.75C** needs no print: it ships in a CNC-machined aluminium
+enclosure.
 
 For the Taby 1.64 desktop case, also get an **extra-strong neodymium block
 magnet, 20 × 10 × 2 mm**, and **self-adhesive rubber grip tape** or a similar

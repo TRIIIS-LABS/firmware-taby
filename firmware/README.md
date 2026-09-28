@@ -18,6 +18,7 @@ python tools/check.py
 python -m unittest discover -s tests -v
 python tools/build.py amoled-1.64
 python tools/build.py round-1.32
+python tools/build.py round-1.75c
 ```
 
 Each board gets its own `firmware/build-BOARD` and `firmware/sdkconfig.BOARD`.
@@ -26,11 +27,18 @@ is required. The asset packs are already present; ESP-IDF makes their SPIFFS ima
 Dependencies are pinned in `main/idf_component.yml` and `dependencies.lock`.
 The SDK fetches managed components during configuration; they are not vendored.
 
+`round-1.75c` is the Waveshare ESP32-S3-Touch-AMOLED-1.75C. The source builds,
+passes the offline checks, and the CO5300 display, CST9217 touch, and the Taby
+app connection are confirmed on a physical board. It is not yet part of a
+public release. See targets/round-1.75c/README.md for the pin mapping and
+verification status.
+
 After a successful build, make a complete install bundle:
 
 ```sh
 python tools/package_release.py amoled-1.64
 python tools/package_release.py round-1.32
+python tools/package_release.py round-1.75c
 ```
 
 This writes `dist/taby-BOARD.zip`, its checksum, and an extracted bundle directory.

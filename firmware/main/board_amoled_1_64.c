@@ -27,6 +27,12 @@ static const char *TAG = "board_1_64";
 #define LCD_HOST SPI2_HOST
 #define LCD_BIT_PER_PIXEL 16
 
+/* The round panels share the software-rotation, no-IMU behaviour. The exact
+   panel pins and touch controller are selected per board below. */
+#if defined(TABY_HARDWARE_ROUND_1_32) || defined(TABY_HARDWARE_ROUND_1_75C)
+#define TABY_HARDWARE_ROUND 1
+#endif
+
 #if TABY_HARDWARE_ROUND_1_32
 #define PIN_NUM_LCD_CS GPIO_NUM_10
 #define PIN_NUM_LCD_PCLK GPIO_NUM_11
@@ -43,6 +49,25 @@ static const char *TAG = "board_1_64";
 #define DISP_X_OFFSET 0x06
 #define DISP_DRAW_BUF_LINES 30
 #define BOARD_MODEL_LOG "Round 1.32 AMOLED"
+#elif TABY_HARDWARE_ROUND_1_75C
+/* Waveshare ESP32-S3-Touch-AMOLED-1.75C (CO5300 QSPI + CST9217 I2C).
+   Pin mapping follows Waveshare's official BSP
+   (waveshare/esp32_s3_touch_amoled_1_75c). */
+#define PIN_NUM_LCD_CS GPIO_NUM_12
+#define PIN_NUM_LCD_PCLK GPIO_NUM_38
+#define PIN_NUM_LCD_DATA0 GPIO_NUM_4
+#define PIN_NUM_LCD_DATA1 GPIO_NUM_5
+#define PIN_NUM_LCD_DATA2 GPIO_NUM_6
+#define PIN_NUM_LCD_DATA3 GPIO_NUM_7
+#define PIN_NUM_LCD_RST GPIO_NUM_1
+#define PIN_NUM_TOUCH_RST GPIO_NUM_2
+#define PIN_NUM_TOUCH_INT GPIO_NUM_11
+
+#define DISP_W 466
+#define DISP_H 466
+#define DISP_X_OFFSET 0x06
+#define DISP_DRAW_BUF_LINES 30
+#define BOARD_MODEL_LOG "Round 1.75C AMOLED"
 #else
 #define PIN_NUM_LCD_CS GPIO_NUM_9
 #define PIN_NUM_LCD_PCLK GPIO_NUM_10
@@ -60,11 +85,18 @@ static const char *TAG = "board_1_64";
 #endif
 
 #define BOARD_I2C_PORT I2C_NUM_0
+#if TABY_HARDWARE_ROUND_1_75C
+#define BOARD_I2C_SCL GPIO_NUM_14
+#define BOARD_I2C_SDA GPIO_NUM_15
+#else
 #define BOARD_I2C_SCL GPIO_NUM_48
 #define BOARD_I2C_SDA GPIO_NUM_47
+#endif
 #define BOARD_I2C_FREQ_HZ (300 * 1000)
 
-#if TABY_HARDWARE_ROUND_1_32
+#if TABY_HARDWARE_ROUND_1_75C
+#define TOUCH_ADDR 0x5A
+#elif TABY_HARDWARE_ROUND_1_32
 #define TOUCH_ADDR 0x15
 #else
 #define TOUCH_ADDR 0x38
@@ -85,7 +117,7 @@ static const char *TAG = "board_1_64";
 #define TABY_DISPLAY_PREFS_NAMESPACE "taby_display"
 #define TABY_DISPLAY_ORIENTATION_KEY "orientation"
 
-#if TABY_HARDWARE_ROUND_1_32
+#if TABY_HARDWARE_ROUND
 #define TABY_DISPLAY_ORIENTATION_DEFAULT_MODE TABY_DISPLAY_ORIENTATION_MODE_ROTATE_90
 #else
 #define TABY_DISPLAY_ORIENTATION_DEFAULT_MODE TABY_DISPLAY_ORIENTATION_MODE_AUTO
@@ -131,7 +163,7 @@ static lv_indev_t *s_input_device = NULL;
 static lv_disp_draw_buf_t s_draw_buf;
 static lv_disp_drv_t s_disp_drv;
 static lv_indev_drv_t s_indev_drv;
-#if TABY_HARDWARE_ROUND_1_32
+#if TABY_HARDWARE_ROUND
 static lv_color_t *s_rotation_buf = NULL;
 #endif
 static esp_timer_handle_t s_tick_timer = NULL;
@@ -162,7 +194,7 @@ static taby_display_orientation_mode_t s_display_orientation_mode =
 static bool s_touch_suppress_until_release = false;
 static portMUX_TYPE s_orientation_state_lock = portMUX_INITIALIZER_UNLOCKED;
 static taby_orientation_imu_diagnostics_t s_orientation_imu = {
-#if TABY_HARDWARE_ROUND_1_32
+#if TABY_HARDWARE_ROUND
     .supported = false,
     .available = false,
     .state = TABY_ORIENTATION_IMU_UNAVAILABLE,
@@ -173,7 +205,7 @@ static taby_orientation_imu_diagnostics_t s_orientation_imu = {
 #endif
 };
 
-#if !TABY_HARDWARE_ROUND_1_32
+#if !TABY_HARDWARE_ROUND
 static bool s_orientation_imu_has_previous_sample = false;
 static int16_t s_orientation_imu_previous_x = 0;
 static int16_t s_orientation_imu_previous_y = 0;
@@ -183,7 +215,22 @@ static int64_t s_orientation_candidate_since_us = 0;
 #endif
 
 static const sh8601_lcd_init_cmd_t s_lcd_init_cmds[] = {
-#if TABY_HARDWARE_ROUND_1_32
+#if TABY_HARDWARE_ROUND_1_75C
+    {0xFE, (uint8_t[]){0x20}, 1, 0},
+    {0x19, (uint8_t[]){0x10}, 1, 0},
+    {0x1C, (uint8_t[]){0xA0}, 1, 0},
+    {0xFE, (uint8_t[]){0x00}, 1, 0},
+    {0xC4, (uint8_t[]){0x80}, 1, 0},
+    {0x3A, (uint8_t[]){0x55}, 1, 0},
+    {0x35, (uint8_t[]){0x00}, 1, 0},
+    {0x53, (uint8_t[]){0x20}, 1, 0},
+    {0x51, (uint8_t[]){0xFF}, 1, 0},
+    {0x63, (uint8_t[]){0xFF}, 1, 0},
+    {0x2A, (uint8_t[]){0x00, 0x06, 0x01, 0xD7}, 4, 0},
+    {0x2B, (uint8_t[]){0x00, 0x00, 0x01, 0xD1}, 4, 600},
+    {0x11, (uint8_t[]){0x00}, 0, 600},
+    {0x29, (uint8_t[]){0x00}, 0, 0},
+#elif TABY_HARDWARE_ROUND_1_32
     {0xFE, (uint8_t[]){0x00}, 1, 0},
     {0xC4, (uint8_t[]){0x80}, 1, 0},
     {0x3A, (uint8_t[]){0x55}, 1, 0},
@@ -273,7 +320,7 @@ static bool display_orientation_mode_is_valid(taby_display_orientation_mode_t mo
 
 static bool display_orientation_mode_is_supported_for_target(
     taby_display_orientation_mode_t mode) {
-#if TABY_HARDWARE_ROUND_1_32
+#if TABY_HARDWARE_ROUND
     return mode != TABY_DISPLAY_ORIENTATION_MODE_AUTO;
 #else
     return mode != TABY_DISPLAY_ORIENTATION_MODE_ROTATE_90 &&
@@ -394,7 +441,7 @@ static esp_err_t erase_persisted_display_orientation(void) {
 }
 
 static uint8_t display_madctl_for_orientation(taby_display_orientation_t orientation) {
-#if TABY_HARDWARE_ROUND_1_32
+#if TABY_HARDWARE_ROUND
     // Waveshare's CO5300 setup keeps quarter-turn rotation in software. MV
     // produces writes outside the panel's 466x466 active window, so 90/270
     // keep the native MX|MY mapping and are transformed in lvgl_flush_cb.
@@ -497,7 +544,7 @@ static esp_err_t board_i2c_init(void) {
     return ESP_OK;
 }
 
-#if !TABY_HARDWARE_ROUND_1_32
+#if !TABY_HARDWARE_ROUND
 static esp_err_t board_i2c_write_reg(uint8_t addr, uint8_t reg, const uint8_t *data, size_t len) {
     uint8_t *tx_buf = malloc(len + 1);
     if (!tx_buf) {
@@ -525,6 +572,7 @@ static esp_err_t board_i2c_write_reg(uint8_t addr, uint8_t reg, const uint8_t *d
 }
 #endif
 
+#if !TABY_HARDWARE_ROUND_1_75C
 static esp_err_t board_i2c_read_reg(uint8_t addr, uint8_t reg, uint8_t *data, size_t len) {
     if (!s_i2c_mutex || xSemaphoreTake(s_i2c_mutex, pdMS_TO_TICKS(1000)) != pdTRUE) {
         return ESP_ERR_TIMEOUT;
@@ -540,8 +588,63 @@ static esp_err_t board_i2c_read_reg(uint8_t addr, uint8_t reg, uint8_t *data, si
     xSemaphoreGive(s_i2c_mutex);
     return err;
 }
+#endif
 
-#if !TABY_HARDWARE_ROUND_1_32
+#if TABY_HARDWARE_ROUND_1_75C
+/* The CST9217 uses 16-bit register addresses. Waveshare's driver issues the
+   address write and the data read as two transfers, so mirror that rather
+   than relying on a repeated start. */
+static esp_err_t board_i2c_read_reg16(uint8_t addr, uint16_t reg, uint8_t *data, size_t len) {
+    uint8_t reg_buf[2] = {(uint8_t)(reg >> 8), (uint8_t)(reg & 0xFF)};
+    if (!s_i2c_mutex || xSemaphoreTake(s_i2c_mutex, pdMS_TO_TICKS(1000)) != pdTRUE) {
+        return ESP_ERR_TIMEOUT;
+    }
+    esp_err_t err = i2c_master_write_to_device(
+        BOARD_I2C_PORT,
+        addr,
+        reg_buf,
+        sizeof(reg_buf),
+        pdMS_TO_TICKS(1000));
+    if (err == ESP_OK) {
+        // Waveshare's CST9217 driver lets the register address settle before
+        // reading; without it the first data byte comes back invalid.
+        vTaskDelay(pdMS_TO_TICKS(2));
+        err = i2c_master_read_from_device(
+            BOARD_I2C_PORT,
+            addr,
+            data,
+            len,
+            pdMS_TO_TICKS(1000));
+    }
+    xSemaphoreGive(s_i2c_mutex);
+    return err;
+}
+
+/* CST9217 register writes send the 16-bit address followed by an optional
+   one-byte payload in a single transfer. */
+static esp_err_t board_i2c_write_reg16(uint8_t addr, uint16_t reg, const uint8_t *data, size_t len) {
+    if (len > 1) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    uint8_t tx[3] = {(uint8_t)(reg >> 8), (uint8_t)(reg & 0xFF), 0};
+    if (len == 1 && data) {
+        tx[2] = data[0];
+    }
+    if (!s_i2c_mutex || xSemaphoreTake(s_i2c_mutex, pdMS_TO_TICKS(1000)) != pdTRUE) {
+        return ESP_ERR_TIMEOUT;
+    }
+    const esp_err_t err = i2c_master_write_to_device(
+        BOARD_I2C_PORT,
+        addr,
+        tx,
+        len + 2,
+        pdMS_TO_TICKS(1000));
+    xSemaphoreGive(s_i2c_mutex);
+    return err;
+}
+#endif
+
+#if !TABY_HARDWARE_ROUND
 static int32_t orientation_abs_i32(int32_t value) {
     return value < 0 ? -value : value;
 }
@@ -805,7 +908,50 @@ static void board_orientation_monitor_task(void *arg) {
 #endif
 
 static esp_err_t board_touch_init(void) {
-#if TABY_HARDWARE_ROUND_1_32
+#if TABY_HARDWARE_ROUND_1_75C
+    gpio_config_t reset_config = {
+        .pin_bit_mask = 1ULL << PIN_NUM_TOUCH_RST,
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_up_en = GPIO_PULLUP_ENABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE,
+    };
+    ESP_RETURN_ON_ERROR(gpio_config(&reset_config), TAG, "touch reset gpio config failed");
+    gpio_set_level(PIN_NUM_TOUCH_RST, 0);
+    vTaskDelay(pdMS_TO_TICKS(10));
+    gpio_set_level(PIN_NUM_TOUCH_RST, 1);
+    vTaskDelay(pdMS_TO_TICKS(100));
+
+    esp_err_t last_err = ESP_FAIL;
+    for (int attempt = 1; attempt <= TOUCH_INIT_RETRY_COUNT; ++attempt) {
+        /* Enter the attribute page, then read the checkcode and resolution.
+           Register 0xD000 only yields a frame marker during a real touch, so
+           identity is the reliable presence check. */
+        last_err = board_i2c_write_reg16(TOUCH_ADDR, 0xD101, NULL, 0);
+        if (last_err == ESP_OK) {
+            vTaskDelay(pdMS_TO_TICKS(10));
+            uint8_t checkcode[4] = {0};
+            uint8_t resolution[4] = {0};
+            last_err = board_i2c_read_reg16(TOUCH_ADDR, 0xD1FC, checkcode, sizeof(checkcode));
+            if (last_err == ESP_OK) {
+                last_err = board_i2c_read_reg16(TOUCH_ADDR, 0xD1F8, resolution, sizeof(resolution));
+            }
+            if (last_err == ESP_OK) {
+                const unsigned int res_x = ((unsigned int)resolution[1] << 8) | resolution[0];
+                const unsigned int res_y = ((unsigned int)resolution[3] << 8) | resolution[2];
+                ESP_LOGI(TAG,
+                         "CST9217 ready checkcode=%02x%02x%02x%02x resolution=%ux%u",
+                         checkcode[0], checkcode[1], checkcode[2], checkcode[3],
+                         res_x, res_y);
+                return ESP_OK;
+            }
+        }
+        ESP_LOGW(TAG, "CST9217 touch init attempt %d/%d failed: %s",
+                 attempt, TOUCH_INIT_RETRY_COUNT, esp_err_to_name(last_err));
+        vTaskDelay(pdMS_TO_TICKS(TOUCH_INIT_RETRY_DELAY_MS));
+    }
+    return last_err;
+#elif TABY_HARDWARE_ROUND_1_32
     gpio_config_t reset_config = {
         .pin_bit_mask = 1ULL << PIN_NUM_TOUCH_RST,
         .mode = GPIO_MODE_OUTPUT,
@@ -846,36 +992,60 @@ static esp_err_t board_touch_init(void) {
 }
 
 static bool board_touch_read_raw(uint16_t *raw_x, uint16_t *raw_y) {
-#if TABY_HARDWARE_ROUND_1_32
+#if TABY_HARDWARE_ROUND_1_75C
+    uint8_t data[10] = {0};
+    if (board_i2c_read_reg16(TOUCH_ADDR, 0xD000, data, sizeof(data)) != ESP_OK) {
+        return false;
+    }
+    /* Every report, touch or empty, must be acknowledged or the controller
+       keeps returning the same frame until its internal timeout. */
+    const uint8_t ack = 0xAB;
+    (void)board_i2c_write_reg16(TOUCH_ADDR, 0xD000, &ack, sizeof(ack));
+
+    if (data[0] == 0) {
+        /* All-zero first byte is the valid no-contact report. */
+        return false;
+    }
+    if (data[6] != 0xAB || (data[5] & 0x7F) == 0 || (data[0] & 0x0F) != 0x06) {
+        return false;
+    }
+    *raw_x = ((uint16_t)data[1] << 4) | ((uint16_t)data[3] >> 4);
+    *raw_y = ((uint16_t)data[2] << 4) | ((uint16_t)data[3] & 0x0F);
+    return true;
+#elif TABY_HARDWARE_ROUND_1_32
     uint8_t gesture[2] = {0};
     if (board_i2c_read_reg(TOUCH_ADDR, 0x02, gesture, sizeof(gesture)) != ESP_OK || gesture[0] == 0 || (gesture[1] >> 6) == 0x01) {
         return false;
     }
-#else
-    uint8_t points = 0;
-    if (board_i2c_read_reg(TOUCH_ADDR, 0x02, &points, 1) != ESP_OK || points == 0) {
-        return false;
-    }
-#endif
 
     uint8_t buf[4] = {0};
     if (board_i2c_read_reg(TOUCH_ADDR, 0x03, buf, sizeof(buf)) != ESP_OK) {
         return false;
     }
 
-#if TABY_HARDWARE_ROUND_1_32
     *raw_x = ((((uint16_t)buf[0]) & 0x0F) << 8) | (uint16_t)buf[1];
     *raw_y = ((((uint16_t)buf[2]) & 0x0F) << 8) | (uint16_t)buf[3];
+    return true;
 #else
+    uint8_t points = 0;
+    if (board_i2c_read_reg(TOUCH_ADDR, 0x02, &points, 1) != ESP_OK || points == 0) {
+        return false;
+    }
+
+    uint8_t buf[4] = {0};
+    if (board_i2c_read_reg(TOUCH_ADDR, 0x03, buf, sizeof(buf)) != ESP_OK) {
+        return false;
+    }
+
     *raw_y = ((((uint16_t)buf[0]) & 0x0F) << 8) | (uint16_t)buf[1];
     *raw_x = ((((uint16_t)buf[2]) & 0x0F) << 8) | (uint16_t)buf[3];
-#endif
     return true;
+#endif
 }
 
 static void lvgl_flush_cb(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *color_map) {
     (void)drv;
-#if TABY_HARDWARE_ROUND_1_32
+#if TABY_HARDWARE_ROUND
     const taby_display_orientation_t orientation =
         board_amoled_1_64_display_orientation();
     if (orientation == TABY_DISPLAY_ORIENTATION_ROTATE_90 ||
@@ -1012,7 +1182,7 @@ static void lvgl_touch_read_cb(lv_indev_drv_t *drv, lv_indev_data_t *data) {
       board_record_gesture(BOARD_AMOLED_1_64_GESTURE_HOLD_START);
     }
 
-#if TABY_HARDWARE_ROUND_1_32
+#if TABY_HARDWARE_ROUND
     uint16_t mapped_x = raw_x < DISP_W ? (DISP_W - 1U - raw_x) : 0;
     uint16_t mapped_y = raw_y < DISP_H ? (DISP_H - 1U - raw_y) : 0;
 #else
@@ -1233,7 +1403,7 @@ const char *board_amoled_1_64_display_orientation_mode_name(void) {
 }
 
 bool board_amoled_1_64_display_orientation_auto_supported(void) {
-#if TABY_HARDWARE_ROUND_1_32
+#if TABY_HARDWARE_ROUND
     return false;
 #else
     return true;
@@ -1350,7 +1520,7 @@ esp_err_t board_amoled_1_64_set_display_orientation_mode(taby_display_orientatio
     taskENTER_CRITICAL(&s_orientation_state_lock);
     s_display_orientation_mode = mode;
     taskEXIT_CRITICAL(&s_orientation_state_lock);
-#if !TABY_HARDWARE_ROUND_1_32
+#if !TABY_HARDWARE_ROUND
     orientation_detector_reset();
 #endif
 
@@ -1371,7 +1541,7 @@ esp_err_t board_amoled_1_64_reset_display_orientation(void) {
     previous_orientation = s_display_orientation;
     taskEXIT_CRITICAL(&s_orientation_state_lock);
 
-#if TABY_HARDWARE_ROUND_1_32
+#if TABY_HARDWARE_ROUND
     const taby_display_orientation_t default_orientation = display_orientation_for_mode(
         TABY_DISPLAY_ORIENTATION_DEFAULT_MODE,
         TABY_DISPLAY_ORIENTATION_LEFT);
@@ -1395,12 +1565,12 @@ esp_err_t board_amoled_1_64_reset_display_orientation(void) {
 
     taskENTER_CRITICAL(&s_orientation_state_lock);
     s_display_orientation_mode = TABY_DISPLAY_ORIENTATION_DEFAULT_MODE;
-#if TABY_HARDWARE_ROUND_1_32
+#if TABY_HARDWARE_ROUND
     s_display_orientation = default_orientation;
 #endif
     s_display_orientation_loaded = true;
     taskEXIT_CRITICAL(&s_orientation_state_lock);
-#if !TABY_HARDWARE_ROUND_1_32
+#if !TABY_HARDWARE_ROUND
     orientation_detector_reset();
 #endif
     ESP_LOGI(
@@ -1421,7 +1591,7 @@ void board_amoled_1_64_orientation_imu_diagnostics(
     int64_t last_sample_us = 0;
     taskENTER_CRITICAL(&s_orientation_state_lock);
     *diagnostics = s_orientation_imu;
-#if !TABY_HARDWARE_ROUND_1_32
+#if !TABY_HARDWARE_ROUND
     last_sample_us = s_orientation_imu_last_sample_us;
 #endif
     taskEXIT_CRITICAL(&s_orientation_state_lock);
@@ -1485,7 +1655,7 @@ esp_err_t board_amoled_1_64_init(void) {
 #endif
 
     ESP_RETURN_ON_ERROR(board_i2c_init(), TAG, "board_i2c_init failed");
-#if !TABY_HARDWARE_ROUND_1_32
+#if !TABY_HARDWARE_ROUND
     esp_err_t imu_err = board_orientation_imu_init();
     if (imu_err != ESP_OK) {
         taskENTER_CRITICAL(&s_orientation_state_lock);
@@ -1550,19 +1720,30 @@ esp_err_t board_amoled_1_64_init(void) {
         TAG,
         "set default brightness failed");
 
-    ESP_RETURN_ON_ERROR(board_touch_init(), TAG, "board_touch_init failed");
+    esp_err_t touch_err = board_touch_init();
+#if TABY_HARDWARE_ROUND_1_75C
+    /* A missing touch controller during bring-up must not brick the display
+       and USB control paths; report it and keep running. */
+    if (touch_err != ESP_OK) {
+        ESP_LOGW(TAG,
+                 "CST9217 touch unavailable (%s); continuing without touch",
+                 esp_err_to_name(touch_err));
+    }
+#else
+    ESP_RETURN_ON_ERROR(touch_err, TAG, "board_touch_init failed");
+#endif
 
     lv_init();
 
     buf1 = heap_caps_malloc(DISP_W * DISP_DRAW_BUF_LINES * sizeof(lv_color_t), MALLOC_CAP_DMA);
     buf2 = heap_caps_malloc(DISP_W * DISP_DRAW_BUF_LINES * sizeof(lv_color_t), MALLOC_CAP_DMA);
-#if TABY_HARDWARE_ROUND_1_32
+#if TABY_HARDWARE_ROUND
     s_rotation_buf = heap_caps_malloc(
         DISP_W * DISP_DRAW_BUF_LINES * sizeof(lv_color_t),
         MALLOC_CAP_DMA);
 #endif
     if (!buf1 || !buf2
-#if TABY_HARDWARE_ROUND_1_32
+#if TABY_HARDWARE_ROUND
         || !s_rotation_buf
 #endif
     ) {
@@ -1606,7 +1787,7 @@ esp_err_t board_amoled_1_64_init(void) {
         return ESP_FAIL;
     }
 
-#if !TABY_HARDWARE_ROUND_1_32
+#if !TABY_HARDWARE_ROUND
     bool imu_available;
     taskENTER_CRITICAL(&s_orientation_state_lock);
     imu_available = s_orientation_imu.available;
