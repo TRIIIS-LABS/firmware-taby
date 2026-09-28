@@ -8,7 +8,7 @@ import subprocess
 import zipfile
 from pathlib import Path
 
-from common import BOARDS, ROOT, allowed_images, inside, load_bundle, sha256, build_fingerprint
+from common import BOARDS, ROOT, allowed_images, asset_dir, inside, load_bundle, sha256, build_fingerprint
 
 
 def copy_dependency_notices(destination, description):
@@ -58,7 +58,7 @@ def package(board, build, output):
     version = re.search(r'TABY_FIRMWARE_VERSION = "([^"]+)"', source)[1]
     if description.get("project_version") != version:
         raise ValueError("Application metadata does not match the reported firmware version; rebuild")
-    assets = json.loads((ROOT / "assets" / board / "manifest.json").read_text())
+    assets = json.loads((asset_dir(board) / "manifest.json").read_text())
     manifest = {"schema": "taby-install-v1", "board": board,
                 "revision": profile["revision"], "chip": "esp32s3",
                 "flash_size_mb": profile["flash_size_mb"],

@@ -9,6 +9,17 @@
     "sdkconfig": "sdkconfig.defaults",
     "partitions": "partitions.csv"
   },
+  "amoled-1.64-v2": {
+    "name": "Waveshare ESP32-S3-Touch-AMOLED-1.64 (V2)",
+    "revision": "V2",
+    "chip": "esp32s3",
+    "flash_size_mb": 16,
+    "width": 280,
+    "height": 456,
+    "sdkconfig": "sdkconfig.defaults",
+    "partitions": "partitions.csv",
+    "assets": "amoled-1.64"
+  },
   "round-1.32": {
     "name": "Waveshare ESP32-S3-Touch-AMOLED-1.32",
     "revision": "original",

@@ -100,7 +100,7 @@ def identify(actual):
                     "next_step": "Display dimensions conflict with the reported target. Resolve the mismatch before flashing."}
     return {**result, "status": "firmware_target", "board": target,
             "revision": profile["revision"], "evidence": "running_firmware_metadata",
-            "next_step": "Use this target for an update if the existing display is working correctly. This identifies the installed build, not an independent PCB revision measurement."}
+            "next_step": "Ask the user whether the screen shows Taby correctly before reusing this target for an update. A black screen means this build may be wrong for the PCB (a 1.64 V2 running an amoled-1.64 bundle reports amoled-1.64); check the PCB marking instead. This identifies the installed build, not an independent PCB revision measurement."}
 
 
 def main():

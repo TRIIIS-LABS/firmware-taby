@@ -50,13 +50,26 @@ class DeviceTests(unittest.TestCase):
         self.assertFalse(result["physical_revision_verified"])
         self.assertNotIn("setup_ap_password", result["device"])
 
+    def test_reused_target_requires_a_working_screen_first(self):
+        # A 1.64 V2 running an amoled-1.64 bundle reports amoled-1.64 and shows a black screen.
+        result = device.identify({"hardware_target": "amoled-1.64"})
+        self.assertIn("black screen", result["next_step"])
+        self.assertIn("PCB marking", result["next_step"])
+
+    def test_v2_firmware_metadata_selects_the_v2_target(self):
+        result = device.identify({"hardware_target": "amoled-1.64-v2",
+                                  "display_width": 280, "display_height": 456})
+        self.assertEqual(result["status"], "firmware_target")
+        self.assertEqual((result["board"], result["revision"]), ("amoled-1.64-v2", "V2"))
+        self.assertFalse(result["physical_revision_verified"])
+
     def test_legacy_firmware_does_not_guess_from_asset_version(self):
         result = device.identify({"firmware_version": "1.0.6", "assets_version": "0.3.2"})
         self.assertEqual(result["status"], "unknown")
         self.assertIsNone(result["board"])
 
     def test_unknown_target_and_conflicting_geometry_do_not_select_a_bundle(self):
-        for actual in ({"hardware_target": "amoled-1.64-v2"},
+        for actual in ({"hardware_target": "amoled-9.99"},
                        {"hardware_target": "amoled-1.64", "display_width": 466}):
             with self.subTest(actual=actual):
                 self.assertIsNone(device.identify(actual)["board"])

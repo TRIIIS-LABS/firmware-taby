@@ -1,7 +1,7 @@
 """Check board layouts and all shipped assets without ESP-IDF or hardware."""
 import json
 import re
-from common import BOARDS, ROOT, inside, partitions, sha256
+from common import BOARDS, ROOT, asset_dir, inside, partitions, sha256
 
 ASSET_TABLE = ROOT / "firmware/main/taby_animation_assets.c"
 
@@ -34,7 +34,7 @@ def check_firmware_names_every_clip(board, catalog, table):
 
 
 def check_assets(board):
-    root = ROOT / "assets" / board
+    root = asset_dir(board)
     manifest_path = root / "manifest.json"
     manifest = json.loads(manifest_path.read_text())
     if manifest_path.stat().st_size > 16 * 1024:

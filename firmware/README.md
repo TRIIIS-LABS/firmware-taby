@@ -17,6 +17,7 @@ From the repository root:
 python tools/check.py
 python -m unittest discover -s tests -v
 python tools/build.py amoled-1.64
+python tools/build.py amoled-1.64-v2
 python tools/build.py round-1.32
 ```
 
@@ -30,6 +31,7 @@ After a successful build, make a complete install bundle:
 
 ```sh
 python tools/package_release.py amoled-1.64
+python tools/package_release.py amoled-1.64-v2
 python tools/package_release.py round-1.32
 ```
 
@@ -39,7 +41,7 @@ Packaging refuses to overwrite an existing bundle directory; choose a fresh
 flash, and verify it. Source builds are development builds until tested and
 released; do not call them an official downloaded release.
 
-The GitHub build workflow builds both boards and attaches installation bundles
+The GitHub build workflow builds every board and attaches installation bundles
 to successful runs. Maintainers publish tested bundles together in a GitHub
 Release, with release notes stating the exact boards/revisions tested. CI never
 publishes automatically and never connects to a physical device.
@@ -152,8 +154,8 @@ The supported first-party integration is in the Taby app.
 5. Verify a fresh build, USB install/recovery, display, touch, and app commands on
    real hardware. Record results in the PR before adding it to supported displays.
 
-Do not infer board support from screen size or the ESP32 chip alone. Waveshare
-1.64 V2 needs its own reviewed pin mapping and hardware tests.
+Do not infer board support from screen size or the ESP32 chip alone. The Waveshare
+1.64 V2 is its own target, `amoled-1.64-v2`; see [its README](targets/amoled-1.64-v2/README.md).
 
 ## Assets and contributions
 

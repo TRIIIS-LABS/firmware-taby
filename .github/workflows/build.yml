@@ -26,7 +26,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        board: [amoled-1.64, round-1.32]
+        board: [amoled-1.64, amoled-1.64-v2, round-1.32]
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Build and package
