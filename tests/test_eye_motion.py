@@ -27,12 +27,13 @@ HEADER = MAIN / "taby_eye_motion.h"
 SOURCES = [ROOT / "tests/host/eye_motion_driver.c", MAIN / "taby_eye_motion.c"]
 FLAGS = ["-std=gnu11", "-Wall", "-Wextra", "-Werror", "-g", "-O1", "-fno-omit-frame-pointer", f"-I{MAIN}"]
 SANITIZERS = ["-fsanitize=address,undefined", "-fno-sanitize-recover=all"]
-BOARDS = ("amoled-1.64", "round-1.32")
+BOARDS = ("amoled-1.64", "round-1.32", "round-1.75c")
 # The rest-face plan was cut by looking at these files. Other art needs its
 # frames read again and the numbers in taby_eye_motion.h changed to match.
 REST_FACE_ART = {
     "amoled-1.64": "b11cae58a6973f7f3ef9c373d5d894fa7f5c981785e0311db2a117155ec28f18",
     "round-1.32": "7cb39158376c6e56811683d165140f997833f6967d0d42d1cfbe03f98696ee3d",
+    "round-1.75c": "7cb39158376c6e56811683d165140f997833f6967d0d42d1cfbe03f98696ee3d",
 }
 DRAWN_MS = 50
 

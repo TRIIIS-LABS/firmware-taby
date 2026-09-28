@@ -18,5 +18,15 @@
     "height": 466,
     "sdkconfig": "targets/round-1.32/sdkconfig.defaults",
     "partitions": "targets/round-1.32/partitions.csv"
+  },
+  "round-1.75c": {
+    "name": "Waveshare ESP32-S3-Touch-AMOLED-1.75C (V1.0)",
+    "revision": "V1.0",
+    "chip": "esp32s3",
+    "flash_size_mb": 32,
+    "width": 466,
+    "height": 466,
+    "sdkconfig": "targets/round-1.75c/sdkconfig.defaults",
+    "partitions": "targets/round-1.75c/partitions.csv"
   }
 }
