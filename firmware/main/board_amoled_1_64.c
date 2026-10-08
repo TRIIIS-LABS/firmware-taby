@@ -44,7 +44,7 @@ static const char *TAG = "board_1_64";
 #define DISP_DRAW_BUF_LINES 30
 #define BOARD_MODEL_LOG "Round 1.32 AMOLED"
 #else
-#define PIN_NUM_LCD_CS GPIO_NUM_9
+#define PIN_NUM_LCD_CS GPIO_NUM_46  /* V1.1: CS moved from GPIO9 */
 #define PIN_NUM_LCD_PCLK GPIO_NUM_10
 #define PIN_NUM_LCD_DATA0 GPIO_NUM_11
 #define PIN_NUM_LCD_DATA1 GPIO_NUM_12
