@@ -152,8 +152,22 @@ The supported first-party integration is in the Taby app.
 5. Verify a fresh build, USB install/recovery, display, touch, and app commands on
    real hardware. Record results in the PR before adding it to supported displays.
 
-Do not infer board support from screen size or the ESP32 chip alone. Waveshare
-1.64 V2 needs its own reviewed pin mapping and hardware tests.
+Do not infer board support from screen size or the ESP32 chip alone.
+
+### Waveshare 1.64 PCB revisions
+
+| Revision | LCD_CS | IMU_INT1 | Build |
+| --- | --- | --- | --- |
+| **V1.1** (current production; Waveshare's "v2" demo image) | GPIO46 | GPIO9 | `python tools/build.py amoled-1.64` |
+| V1 (original, out of production) | GPIO9 | GPIO46 | `python tools/build.py amoled-1.64 --pcb V1` |
+
+V1.1 also adds TP_INT (GPIO18), TP_RESET, LCD_TE (GPIO45), IMU_INT2 (GPIO17) and a
+500 mA charge current. This firmware polls touch (FT3168, 0x38) and the IMU
+(QMI8658, 0x6B) over I2C and registers no GPIO interrupts, so LCD_CS is the only
+pin that differs between the two builds. Both report `amoled-1.64`; the PCB
+revision is a build-time choice (`TABY_AMOLED_1_64_REVISION`), not detected at
+runtime. GPIO46 is an ESP32-S3 strapping pin: it is only driven after boot, so
+do not add an external pull-up to it.
 
 ## Assets and contributions
 

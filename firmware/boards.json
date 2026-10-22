@@ -1,7 +1,7 @@
 {
   "amoled-1.64": {
-    "name": "Waveshare ESP32-S3-Touch-AMOLED-1.64 (V1)",
-    "revision": "V1",
+    "name": "Waveshare ESP32-S3-Touch-AMOLED-1.64 (V1.1)",
+    "revision": "V1.1",
     "chip": "esp32s3",
     "flash_size_mb": 16,
     "width": 280,

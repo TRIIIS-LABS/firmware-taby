@@ -44,7 +44,16 @@ static const char *TAG = "board_1_64";
 #define DISP_DRAW_BUF_LINES 30
 #define BOARD_MODEL_LOG "Round 1.32 AMOLED"
 #else
+// Waveshare ESP32-S3-Touch-AMOLED-1.64: only LCD_CS differs between PCB revisions.
+// V1.1 (current production, Waveshare's "v2" demo image): LCD_CS = GPIO46, IMU_INT1 = GPIO9.
+// V1 (original):                                           LCD_CS = GPIO9,  IMU_INT1 = GPIO46.
+// Touch and IMU are polled over I2C, so the swapped/added interrupt pins
+// (IMU_INT1/2, TP_INT, LCD_TE) are not used by this firmware.
+#if defined(TABY_AMOLED_1_64_V1) && TABY_AMOLED_1_64_V1
 #define PIN_NUM_LCD_CS GPIO_NUM_9
+#else
+#define PIN_NUM_LCD_CS GPIO_NUM_46
+#endif
 #define PIN_NUM_LCD_PCLK GPIO_NUM_10
 #define PIN_NUM_LCD_DATA0 GPIO_NUM_11
 #define PIN_NUM_LCD_DATA1 GPIO_NUM_12
@@ -56,7 +65,11 @@ static const char *TAG = "board_1_64";
 #define DISP_H 456
 #define DISP_X_OFFSET 0x14
 #define DISP_DRAW_BUF_LINES (DISP_H / 4)
-#define BOARD_MODEL_LOG "1.64 AMOLED"
+#if defined(TABY_AMOLED_1_64_V1) && TABY_AMOLED_1_64_V1
+#define BOARD_MODEL_LOG "1.64 AMOLED (V1 pinout)"
+#else
+#define BOARD_MODEL_LOG "1.64 AMOLED (V1.1 pinout)"
+#endif
 #endif
 
 #define BOARD_I2C_PORT I2C_NUM_0

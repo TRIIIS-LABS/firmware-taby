@@ -21,11 +21,15 @@ and can install the complete release directly on a supported new board.
 
 | Board argument | Exact hardware | Flash |
 | --- | --- | --- |
-| `amoled-1.64` | Waveshare ESP32-S3-Touch-AMOLED-1.64 **V1** | 16 MB |
+| `amoled-1.64` | Waveshare ESP32-S3-Touch-AMOLED-1.64 **V1.1** (current production) | 16 MB |
 | `round-1.32` | Waveshare ESP32-S3-Touch-AMOLED-1.32 | 8 MB |
 
 **An ESP32-S3 chip ID or USB VID/PID cannot identify the display or PCB revision.**
-The 1.64 V2 is unsupported. Do not use a 1.64 image on the round board or patch
+Waveshare's "V2" naming (for example its `...-1.64-v2.bin` demo image) refers to
+this same V1.1 board. The original 1.64 **V1** (LCD_CS on GPIO9) is out of
+production and has no prebuilt image; build it from source with
+`python tools/build.py amoled-1.64 --pcb V1` (see `firmware/README.md`).
+Do not use a 1.64 image on the round board or patch
 pins during an ordinary installation. See the discovery rules below when a
 device cannot report a supported target.
 
@@ -93,7 +97,7 @@ problem using the USB section below.
 - **`firmware_target`:** use the returned `board` and `revision` for an update
   when the existing display works correctly. Do not ask the user to read a PCB
   marking again if this working target is already established. `amoled-1.64`
-  currently maps to V1; `round-1.32` maps to the original round board.
+  currently maps to V1.1; `round-1.32` maps to the original round board.
 - **`unknown` or no Taby reply:** older firmware (including the tested 1.0.6
   build), blank boards, and vendor demos may not report a target. Ask for the
   board marking, order details that specify the revision, or a clear PCB photo.
@@ -106,7 +110,7 @@ blank screen. Firmware versions, asset versions, flash capacity, and ESP32 chip
 revision are not proof of the Waveshare PCB revision. A later update can reuse a
 target whose display was already tested successfully.
 
-For 1.64 V1/V2, Waveshare documents identification by PCB marking and different
+For 1.64 V1/V1.1, Waveshare documents identification by PCB marking and different
 LCD chip-select wiring, not a USB-readable revision ID. Use the
 [manufacturer's illustrated revision guide](https://docs.waveshare.com/ESP32-S3-Touch-AMOLED-1.64)
 when discovery is inconclusive. Do not trial-flash multiple board images as an
@@ -221,7 +225,7 @@ calling a tool on the Taby app's maintained MCP interface and checking its resul
   try `PYTHON tools/device.py reset --port PORT`. This requests a normal USB
   reset without writing flash. Wait a few seconds, list ports, and run `verify`.
   If software reset fails, use the board's buttons below.
-- **1.64 V1:** hold BOOT, press/release RESET, then release BOOT.
+- **1.64 (V1.1 and V1):** hold BOOT, press/release RESET, then release BOOT.
 - **Round 1.32:** hold BOOT while powering the board on again, then release BOOT.
   Follow [Waveshare's board guide](https://docs.waveshare.com/ESP32-S3-Touch-AMOLED-1.32).
 - List ports again; bootloader and running firmware can enumerate differently.
