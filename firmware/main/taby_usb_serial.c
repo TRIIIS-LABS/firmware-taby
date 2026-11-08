@@ -17,6 +17,7 @@
 #include "taby_build_info.h"
 #include "taby_display.h"
 #include "taby_eye_motion.h"
+#include "taby_live_talk.h"
 #include "taby_identity.h"
 #include "taby_line_reader.h"
 #include "taby_mqtt.h"
@@ -506,6 +507,10 @@ static void add_usb_capabilities(cJSON *root) {
     cJSON_AddItemToArray(capabilities, cJSON_CreateString("clear"));
     /* EYE_MOTION normal|calm|still, kept across restarts (1.2.0). */
     cJSON_AddItemToArray(capabilities, cJSON_CreateString("eye_motion"));
+    /* VOICE_MOTION: Taby talks live, wearing the app's mouth motion. */
+    if (taby_live_talk_offered()) {
+        cJSON_AddItemToArray(capabilities, cJSON_CreateString("voice_motion"));
+    }
     cJSON_AddItemToObject(root, "capabilities", capabilities);
 }
 
@@ -720,6 +725,19 @@ static const taby_transport_display_hooks_t k_usb_display_hooks = {
 static void handle_usb_line(char *line) {
     trim_ascii_spaces(line);
     if (line[0] == '\0') {
+        return;
+    }
+    /* A run of talking every two seconds is not kept in the command log. */
+    if (strncmp(line, "VOICE_MOTION ", 13) == 0) {
+        if (!taby_live_talk_offered()) {
+            usb_write_line("TABY:ERR unsupported_command VOICE_MOTION");
+        } else if (!taby_live_talk_ready()) {
+            usb_write_line("TABY:ERR runtime_unavailable VOICE_MOTION");
+        } else if (taby_live_talk_voice_motion(line + 13)) {
+            usb_write_line("TABY:OK VOICE_MOTION");
+        } else {
+            usb_write_line("TABY:ERR voice_motion_invalid");
+        }
         return;
     }
     usb_record_command(line);

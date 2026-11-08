@@ -1,6 +1,7 @@
 #include "board_amoled_1_64.h"
 #include "esp_log.h"
 #include "taby_asset_store.h"
+#include "taby_live_talk.h"
 #include "taby_ble_transport.h"
 #include "taby_identity.h"
 #include "taby_onboarding.h"
@@ -47,6 +48,8 @@ void app_main(void) {
     ESP_ERROR_CHECK(board_amoled_1_64_init());
     taby_reusable_ui_start();
     taby_asset_store_init();
+    /* The live character loads in the background; talking is its GIF until then. */
+    taby_live_talk_start();
     taby_runtime_start();
     ESP_ERROR_CHECK(taby_power_button_start());
     ESP_ERROR_CHECK(taby_usb_serial_init());

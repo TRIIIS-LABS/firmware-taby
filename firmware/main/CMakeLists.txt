@@ -14,6 +14,7 @@ idf_component_register(
         "taby_identity.c"
         "taby_idle_eyes.c"
         "taby_line_reader.c"
+        "taby_live_talk.cpp"
         "taby_mqtt.c"
         "taby_onboarding.c"
         "taby_power.c"
@@ -27,8 +28,11 @@ idf_component_register(
         "taby_usb_serial.c"
         "taby_wifi.c"
     INCLUDE_DIRS "."
-    REQUIRES bt driver esp_adc esp_event esp_http_server esp_lcd esp_netif esp_timer esp_wifi json lvgl mdns mqtt nvs_flash esp_lcd_sh8601 spiffs
+    REQUIRES bt driver esp_adc esp_event esp_http_server esp_lcd esp_netif esp_timer esp_wifi json lvgl mdns mqtt nvs_flash esp_lcd_sh8601 spiffs taby_character
+    # The desktop notch's Rive character, which talks live (taby_live_talk).
+    EMBED_FILES "taby-talk.riv"
 )
+target_compile_options(${COMPONENT_LIB} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-std=gnu++17>)
 
 if(TABY_HARDWARE_TARGET STREQUAL "round-1.32")
     target_compile_definitions(${COMPONENT_LIB} PRIVATE TABY_HARDWARE_ROUND_1_32=1)
