@@ -41,7 +41,7 @@ You'll need a supported board and a **USB data cable**.
 <tr>
 <td width="430" valign="top">
 <h3>Taby 1.64</h3>
-<p>The rectangular one.<br>280 × 456 AMOLED · 84 animations</p>
+<p>The rectangular one.<br>280 × 456 AMOLED · 85 animations</p>
 <p><strong>Waveshare ESP32-S3-Touch-AMOLED-1.64</strong></p>
 <p><a href="https://www.waveshare.com/esp32-s3-touch-amoled-1.64.htm?&amp;aff_id=134369">Get the board ↗</a> &nbsp;·&nbsp; <a href="#a-home-for-your-taby">Print its case</a></p>
 </td>

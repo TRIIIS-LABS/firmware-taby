@@ -25,6 +25,7 @@ static const taby_animation_asset_t k_animation_assets[] = {
     {"blush", "/assets/animations/blush.gif", NULL, 0, 4875U, false},
     {"boxing", "/assets/animations/boxing.gif", NULL, 0, 5042U, false},
     {"break_start", "/assets/animations/break_start.gif", NULL, 0, 6708U, false},
+    {"building_loop", "/assets/animations/building_loop.gif", NULL, 0, 1583U, true},
     {"busy_loop", "/assets/animations/busy_loop.gif", NULL, 0, 3500U, true},
     {"calendar_in", "/assets/animations/calendar_in.gif", NULL, 0, 2083U, false},
     {"calendar_loop", "/assets/animations/calendar_loop.gif", NULL, 0, 2042U, true},
