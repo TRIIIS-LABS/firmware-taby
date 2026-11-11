@@ -209,16 +209,6 @@
       "sha256": "97b98a6b3a1930432c7006165838113f0e040c3c1f73b2bb5dd86d4634e01e68"
     },
     {
-      "id": "fishing_short",
-      "version": 1,
-      "duration_ms": 5750,
-      "fallback_label": "FISHING SHORT",
-      "loop_policy": "play_once",
-      "relative_path": "a/d83e6b18.gif",
-      "byte_length": 118622,
-      "sha256": "61309b1bbdc50b8ebf88058419ee0260337b483089d8955a7a61498e9972d202"
-    },
-    {
       "id": "flower_grow",
       "version": 1,
       "duration_ms": 8583,

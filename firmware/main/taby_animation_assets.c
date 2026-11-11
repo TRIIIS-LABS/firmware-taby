@@ -43,7 +43,6 @@ static const taby_animation_asset_t k_animation_assets[] = {
     {"drink_water", "/assets/animations/drink_water.gif", NULL, 0, 6875U, false},
     {"f1_car", "/assets/animations/f1_car.gif", NULL, 0, 8417U, false},
     {"fishing_long", "/assets/animations/fishing_long.gif", NULL, 0, 7875U, false},
-    {"fishing_short", "/assets/animations/fishing_short.gif", NULL, 0, 5750U, false},
     {"flower_grow", "/assets/animations/flower_grow.gif", NULL, 0, 8583U, false},
     {"hello_annoyed", "/assets/animations/hello_annoyed.gif", NULL, 0, 8833U, false},
     {"hello_disappointed", "/assets/animations/hello_disappointed.gif", NULL, 0, 4250U, false},
