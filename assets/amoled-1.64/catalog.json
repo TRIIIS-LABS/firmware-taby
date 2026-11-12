@@ -1,7 +1,7 @@
 {
   "schema": "taby_amoled_asset_catalog_v1",
   "pack_schema": "taby_amoled_asset_pack_v1",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "mount_path": "/assets",
   "display": {
     "width": 280,

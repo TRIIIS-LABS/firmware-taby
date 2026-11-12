@@ -85,6 +85,13 @@ unsupported commands return `TABY:ERR ...`. Keep control strings in English;
 display text can differ, subject to the fonts' supported glyphs. Avoid protocol
 delimiters/newlines in user-provided text and keep labels short.
 
+### Building
+
+Since 1.3.0, with the 1.64 pack 0.4.0, the rectangular board has
+`building_loop`: Taby lays bricks, a working look the desktop picks for a
+question that makes or changes something. `fishing_short`, which nothing
+played, left that pack to make room for it.
+
 ### Calmer eyes
 
 Since 1.2.0, `INFO` lists `eye_motion` in `capabilities` and reports the
