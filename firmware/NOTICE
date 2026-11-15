@@ -2,6 +2,11 @@ Physical Taby third-party notices
 
 Runtime: ESP-IDF v5.4.2 (Espressif), LVGL 8.3.11, esp_lcd_sh8601 2.0.1, mDNS 1.10.1, cmake_utilities 0.5.3. Managed dependencies are fetched by ESP-IDF and retain their upstream licenses.
 
+Taby talking live (firmware 1.3.0 and later) links two more, fetched by firmware/tools/fetch-rive.sh at pinned commits; each bundle carries their license files under licenses/:
+- Rive C++ runtime (rive-app/rive-runtime 60e398b), MIT License, Copyright (c) 2020 Rive.
+- PlutoVG (sammycageagle/plutovg f63f9b5), MIT License, Copyright (c) 2020-2026 Samuel Ugochukwu.
+- PlutoVG's rasterizer and stroker derive from FreeType: portions of this software are copyright (c) 2000-2014 The FreeType Project (www.freetype.org). All rights reserved. Used under the FreeType License (FTL), https://freetype.org/license.html.
+
 Source extraction retains the existing Waveshare board integration. Waveshare reference sources: https://github.com/waveshareteam/ESP32-S3-Touch-AMOLED-1.64 and https://github.com/waveshareteam/ESP32-S3-Touch-AMOLED-1.32.
 
 Host dependencies: esptool 4.11.0 (GPL-2.0-or-later) and pyserial 3.5 (BSD-3-Clause) are installed separately from PyPI; their licenses remain with their distributions.
