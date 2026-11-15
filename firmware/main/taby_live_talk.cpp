@@ -276,6 +276,11 @@ void renderTask(void *)
 
 extern "C" void taby_live_talk_start(void)
 {
+#if defined(TABY_HARDWARE_ROUND_1_32)
+  // The character is drawn for the 1.64's 280 x 456 panel. The round board
+  // keeps its talking GIF and does not list voice_motion.
+  return;
+#else
   Load idle = Load::idle;
   if (!s_load.compare_exchange_strong(idle, Load::loading)) return;
   // Core 1, beside the LVGL task; the stack is in PSRAM, as Rive's draw
@@ -286,6 +291,7 @@ extern "C" void taby_live_talk_start(void)
     ESP_LOGE(TAG, "no task");
     s_load = Load::failed;
   }
+#endif
 }
 
 extern "C" bool taby_live_talk_offered(void)
