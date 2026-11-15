@@ -3,8 +3,8 @@
 #include "taby_asset_store.h"
 
 static const char *TABY_PRODUCT_NAME = "taby";
-static const char *TABY_FIRMWARE_VERSION = "1.2.0";
-static const char *TABY_ASSETS_VERSION_FALLBACK = "0.3.3";
+static const char *TABY_FIRMWARE_VERSION = "1.3.0";
+static const char *TABY_ASSETS_VERSION_FALLBACK = "0.4.0";
 
 const char *taby_firmware_version(void) {
     return TABY_FIRMWARE_VERSION;

@@ -1,7 +1,7 @@
 {
   "schema": "taby_amoled_asset_catalog_v1",
   "pack_schema": "taby_amoled_asset_pack_v1",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "mount_path": "/assets",
   "display": {
     "width": 280,
@@ -77,6 +77,16 @@
       "relative_path": "a/453f80ff.gif",
       "byte_length": 261408,
       "sha256": "0dc7ba272d8ce5fb617e374c8e27842bebfb1f1048514a615b822725056a0de1"
+    },
+    {
+      "id": "building_loop",
+      "version": 1,
+      "duration_ms": 1583,
+      "fallback_label": "BUILDING",
+      "loop_policy": "loop",
+      "relative_path": "a/327aacc4.gif",
+      "byte_length": 66948,
+      "sha256": "2e06f43a1f4c39c61beb967d33d9c8f04580fa35af016e3dcc5e409604c76647"
     },
     {
       "id": "busy_loop",
@@ -197,16 +207,6 @@
       "relative_path": "a/76916c58.gif",
       "byte_length": 152783,
       "sha256": "97b98a6b3a1930432c7006165838113f0e040c3c1f73b2bb5dd86d4634e01e68"
-    },
-    {
-      "id": "fishing_short",
-      "version": 1,
-      "duration_ms": 5750,
-      "fallback_label": "FISHING SHORT",
-      "loop_policy": "play_once",
-      "relative_path": "a/d83e6b18.gif",
-      "byte_length": 118622,
-      "sha256": "61309b1bbdc50b8ebf88058419ee0260337b483089d8955a7a61498e9972d202"
     },
     {
       "id": "flower_grow",
