@@ -614,7 +614,7 @@ void Character::advanceStars(float seconds, double now)
 std::vector<std::string> Character::advance(float seconds, double now)
 {
   advanceStars(seconds, now);
-  m_machine->advanceAndApply(seconds);
+  m_moving = m_machine->advanceAndApply(seconds);
   std::vector<std::string> entered;
   const size_t count = m_machine->stateChangedCount();
   for (size_t i = 0; i < count; ++i)

@@ -15,3 +15,7 @@ bool taby_display_render_state(
     const char *fallback_subtitle,
     const char *animation_id);
 bool taby_display_swap_custom_animation(const char *animation_id);
+
+/* Through lv_async_call, once the live character has loaded: a face shown
+   as its GIF meanwhile (the idle face at boot) turns live. */
+void taby_display_live_ready(void *unused);

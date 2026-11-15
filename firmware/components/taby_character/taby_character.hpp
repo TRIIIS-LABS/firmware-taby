@@ -146,6 +146,9 @@ public:
 
   /** Advances the state machine; returns the names of states it entered. */
   std::vector<std::string> advance(float seconds, double nowMs);
+  /** The last advance changed the picture or will again: false once the
+   *  face has settled and nothing moves (a held rest between blinks). */
+  bool moving() const { return m_moving; }
   /** `extra`: an artboard-space transform (a clip's framing); `opacity`
    *  fades the whole character. */
   void draw(rive::Renderer* renderer, float width, float height,
@@ -176,6 +179,7 @@ private:
   rive::rcp<rive::ViewModelInstanceRuntime> m_vm;
   CharacterAction m_action;
   Mode m_mode = Mode::idle;
+  bool m_moving = true;
 
   rive::ViewModelInstanceEnumRuntime* m_viseme = nullptr;
   rive::ViewModelInstanceEnumRuntime* m_gesture = nullptr;

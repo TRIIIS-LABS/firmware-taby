@@ -38,6 +38,34 @@ static lv_timer_t *s_animation_completion_timer = NULL;
 static bool s_animation_complete_on_ready = false;
 static lv_obj_t *s_fallback_canvas = NULL;
 static lv_color_t *s_fallback_canvas_buf = NULL;
+/* The scene is the live face (taby_live_talk), not a GIF. */
+static bool s_scene_live = false;
+/* The animation the scene shows, live or GIF. */
+static char s_shown_animation_id[64] = {0};
+
+/* A scene waiting for the live face to rest before it shows (its arguments
+   to taby_display_render_state, copied). */
+#define TABY_DISPLAY_PENDING_TEXT 128
+static struct {
+    bool valid;
+    taby_state_t state;
+    taby_display_animation_complete_cb_t animation_complete_cb;
+    void *animation_complete_ctx;
+    char fallback_title[TABY_DISPLAY_PENDING_TEXT];
+    char fallback_subtitle[TABY_DISPLAY_PENDING_TEXT];
+    char animation_id[64];
+} s_pending;
+/* Set while the scene the live face rested for is drawn. */
+static bool s_face_rested = false;
+
+static void copy_display_text(char *to, size_t size, const char *from) {
+    if (!from) {
+        to[0] = '\0';
+        return;
+    }
+    strncpy(to, from, size - 1);
+    to[size - 1] = '\0';
+}
 
 typedef struct {
     const lv_font_t *font;
@@ -86,6 +114,9 @@ static void reset_scene(void) {
 
     taby_idle_eyes_forget();
     taby_live_talk_hide();
+    s_scene_live = false;
+    s_pending.valid = false;
+    s_shown_animation_id[0] = '\0';
 
     if (s_animation_completion_timer) {
         lv_timer_del(s_animation_completion_timer);
@@ -220,20 +251,25 @@ bool taby_display_animation_available(const char *animation_id) {
     return taby_animation_asset_for_id(animation_id, &asset) && animation_asset_available(&asset);
 }
 
-static bool create_animation_object_from_asset(taby_state_t state, const taby_animation_asset_t *asset) {
+static bool create_animation_object_from_asset(
+    taby_state_t state,
+    const taby_animation_asset_t *asset,
+    taby_live_after_t after) {
     lv_obj_t *screen = lv_scr_act();
 
     if (!asset) {
         return false;
     }
 
-    /* Talking is drawn live, wearing the app's mouth motion, when the board
-       can; its GIF otherwise. */
+    copy_display_text(s_shown_animation_id, sizeof(s_shown_animation_id), asset->animation_id);
+    /* Resting, listening and talking are drawn live, talking wearing the
+       app's mouth motion, when the board can; their GIFs otherwise. */
     if (taby_live_talk_takes(asset->animation_id)) {
-        s_animation_obj = taby_live_talk_show(screen);
+        s_animation_obj = taby_live_talk_show(screen, asset->animation_id, after);
         if (s_animation_obj) {
-            ESP_LOGI(TAG, "render_state=%s animation_id=%s source=live",
-                     taby_state_name(state), asset->animation_id);
+            ESP_LOGI(TAG, "render_state=%s animation_id=%s source=live after=%d",
+                     taby_state_name(state), asset->animation_id, (int)after);
+            s_scene_live = true;
             lv_obj_move_foreground(s_animation_obj);
             return true;
         }
@@ -277,6 +313,7 @@ bool taby_display_swap_custom_animation(const char *animation_id) {
     if (!apply_animation_asset_to_object(TABY_STATE_CUSTOM_ANIMATION, s_animation_obj, &asset)) {
         return false;
     }
+    copy_display_text(s_shown_animation_id, sizeof(s_shown_animation_id), asset.animation_id);
 
     s_animation_complete_on_ready = !asset.loop && s_animation_complete_cb != NULL;
     lv_obj_clear_flag(s_animation_obj, LV_OBJ_FLAG_HIDDEN);
@@ -541,6 +578,40 @@ static void create_busy_text_screen(const char *display_text, const taby_busy_te
     lv_obj_move_foreground(label);
 }
 
+/* The live face rests: the scene that waited for it shows. */
+static void handle_live_face_rested(void *unused) {
+    (void)unused;
+    if (!s_pending.valid) {
+        return;
+    }
+    s_pending.valid = false;
+    taby_state_t state = s_pending.state;
+    taby_display_animation_complete_cb_t cb = s_pending.animation_complete_cb;
+    void *ctx = s_pending.animation_complete_ctx;
+    char title[TABY_DISPLAY_PENDING_TEXT];
+    char subtitle[TABY_DISPLAY_PENDING_TEXT];
+    char animation_id[64];
+    copy_display_text(title, sizeof(title), s_pending.fallback_title);
+    copy_display_text(subtitle, sizeof(subtitle), s_pending.fallback_subtitle);
+    copy_display_text(animation_id, sizeof(animation_id), s_pending.animation_id);
+    s_face_rested = true;
+    taby_display_render_state(state, cb, ctx, title, subtitle, animation_id);
+    s_face_rested = false;
+}
+
+void taby_display_live_ready(void *unused) {
+    (void)unused;
+    if (s_scene_live || !s_animation_obj || !lv_obj_check_type(s_animation_obj, &lv_gif_class) ||
+        !taby_live_talk_takes(s_shown_animation_id)) {
+        return;
+    }
+    char animation_id[64];
+    copy_display_text(animation_id, sizeof(animation_id), s_shown_animation_id);
+    ESP_LOGI(TAG, "live face ready: %s turns live", animation_id);
+    taby_display_render_state(
+        s_animation_state, s_animation_complete_cb, s_animation_complete_ctx, NULL, NULL, animation_id);
+}
+
 void taby_display_init(void) {
     lv_obj_t *screen = lv_scr_act();
     taby_reusable_ui_deactivate_choice_input();
@@ -588,6 +659,58 @@ bool taby_display_render_state(
         return false;
     }
 
+    /* The scene create_animation_object_from_asset draws below is the live
+       face. */
+    bool next_live =
+        should_use_animation_asset &&
+        !(state == TABY_STATE_CUSTOM_ANIMATION && !has_custom_animation) &&
+        state != TABY_STATE_AMBIENT_BUSY_TEXT &&
+        taby_state_has_animation(state) &&
+        taby_live_talk_takes(asset.animation_id);
+
+    if (s_scene_live && s_animation_obj) {
+        if (next_live) {
+            /* The face carries on and moves there by its own transitions. */
+            taby_reusable_ui_deactivate_choice_input();
+            taby_live_talk_change(asset.animation_id);
+            s_pending.valid = false;
+            s_animation_complete_cb = animation_complete_cb;
+            s_animation_complete_ctx = animation_complete_ctx;
+            s_animation_complete_on_ready = false;
+            s_animation_state = state;
+            copy_display_text(s_shown_animation_id, sizeof(s_shown_animation_id), asset.animation_id);
+            ESP_LOGI(TAG, "render_state=%s animation_id=%s source=live carried_on=1",
+                     taby_state_name(state), asset.animation_id);
+            return true;
+        }
+        /* Anything else takes over once the face rests on its neutral face,
+           where the pack's clips start. */
+        if (!s_face_rested && taby_live_talk_leave(handle_live_face_rested)) {
+            s_pending.valid = true;
+            s_pending.state = state;
+            s_pending.animation_complete_cb = animation_complete_cb;
+            s_pending.animation_complete_ctx = animation_complete_ctx;
+            copy_display_text(s_pending.fallback_title, sizeof(s_pending.fallback_title), fallback_title);
+            copy_display_text(s_pending.fallback_subtitle, sizeof(s_pending.fallback_subtitle), fallback_subtitle);
+            copy_display_text(s_pending.animation_id, sizeof(s_pending.animation_id), animation_id);
+            ESP_LOGI(TAG, "render_state=%s animation_id=%s waits_for_rest=1",
+                     taby_state_name(state), asset.animation_id ? asset.animation_id : "<none>");
+            return true;
+        }
+    }
+
+    /* What the live face shows until its first frame: its own last frame, a
+       GIF's last frame, or black. */
+    taby_live_after_t after = TABY_LIVE_AFTER_OTHER;
+    if (next_live) {
+        if (s_scene_live) {
+            after = TABY_LIVE_AFTER_LIVE;
+        } else if (s_animation_obj && lv_obj_check_type(s_animation_obj, &lv_gif_class)) {
+            taby_live_talk_take_frame(s_animation_obj);
+            after = TABY_LIVE_AFTER_CLIP;
+        }
+    }
+
     taby_reusable_ui_deactivate_choice_input();
     reset_scene();
 
@@ -628,7 +751,7 @@ bool taby_display_render_state(
     s_animation_dsc.header.w = 0;
     s_animation_dsc.header.h = 0;
 
-    if (!create_animation_object_from_asset(state, &asset)) {
+    if (!create_animation_object_from_asset(state, &asset, after)) {
         return false;
     }
 
