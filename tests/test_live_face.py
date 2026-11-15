@@ -62,19 +62,21 @@ class LiveFaceTest(unittest.TestCase):
     def frames(lines):
         return [line for line in lines if "frame" in line]
 
-    def test_listening_and_talking_are_the_characters_own_modes(self):
-        lines = self.play("show listening", "run 0 1000", "show talking", "gesture hi", "run 1000 2000")
-        self.assertEqual([mode for mode, _ in self.modes(lines)], ["listening", "speaking"])
+    def test_listening_working_and_talking_go_straight_from_one_to_the_next(self):
+        lines = self.play("show listening", "run 0 1000", "show working", "run 1000 2000",
+                          "show talking", "gesture hi", "run 2000 3000")
+        # No rest between them: the character's own transitions carry it.
+        self.assertEqual([mode for mode, _ in self.modes(lines)], ["listening", "working", "speaking"])
         speech = [line for line in lines if line.get("event") == "speech"]
         self.assertTrue(speech, "talking applies the app's mouth motion")
         # The body takes a gesture only once the action before it has let go.
         # (The stand-in counts from the frame before, so one frame either way.)
-        early = [s["gesture"] for s in speech if s["t"] < 1000 + 300]
-        late = [s["gesture"] for s in speech if s["t"] > 1000 + 300 + 1000 / 30]
+        early = [s["gesture"] for s in speech if s["t"] < 2000 + 300]
+        late = [s["gesture"] for s in speech if s["t"] > 2000 + 300 + 1000 / 30]
         self.assertEqual(set(early), {"idle"})
         self.assertEqual(set(late), {"hi"})
-        talking = [f for f in self.frames(lines) if f["frame"] >= 1000]
-        self.assertTrue(all(abs(f["frameMs"] - 1000 / 30) < 0.1 for f in talking))
+        live = [f for f in self.frames(lines) if f["frame"] >= 1000]
+        self.assertTrue(all(abs(f["frameMs"] - 1000 / 30) < 0.1 for f in live))
 
     def test_a_clip_cuts_in_only_once_the_face_rests_and_the_face_comes_back(self):
         lines = self.play("show listening", "run 0 1000", "handover", "run 1000 2000", "takeback", "run 2000 2500")

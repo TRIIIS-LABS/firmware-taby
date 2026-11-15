@@ -395,6 +395,10 @@ bool Character::load(rive::Span<const uint8_t> riv,
     }
   }
 
+#ifndef WITH_RIVE_SCRIPTING
+  m_native.bind(*m_file, *m_artboard);
+#endif
+
   // bindTabyCharacterModel: reset, leave any action, start the idle loop,
   // and run the opening blends before the first frame is drawn.
   resetFace();
@@ -588,9 +592,11 @@ void Character::advanceStars(float seconds, double now)
   {
     m_starsOpacity = 1.0f;
     m_starsCleared = false;
+    m_native.advance(seconds, true);
   }
   else if (!m_starsCleared)
   {
+    m_native.advance(seconds, false);
     m_starsOpacity = std::max(0.0f, m_starsOpacity - float(seconds * 1000 / kStarsFadeMs));
     if (m_starsOpacity <= 0.0f)
     {
@@ -602,6 +608,7 @@ void Character::advanceStars(float seconds, double now)
                                 rive::AdvanceFlags::AdvanceNested | rive::AdvanceFlags::NewFrame |
                                     rive::AdvanceFlags::Animate);
       if (m_flowRate != nullptr) m_flowRate->propertyValue(flow);
+      m_native.clear();
       m_starsCleared = true;
     }
   }
@@ -614,7 +621,7 @@ void Character::advanceStars(float seconds, double now)
 std::vector<std::string> Character::advance(float seconds, double now)
 {
   advanceStars(seconds, now);
-  m_moving = m_machine->advanceAndApply(seconds);
+  m_moving = m_machine->advanceAndApply(seconds) || m_native.count() > 0;
   std::vector<std::string> entered;
   const size_t count = m_machine->stateChangedCount();
   for (size_t i = 0; i < count; ++i)
@@ -652,6 +659,8 @@ void Character::draw(rive::Renderer* renderer, float width, float height,
     renderer->clipPath(m_frame.get());
   }
   m_artboard->draw(renderer);
+  // The script's drawable sits above the face, hat and hands.
+  m_native.draw(renderer);
   renderer->restore();
 }
 

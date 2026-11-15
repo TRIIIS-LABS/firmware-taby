@@ -4,7 +4,7 @@
 //
 // Reads one command per line and prints JSON lines: the stand-in's own
 // events, and one line per frame the face is advanced.
-//   show idle|listening|talking     eyes normal|calm|still
+//   show idle|listening|working|talking   eyes normal|calm|still
 //   handover                        takeback
 //   fromrest T                      start from rest at T ms
 //   gesture NAME                    the app's gesture in the speech from now
@@ -43,7 +43,8 @@ int main(int argc, char** argv)
     if (word == "show")
     {
       in >> word;
-      face.show(word == "talking" ? taby::Face::talking
+      face.show(word == "talking"     ? taby::Face::talking
+                : word == "working"   ? taby::Face::working
                 : word == "listening" ? taby::Face::listening
                                       : taby::Face::idle);
     }

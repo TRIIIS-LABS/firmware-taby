@@ -262,8 +262,9 @@ static bool create_animation_object_from_asset(
     }
 
     copy_display_text(s_shown_animation_id, sizeof(s_shown_animation_id), asset->animation_id);
-    /* Resting, listening and talking are drawn live, talking wearing the
-       app's mouth motion, when the board can; their GIFs otherwise. */
+    /* Resting, listening, working and talking are drawn live, talking
+       wearing the app's mouth motion, when the board can; their GIFs
+       otherwise. */
     if (taby_live_talk_takes(asset->animation_id)) {
         s_animation_obj = taby_live_talk_show(screen, asset->animation_id, after);
         if (s_animation_obj) {

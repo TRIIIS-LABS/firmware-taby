@@ -1,9 +1,10 @@
 #pragma once
 
-/* Taby's live face on the 1.64 board: resting, listening and talking are the
-   desktop notch's own Rive character, moving between them by its own
-   transitions, and talking wears the app's mouth motion (VOICE_MOTION lines;
-   draft ADRs device-live-talk and device-live-face in app-taby). Every other
+/* Taby's live face on the 1.64 board: resting, listening, working (the
+   wizard) and talking are the desktop notch's own Rive character, moving
+   between them by its own transitions, and talking wears the app's mouth
+   motion (VOICE_MOTION lines; draft ADRs device-live-talk and
+   device-live-face in app-taby). Every other
    clip stays a GIF: the face rests on its neutral face before one takes
    over, and starts there again after it, which is where the pack's clips
    start and end. The round board keeps its GIFs. */

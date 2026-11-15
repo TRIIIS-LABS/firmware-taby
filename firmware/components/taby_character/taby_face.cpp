@@ -63,6 +63,8 @@ Mode LiveFace::wanted() const
       return Mode::speaking;
     case Face::listening:
       return Mode::listening;
+    case Face::working:
+      return Mode::working;
     case Face::idle:
       break;
   }

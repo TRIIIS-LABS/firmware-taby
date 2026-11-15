@@ -10,6 +10,7 @@
 #include "rive/artboard.hpp"
 #include "rive/file.hpp"
 #include "rive/viewmodel/runtime/viewmodel_instance_runtime.hpp"
+#include "taby_stars.hpp"
 
 #include <memory>
 #include <string>
@@ -202,6 +203,9 @@ private:
   float m_starsOpacity = 1.0f;
   bool m_starsCleared = true;
   bool m_starsQuickExit = true;
+  // Without a script engine (the board) the stars are drawn by this port of
+  // the script instead.
+  Stars m_native;
 };
 
 } // namespace taby

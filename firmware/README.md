@@ -98,12 +98,18 @@ Since 1.3.0 the 1.64 board draws talking live: the desktop notch's own Rive
 character, wearing the mouth motion the app sends as `VOICE_MOTION` lines, and
 `INFO` lists `voice_motion` in `capabilities`. Since 1.4.0 resting
 (`idle_01_loop`, and the idle state) and listening (`listening_loop`) are
-live too, so the face moves between them by the character's own transitions,
-as the notch's does. Every other animation is still its GIF. Before one
+live too, and so is working (`working_loop`): the wizard's hat and wand, with
+the stars the wand throws, so the face goes from listening to working to
+talking by the character's own transitions, as the notch's does. The stars
+are the character file's one Rive script, which the board has no engine for;
+the firmware draws them with a port of that script (`taby_stars`). Every
+other animation is still its GIF, the magnifier and the bricks among them.
+Before one
 plays, the face rests on its neutral face for about half a second, which is
 where the pack's clips start; after one, the face starts there again. The
 character is placed where the pack draws Taby's resting face. An intro sent
-before a live loop (`listening_in>listening_loop`) is skipped, since the face
+before a live loop (`listening_in>listening_loop`, `working_in>working_loop`)
+is skipped, since the face
 makes its own way in. A dark screen draws nothing. The round board keeps its
 GIFs.
 

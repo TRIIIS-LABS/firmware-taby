@@ -1,7 +1,8 @@
-// The board's live face: Taby resting, listening and talking as the desktop
-// notch's character, moving between them by the character's own transitions
-// (Peter, 2026-11-15: "the listening now instantly goes from idle, no cool
-// smooth rive transition?"). The clips the face also plays (the wizard, the
+// The board's live face: Taby resting, listening, working and talking as the
+// desktop notch's character, moving between them by the character's own
+// transitions (Peter, 2026-11-15: "the listening now instantly goes from
+// idle, no cool smooth rive transition?", then "for listening to working why
+// does it have to go back to idle?"). The clips the face also plays (the
 // bricks, the magnifier, the waiting answer, success clips) stay GIFs; the
 // face hands over to one from its neutral resting face and comes back to it,
 // which is where those clips start and end.
@@ -43,6 +44,7 @@ enum class Face
 {
   idle,      // idle_01_loop
   listening, // listening_loop
+  working,   // working_loop: the wizard's wand and hat, as the notch works
   talking,   // talking_default_loop
 };
 

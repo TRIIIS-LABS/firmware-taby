@@ -356,8 +356,8 @@ bool taby_runtime_apply_transport_resolution(const taby_transport_resolution_t *
     copy_text(s_animation_id, sizeof(s_animation_id), resolution->animation_id);
     copy_text(s_next_animation_id, sizeof(s_next_animation_id), resolution->next_animation_id);
     /* A loop the live face draws needs no GIF way in (an older app's
-       listening_in>listening_loop): the face moves there by its own
-       transitions. */
+       listening_in>listening_loop, the app's working_in>working_loop): the
+       face moves there by its own transitions. */
     if (s_next_animation_id[0] != '\0' && taby_live_talk_takes(s_next_animation_id)) {
         copy_text(s_animation_id, sizeof(s_animation_id), s_next_animation_id);
         s_next_animation_id[0] = '\0';

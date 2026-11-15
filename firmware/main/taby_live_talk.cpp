@@ -140,6 +140,8 @@ bool faceFor(const char *animation_id, taby::Face *face)
     *face = taby::Face::idle;
   else if (std::strcmp(animation_id, "listening_loop") == 0)
     *face = taby::Face::listening;
+  else if (std::strcmp(animation_id, "working_loop") == 0)
+    *face = taby::Face::working;
   else if (std::strcmp(animation_id, "talking_default_loop") == 0)
     *face = taby::Face::talking;
   else
