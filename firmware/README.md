@@ -2,6 +2,7 @@
 
 This is the working ESP-IDF firmware extracted from Hey Taby for public
 development. Start at [INSTALL.md](../INSTALL.md) to install a prebuilt release.
+[ARCHITECTURE.md](ARCHITECTURE.md) maps how the firmware fits together.
 
 ## Build from source
 
