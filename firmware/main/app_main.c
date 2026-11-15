@@ -1,6 +1,7 @@
 #include "board_amoled_1_64.h"
 #include "esp_log.h"
 #include "taby_asset_store.h"
+#include "taby_live_talk.h"
 #include "taby_ble_transport.h"
 #include "taby_identity.h"
 #include "taby_onboarding.h"
@@ -66,5 +67,8 @@ void app_main(void) {
             ESP_LOGE(TAG, "Bluetooth transport init failed: %s", esp_err_to_name(ble_err));
         }
     }
+    /* The live character loads in the background; talking is its GIF until
+     * then. It starts after Wi-Fi and Bluetooth have taken their internal RAM. */
+    taby_live_talk_start();
     taby_onboarding_start();
 }

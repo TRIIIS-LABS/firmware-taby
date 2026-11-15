@@ -11,6 +11,7 @@
 #include "taby_animation_assets.h"
 #include "taby_asset_store.h"
 #include "taby_idle_eyes.h"
+#include "taby_live_talk.h"
 #include "taby_reusable_ui.h"
 
 static const char *TAG = "taby_display";
@@ -84,6 +85,7 @@ static void reset_scene(void) {
     lv_obj_t *screen = lv_scr_act();
 
     taby_idle_eyes_forget();
+    taby_live_talk_hide();
 
     if (s_animation_completion_timer) {
         lv_timer_del(s_animation_completion_timer);
@@ -225,6 +227,18 @@ static bool create_animation_object_from_asset(taby_state_t state, const taby_an
         return false;
     }
 
+    /* Talking is drawn live, wearing the app's mouth motion, when the board
+       can; its GIF otherwise. */
+    if (taby_live_talk_takes(asset->animation_id)) {
+        s_animation_obj = taby_live_talk_show(screen);
+        if (s_animation_obj) {
+            ESP_LOGI(TAG, "render_state=%s animation_id=%s source=live",
+                     taby_state_name(state), asset->animation_id);
+            lv_obj_move_foreground(s_animation_obj);
+            return true;
+        }
+    }
+
     s_animation_obj = lv_gif_create(screen);
     lv_obj_add_event_cb(s_animation_obj, handle_gif_ready, LV_EVENT_READY, NULL);
 
@@ -247,6 +261,11 @@ static bool create_animation_object_from_asset(taby_state_t state, const taby_an
 
 bool taby_display_swap_custom_animation(const char *animation_id) {
     if (!s_animation_obj || s_animation_state != TABY_STATE_CUSTOM_ANIMATION || !animation_id || animation_id[0] == '\0') {
+        return false;
+    }
+    /* The live scene is not a GIF to swap into or out of: the whole scene is
+       rendered again. */
+    if (!lv_obj_check_type(s_animation_obj, &lv_gif_class) || taby_live_talk_takes(animation_id)) {
         return false;
     }
 

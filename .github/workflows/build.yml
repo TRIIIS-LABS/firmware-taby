@@ -36,6 +36,7 @@ jobs:
         run: |
           . "$IDF_PATH/export.sh"
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          bash firmware/tools/fetch-rive.sh
           python tools/build.py "$TABY_BOARD"
           python tools/package_release.py "$TABY_BOARD"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

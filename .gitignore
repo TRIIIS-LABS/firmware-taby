@@ -13,3 +13,4 @@ factory/
 firmware/factory/
 *.pem
 *.key
+firmware/third_party/

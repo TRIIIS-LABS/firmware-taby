@@ -1,0 +1,26 @@
+diff --git a/include/rive/shapes/paint/color.hpp b/include/rive/shapes/paint/color.hpp
+index 874394b..8b5c015 100644
+--- a/include/rive/shapes/paint/color.hpp
++++ b/include/rive/shapes/paint/color.hpp
+@@ -25,7 +25,7 @@ void UnpackColorToRGBA32F(ColorInt color, float out[4]);
+ 
+ void UnpackColorToRGBA32FPremul(ColorInt color, float out[4]);
+ 
+-float colorOpacity(unsigned int value);
++float colorOpacity(ColorInt value);
+ 
+ ColorInt colorWithAlpha(ColorInt value, unsigned int a);
+ 
+diff --git a/src/shapes/paint/color.cpp b/src/shapes/paint/color.cpp
+index d9fb52e..2b02cb1 100644
+--- a/src/shapes/paint/color.cpp
++++ b/src/shapes/paint/color.cpp
+@@ -6,7 +6,7 @@
+ 
+ namespace rive
+ {
+-unsigned int colorARGB(int a, int r, int g, int b)
++ColorInt colorARGB(int a, int r, int g, int b)
+ {
+   return (((a & 0xff) << 24) | ((r & 0xff) << 16) | ((g & 0xff) << 8) |
+           ((b & 0xff) << 0)) &
