@@ -23,6 +23,7 @@ and can install the complete release directly on a supported new board.
 | --- | --- | --- |
 | `amoled-1.64` | Waveshare ESP32-S3-Touch-AMOLED-1.64 **V1** | 16 MB |
 | `round-1.32` | Waveshare ESP32-S3-Touch-AMOLED-1.32 | 8 MB |
+| `round-1.75c` | Waveshare ESP32-S3-Touch-AMOLED-1.75C **V1.0** | 32 MB |
 
 **An ESP32-S3 chip ID or USB VID/PID cannot identify the display or PCB revision.**
 The 1.64 V2 is unsupported. Do not use a 1.64 image on the round board or patch
@@ -93,7 +94,8 @@ problem using the USB section below.
 - **`firmware_target`:** use the returned `board` and `revision` for an update
   when the existing display works correctly. Do not ask the user to read a PCB
   marking again if this working target is already established. `amoled-1.64`
-  currently maps to V1; `round-1.32` maps to the original round board.
+  currently maps to V1; `round-1.32` maps to the original round board;
+  `round-1.75c` maps to the 1.75C V1.0.
 - **`unknown` or no Taby reply:** older firmware (including the tested 1.0.6
   build), blank boards, and vendor demos may not report a target. Ask for the
   board marking, order details that specify the revision, or a clear PCB photo.
@@ -148,8 +150,8 @@ See [Espressif's native USB explanation](https://docs.espressif.com/projects/esp
 
 Use a published release from
 [TRIIIS-LABS/firmware-taby](https://github.com/TRIIIS-LABS/firmware-taby/releases).
-Download `taby-amoled-1.64.zip` or `taby-round-1.32.zip` and its `.sha256` file
-from the **same release**. Follow any release-specific compatibility notes.
+Download `taby-amoled-1.64.zip`, `taby-round-1.32.zip`, or
+`taby-round-1.75c.zip` and its `.sha256` file from the **same release**. Follow any release-specific compatibility notes.
 Verify the ZIP's SHA-256 against that file, then extract it to a local directory.
 Checksums detect corruption; obtain both files from the official release, not an
 untrusted mirror. Do not execute scripts from inside a downloaded firmware ZIP.
@@ -224,6 +226,8 @@ calling a tool on the Taby app's maintained MCP interface and checking its resul
 - **1.64 V1:** hold BOOT, press/release RESET, then release BOOT.
 - **Round 1.32:** hold BOOT while powering the board on again, then release BOOT.
   Follow [Waveshare's board guide](https://docs.waveshare.com/ESP32-S3-Touch-AMOLED-1.32).
+- **Round 1.75C:** hold BOOT, power the board on again (PWR), then release BOOT.
+  Follow [Waveshare's board guide](https://docs.waveshare.com/ESP32-S3-Touch-AMOLED-1.75C).
 - List ports again; bootloader and running firmware can enumerate differently.
 - Retry using the identified bootloader port. If flashing succeeds but Taby does
   not start, release BOOT and reset/power-cycle normally, then run `verify`.

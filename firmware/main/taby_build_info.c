@@ -25,6 +25,8 @@ const char *taby_product_name(void) {
 const char *taby_hardware_target(void) {
 #if defined(TABY_HARDWARE_ROUND_1_32) && TABY_HARDWARE_ROUND_1_32
     return "round-1.32";
+#elif defined(TABY_HARDWARE_ROUND_1_75C) && TABY_HARDWARE_ROUND_1_75C
+    return "round-1.75c";
 #else
     return "amoled-1.64";
 #endif
@@ -32,6 +34,8 @@ const char *taby_hardware_target(void) {
 
 const char *taby_display_shape(void) {
 #if defined(TABY_HARDWARE_ROUND_1_32) && TABY_HARDWARE_ROUND_1_32
+    return "round";
+#elif defined(TABY_HARDWARE_ROUND_1_75C) && TABY_HARDWARE_ROUND_1_75C
     return "round";
 #else
     return "rectangle";
@@ -41,6 +45,8 @@ const char *taby_display_shape(void) {
 unsigned int taby_display_width(void) {
 #if defined(TABY_HARDWARE_ROUND_1_32) && TABY_HARDWARE_ROUND_1_32
     return 466U;
+#elif defined(TABY_HARDWARE_ROUND_1_75C) && TABY_HARDWARE_ROUND_1_75C
+    return 466U;
 #else
     return 280U;
 #endif
@@ -48,6 +54,8 @@ unsigned int taby_display_width(void) {
 
 unsigned int taby_display_height(void) {
 #if defined(TABY_HARDWARE_ROUND_1_32) && TABY_HARDWARE_ROUND_1_32
+    return 466U;
+#elif defined(TABY_HARDWARE_ROUND_1_75C) && TABY_HARDWARE_ROUND_1_75C
     return 466U;
 #else
     return 456U;
