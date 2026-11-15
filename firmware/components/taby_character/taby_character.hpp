@@ -77,6 +77,13 @@ public:
   {
     return m_desired == Mode::rest && m_phase == Phase::settled ? nowMs - m_phaseSince : 0;
   }
+  /** The working action still has the face (its wand still swings until
+   *  `exitAction` fires), whatever comes next. */
+  bool working() const
+  {
+    return m_authored.rfind("prossesing", 0) == 0 &&
+           (m_phase == Phase::settled || m_phase == Phase::waiting || m_phase == Phase::lead);
+  }
   bool allowsTalkingFace() const
   {
     return m_phase == Phase::settled || m_phase == Phase::lead ||

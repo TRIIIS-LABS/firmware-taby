@@ -152,7 +152,14 @@ void CharacterAction::request(Mode mode, double now, double holdMs)
     m_startPending = false;
     return;
   }
-  if (free || (previous == Mode::idle && !exited(mode)))
+  // From resting, and from listening into working, the next action takes
+  // over at once and the layer blends one into the other, with no stop on the
+  // neutral face between (Peter, 2026-11-15, of listening into working: "it
+  // needs to be like ... from idle").
+  const bool straight =
+      !exited(mode) && (previous == Mode::idle ||
+                        (previous == Mode::listening && mode == Mode::working));
+  if (free || straight)
   {
     const double running = m_startPending ? m_startNotBefore : 0;
     const double notBefore = std::max(now + holdMs, running);
@@ -588,7 +595,9 @@ void Character::advanceStars(float seconds, double now)
   {
     return;
   }
-  if (m_mode == Mode::working)
+  // The stars go with the wand: they keep coming while it swings, until the
+  // working action lets go of the face.
+  if (m_mode == Mode::working || m_action.working())
   {
     m_starsOpacity = 1.0f;
     m_starsCleared = false;
