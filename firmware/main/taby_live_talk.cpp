@@ -3,7 +3,9 @@
 #include <algorithm>
 #include <atomic>
 #include <cmath>
+#include <cstdlib>
 #include <cstring>
+#include <new>
 #include <string>
 
 extern "C" {
@@ -22,6 +24,40 @@ extern "C" {
 
 extern const uint8_t taby_talk_riv_start[] asm("_binary_taby_talk_riv_start");
 extern const uint8_t taby_talk_riv_end[] asm("_binary_taby_talk_riv_end");
+
+/*
+ * The firmware's C++ is the live character (Rive and its renderer), and its
+ * thousands of small objects go in PSRAM. malloc() keeps anything under
+ * CONFIG_SPIRAM_MALLOC_ALWAYSINTERNAL in internal RAM, and the character's
+ * load alone left 12 KB of it, so the Bluetooth controller could not start
+ * and the board restarted at every boot (first board run, 2026-11-15).
+ * Internal RAM is still used when PSRAM is out.
+ */
+namespace
+{
+void *cxxAlloc(std::size_t size)
+{
+  if (size == 0) size = 1;
+  void *p = heap_caps_malloc(size, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+  return p != nullptr ? p : std::malloc(size);
+}
+} // namespace
+
+void *operator new(std::size_t size)
+{
+  void *p = cxxAlloc(size);
+  if (p == nullptr) abort();
+  return p;
+}
+void *operator new[](std::size_t size) { return operator new(size); }
+void *operator new(std::size_t size, const std::nothrow_t &) noexcept { return cxxAlloc(size); }
+void *operator new[](std::size_t size, const std::nothrow_t &) noexcept { return cxxAlloc(size); }
+void operator delete(void *p) noexcept { std::free(p); }
+void operator delete[](void *p) noexcept { std::free(p); }
+void operator delete(void *p, std::size_t) noexcept { std::free(p); }
+void operator delete[](void *p, std::size_t) noexcept { std::free(p); }
+void operator delete(void *p, const std::nothrow_t &) noexcept { std::free(p); }
+void operator delete[](void *p, const std::nothrow_t &) noexcept { std::free(p); }
 
 namespace
 {
@@ -134,19 +170,26 @@ bool load()
   std::string error;
   const double started = nowMs();
   const size_t before = heap_caps_get_free_size(MALLOC_CAP_SPIRAM);
-  if (live->renderer == nullptr ||
-      !live->character.load(
+  // Rive's arrays use malloc() itself: while it loads, small blocks go in
+  // PSRAM too, and then malloc() keeps its usual limit.
+  heap_caps_malloc_extmem_enable(0);
+  const bool loaded =
+      live->renderer != nullptr &&
+      live->character.load(
           rive::Span<const uint8_t>(taby_talk_riv_start, taby_talk_riv_end - taby_talk_riv_start),
           &live->factory,
-          &error))
+          &error);
+  heap_caps_malloc_extmem_enable(CONFIG_SPIRAM_MALLOC_ALWAYSINTERNAL);
+  if (!loaded)
   {
     ESP_LOGE(TAG, "character did not load: %s", error.c_str());
     return false;
   }
   ESP_LOGI(TAG,
-           "character loaded in %.0f ms, %u KB",
+           "character loaded in %.0f ms, %u KB; internal RAM free %u KB",
            nowMs() - started,
-           (unsigned)((before - heap_caps_get_free_size(MALLOC_CAP_SPIRAM)) / 1024));
+           (unsigned)((before - heap_caps_get_free_size(MALLOC_CAP_SPIRAM)) / 1024),
+           (unsigned)(heap_caps_get_free_size(MALLOC_CAP_INTERNAL) / 1024));
   s_live = live;
   return true;
 }

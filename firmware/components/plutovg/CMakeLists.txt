@@ -11,4 +11,5 @@ target_compile_definitions(${COMPONENT_LIB} PUBLIC PLUTOVG_BUILD_STATIC)
 # both 32-bit here; GCC 14 only refuses to mix the pointer types.
 target_compile_definitions(${COMPONENT_LIB} PRIVATE
     PLUTOVG_DISABLE_FONT_FACE_CACHE_LOAD PLUTOVG_DISABLE_IMAGE_WRITE)
-target_compile_options(${COMPONENT_LIB} PRIVATE -w -Wno-error=incompatible-pointer-types)
+target_compile_options(${COMPONENT_LIB} PRIVATE -w -Wno-error=incompatible-pointer-types
+    -include "${CMAKE_CURRENT_LIST_DIR}/taby_psram_alloc.h")

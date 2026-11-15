@@ -48,8 +48,6 @@ void app_main(void) {
     ESP_ERROR_CHECK(board_amoled_1_64_init());
     taby_reusable_ui_start();
     taby_asset_store_init();
-    /* The live character loads in the background; talking is its GIF until then. */
-    taby_live_talk_start();
     taby_runtime_start();
     ESP_ERROR_CHECK(taby_power_button_start());
     ESP_ERROR_CHECK(taby_usb_serial_init());
@@ -69,5 +67,8 @@ void app_main(void) {
             ESP_LOGE(TAG, "Bluetooth transport init failed: %s", esp_err_to_name(ble_err));
         }
     }
+    /* The live character loads in the background; talking is its GIF until
+     * then. It starts after Wi-Fi and Bluetooth have taken their internal RAM. */
+    taby_live_talk_start();
     taby_onboarding_start();
 }
