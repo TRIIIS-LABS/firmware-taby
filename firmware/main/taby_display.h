@@ -15,5 +15,3 @@ bool taby_display_render_state(
     const char *fallback_subtitle,
     const char *animation_id);
 bool taby_display_swap_custom_animation(const char *animation_id);
-/* Under the LVGL lock: the screen plays this animation as its GIF. */
-bool taby_display_shows_gif_of(const char *animation_id);
