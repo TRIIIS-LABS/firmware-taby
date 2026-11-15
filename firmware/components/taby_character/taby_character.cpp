@@ -152,13 +152,12 @@ void CharacterAction::request(Mode mode, double now, double holdMs)
     m_startPending = false;
     return;
   }
-  // From resting, and from listening into working, the next action takes
-  // over at once and the layer blends one into the other, with no stop on the
-  // neutral face between (Peter, 2026-11-15, of listening into working: "it
-  // needs to be like ... from idle").
-  const bool straight =
-      !exited(mode) && (previous == Mode::idle ||
-                        (previous == Mode::listening && mode == Mode::working));
+  // From one authored action to another (resting, listening, working) the
+  // next takes over at once and the layer blends one into the other, with no
+  // stop on the neutral face between (Peter, 2026-11-15, of listening into
+  // working: "it needs to be like ... from idle"; of working back to idle:
+  // "it seems to lag a little").
+  const bool straight = !exited(mode) && !exited(previous);
   if (free || straight)
   {
     const double running = m_startPending ? m_startNotBefore : 0;
