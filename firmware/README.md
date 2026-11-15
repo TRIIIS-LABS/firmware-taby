@@ -100,7 +100,11 @@ character, wearing the mouth motion the app sends as `VOICE_MOTION` lines, and
 (`idle_01_loop`, and the idle state) and listening (`listening_loop`) are
 live too, and so is working (`working_loop`): the wizard's hat and wand, with
 the stars the wand throws, so the face goes from listening to working to
-talking by the character's own transitions, as the notch's does. The stars
+talking by the character's own transitions, as the notch's does. On the board
+working starts straight in the wand swing: the file's way in
+(`prossesingFirst`, a second of the wand held still by the hat) is skipped by
+pointing its one transition at the swing (`prossesingtwo`), blended over
+300 ms. The stars
 are the character file's one Rive script, which the board has no engine for;
 the firmware draws them with a port of that script (`taby_stars`). Every
 other animation is still its GIF, the magnifier and the bricks among them.
