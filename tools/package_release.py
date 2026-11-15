@@ -32,6 +32,20 @@ def copy_dependency_notices(destination, description):
                 target = destination / "licenses" / component.name / source.relative_to(component)
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(source, target)
+    # The Rive runtime and PlutoVG are fetched into firmware/third_party
+    # (firmware/tools/fetch-rive.sh), outside any component's own folder.
+    third_party = ROOT / "firmware/third_party"
+    if third_party.is_dir():
+        for project in sorted(third_party.iterdir()):
+            for source in sorted(project.glob("*")):
+                upper = source.name.upper()
+                if not source.is_file() or not upper.startswith(("LICENSE", "LICENCE", "COPYING", "NOTICE")):
+                    continue
+                if source.suffix.lower() not in ("", ".txt", ".md", ".rst"):
+                    continue
+                target = destination / "licenses" / project.name / source.name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(source, target)
     idf_license = Path(os.environ.get("IDF_PATH", "")) / "LICENSE"
     if idf_license.is_file():
         target = destination / "licenses/esp-idf/LICENSE"
