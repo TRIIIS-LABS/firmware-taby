@@ -433,6 +433,22 @@ bool taby_runtime_refresh_current_state(void) {
     return true;
 }
 
+void taby_runtime_take_talk_live(const char *animation_id) {
+    if (!s_runtime_started || s_custom_ui_active) {
+        return;
+    }
+    if (!board_amoled_1_64_lock(200)) {
+        ESP_LOGW(TAG, "failed to acquire LVGL lock to talk live");
+        return;
+    }
+    /* The talk began as its GIF; drawn again, it is drawn live. */
+    if (taby_display_shows_gif_of(animation_id)) {
+        s_last_render_valid = false;
+        render_current_state_locked();
+    }
+    board_amoled_1_64_unlock();
+}
+
 void taby_runtime_invalidate_render_cache(void) {
     s_last_render_valid = false;
 }

@@ -2,6 +2,7 @@
 
 #include <ctype.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "board_amoled_1_64.h"
@@ -36,6 +37,8 @@ static taby_display_animation_complete_cb_t s_animation_complete_cb = NULL;
 static void *s_animation_complete_ctx = NULL;
 static lv_timer_t *s_animation_completion_timer = NULL;
 static bool s_animation_complete_on_ready = false;
+/* The animation the GIF on screen plays, or empty. */
+static char s_gif_animation_id[64] = "";
 static lv_obj_t *s_fallback_canvas = NULL;
 static lv_color_t *s_fallback_canvas_buf = NULL;
 
@@ -86,6 +89,7 @@ static void reset_scene(void) {
 
     taby_idle_eyes_forget();
     taby_live_talk_hide();
+    s_gif_animation_id[0] = '\0';
 
     if (s_animation_completion_timer) {
         lv_timer_del(s_animation_completion_timer);
@@ -256,7 +260,14 @@ static bool create_animation_object_from_asset(taby_state_t state, const taby_an
     lv_obj_center(s_animation_obj);
     lv_obj_move_foreground(s_animation_obj);
     lv_obj_invalidate(s_animation_obj);
+    snprintf(s_gif_animation_id, sizeof(s_gif_animation_id), "%s",
+             asset->animation_id ? asset->animation_id : "");
     return true;
+}
+
+bool taby_display_shows_gif_of(const char *animation_id) {
+    return animation_id != NULL && s_animation_obj != NULL &&
+           strcmp(s_gif_animation_id, animation_id) == 0;
 }
 
 bool taby_display_swap_custom_animation(const char *animation_id) {
@@ -279,6 +290,7 @@ bool taby_display_swap_custom_animation(const char *animation_id) {
     }
 
     s_animation_complete_on_ready = !asset.loop && s_animation_complete_cb != NULL;
+    snprintf(s_gif_animation_id, sizeof(s_gif_animation_id), "%s", animation_id);
     lv_obj_clear_flag(s_animation_obj, LV_OBJ_FLAG_HIDDEN);
     lv_obj_move_foreground(s_animation_obj);
     lv_obj_invalidate(s_animation_obj);

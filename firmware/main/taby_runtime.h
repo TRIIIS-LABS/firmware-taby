@@ -19,6 +19,8 @@ void taby_runtime_dismiss_reusable_card_locked(void);
 bool taby_runtime_clear_reusable_card(void);
 void taby_runtime_show_transport_banner(const char *title, const char *subtitle, uint32_t duration_ms);
 bool taby_runtime_refresh_current_state(void);
+/* The app drives the mouth now: a talk showing as its GIF is drawn live. */
+void taby_runtime_take_talk_live(const char *animation_id);
 void taby_runtime_invalidate_render_cache(void);
 taby_state_t taby_runtime_current_state(void);
 bool taby_runtime_set_display_awake(bool awake);

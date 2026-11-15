@@ -10,6 +10,7 @@
 
 extern "C" {
 #include "board_amoled_1_64.h"
+#include "taby_runtime.h"
 }
 #include "esp_heap_caps.h"
 #include "esp_log.h"
@@ -80,6 +81,25 @@ enum class Load : int
   failed
 };
 std::atomic<Load> s_load{Load::idle};
+
+/* Talking is drawn live only while the app drives the mouth: from a run that
+   came in the last few seconds. An app that sends none keeps the talking GIF,
+   whose mouth moves (Peter's app on the first board run, 2026-11-15). */
+constexpr int64_t kDrivenUs = 4000000;
+std::atomic<int64_t> s_lastRunUs{-1};
+
+bool driven()
+{
+  const int64_t at = s_lastRunUs.load();
+  return at >= 0 && esp_timer_get_time() - at < kDrivenUs;
+}
+
+/* "<talk> stop", as opposed to a run of frames. */
+bool isStop(const char *args)
+{
+  const char *space = std::strchr(args, ' ');
+  return space != nullptr && std::strcmp(space + 1, "stop") == 0;
+}
 
 /* A panel box, half-open: [x0, x1) x [y0, y1). */
 struct Box
@@ -299,7 +319,7 @@ extern "C" bool taby_live_talk_ready(void) { return s_load.load() == Load::ready
 extern "C" bool taby_live_talk_takes(const char *animation_id)
 {
   return s_load.load() == Load::ready && animation_id != nullptr &&
-         std::strcmp(animation_id, kTalking) == 0;
+         std::strcmp(animation_id, kTalking) == 0 && driven();
 }
 
 extern "C" lv_obj_t *taby_live_talk_show(lv_obj_t *parent)
@@ -331,5 +351,11 @@ extern "C" bool taby_live_talk_voice_motion(const char *args)
   if (xSemaphoreTake(s_live->voiceLock, pdMS_TO_TICKS(20)) != pdTRUE) return false;
   const bool taken = s_live->voice.take(args, nowMs());
   xSemaphoreGive(s_live->voiceLock);
+  if (taken && !isStop(args))
+  {
+    s_lastRunUs = esp_timer_get_time();
+    // A talk that began as its GIF goes live now.
+    if (!s_live->showing.load()) taby_runtime_take_talk_live(kTalking);
+  }
   return taken;
 }
