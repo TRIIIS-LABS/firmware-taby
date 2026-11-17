@@ -29,6 +29,10 @@ public:
   SpeechFrame at(double nowMs) const;
   /** A piece is playing, or has frames still ahead. */
   bool active(double nowMs) const;
+  /** The mouth while the face has shown talking since `talkingSinceMs`:
+   *  the app's motion when a run came for this talk, and otherwise, after a
+   *  short wait for one, Taby's own (ownTalk). */
+  SpeechFrame mouth(double nowMs, double talkingSinceMs) const;
   /** Forget everything (the face left talking). */
   void reset();
 
@@ -46,6 +50,14 @@ private:
   std::vector<Frame> m_frames;
   /** Which frames have arrived; a gap is a shut mouth, not a stale one. */
   std::vector<bool> m_have;
+  /** Device time the last run was taken. */
+  double m_lastRunAt = -1e12;
 };
+
+/** Taby talking with no motion from the app: over Bluetooth, which carries no
+ *  VOICE_MOTION, or from an app that sends none. Without it the face talked
+ *  with its mouth shut where the GIF pack's talking clip had moved it. Made-up
+ *  syllables, `ms` into the talk, as unsynced with the voice as that clip. */
+SpeechFrame ownTalk(double ms);
 
 } // namespace taby
