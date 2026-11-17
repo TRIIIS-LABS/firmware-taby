@@ -1,6 +1,7 @@
 """Bounded USB discovery and Taby INFO/animation commands; never flashes."""
 import argparse
 import json
+import os
 import re
 import time
 from common import BOARDS
@@ -20,13 +21,29 @@ SAFE_INFO = (
 EYE_MOTIONS = ("normal", "calm", "still")
 
 
-def exchange(port, command, prefix, timeout=6):
+def open_port(port):
+    """Open with DTR/RTS deasserted, never passing through the reset pattern.
+
+    The ESP32-S3 USB-Serial-JTAG resets the chip while RTS is asserted and DTR
+    is not. macOS/Linux assert both lines on open and pyserial then applies
+    lines set beforehand DTR first, so presetting them resets the board. There
+    the lines are released after opening, RTS first. Windows applies preset
+    lines at open.
+    """
     connection = serial.Serial(port=None, baudrate=115200, timeout=0.15,
                                write_timeout=2)
-    connection.dtr = False
-    connection.rts = False
+    if os.name == "nt":
+        connection.dtr = False
+        connection.rts = False
     connection.port = port
     connection.open()
+    connection.rts = False
+    connection.dtr = False
+    return connection
+
+
+def exchange(port, command, prefix, timeout=6):
+    connection = open_port(port)
     try:
         connection.reset_input_buffer()
         connection.write((command + "\n").encode("utf-8"))

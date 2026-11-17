@@ -12,16 +12,51 @@ except SystemExit:
 
 
 class FakePort:
+    """Models the control lines as a POSIX kernel and pyserial drive them.
+
+    Opening asserts DTR and RTS; pyserial then applies any lines set before
+    opening, DTR first. `lines` records every (dtr, rts) state while open.
+    """
     def __init__(self, chunks):
         self.chunks = list(chunks)
         self.in_waiting = 4
         self.opened = False
         self.closed = False
         self.sent = b""
+        self.preset = {}
+        self.lines = []
+        self._dtr = self._rts = None
+
+    @property
+    def dtr(self):
+        return self._dtr
+
+    @dtr.setter
+    def dtr(self, value):
+        self._set_line("dtr", value)
+
+    @property
+    def rts(self):
+        return self._rts
+
+    @rts.setter
+    def rts(self, value):
+        self._set_line("rts", value)
+
+    def _set_line(self, name, value):
+        setattr(self, "_" + name, value)
+        if self.opened:
+            self.lines.append((self._dtr, self._rts))
+        else:
+            self.preset[name] = value
 
     def open(self):
-        assert self.dtr is False and self.rts is False
         self.opened = True
+        self._dtr = self._rts = True
+        self.lines.append((True, True))
+        for name in ("dtr", "rts"):
+            if name in self.preset:
+                setattr(self, name, self.preset[name])
 
     def reset_input_buffer(self):
         pass
@@ -60,6 +95,23 @@ class DeviceTests(unittest.TestCase):
                        {"hardware_target": "amoled-1.64", "display_width": 466}):
             with self.subTest(actual=actual):
                 self.assertIsNone(device.identify(actual)["board"])
+
+    def test_opening_the_port_never_signals_a_reset(self):
+        # ESP32-S3 USB-Serial-JTAG resets the chip while RTS is asserted and DTR is not.
+        port = FakePort([b"TABY:PONG\n"])
+        with patch.object(device.os, "name", "posix"), \
+                patch.object(device.serial, "Serial", return_value=port):
+            device.exchange("test-port", "PING", "TABY:")
+        self.assertNotIn((False, True), port.lines)
+        self.assertEqual(port.lines[-1], (False, False))
+
+    def test_windows_deasserts_the_lines_before_opening(self):
+        port = FakePort([b"TABY:PONG\n"])
+        with patch.object(device.os, "name", "nt"), \
+                patch.object(device.serial, "Serial", return_value=port):
+            device.exchange("test-port", "PING", "TABY:")
+        self.assertEqual(port.preset, {"dtr": False, "rts": False})
+        self.assertEqual(port.lines[-1], (False, False))
 
     def test_chunked_info_filters_private_fields_and_closes_port(self):
         port = FakePort([b"boot log\nTABY:IN", b'FO {"firmware_version":"test",',
