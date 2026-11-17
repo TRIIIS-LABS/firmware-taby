@@ -10,6 +10,7 @@
 #include "rive/artboard.hpp"
 #include "rive/file.hpp"
 #include "rive/viewmodel/runtime/viewmodel_instance_runtime.hpp"
+#include "taby_stars.hpp"
 
 #include <memory>
 #include <string>
@@ -75,6 +76,13 @@ public:
   double restingMs(double nowMs) const
   {
     return m_desired == Mode::rest && m_phase == Phase::settled ? nowMs - m_phaseSince : 0;
+  }
+  /** The working action still has the face (its wand still swings until
+   *  `exitAction` fires), whatever comes next. */
+  bool working() const
+  {
+    return m_authored.rfind("prossesing", 0) == 0 &&
+           (m_phase == Phase::settled || m_phase == Phase::waiting || m_phase == Phase::lead);
   }
   bool allowsTalkingFace() const
   {
@@ -146,6 +154,9 @@ public:
 
   /** Advances the state machine; returns the names of states it entered. */
   std::vector<std::string> advance(float seconds, double nowMs);
+  /** The last advance changed the picture or will again: false once the
+   *  face has settled and nothing moves (a held rest between blinks). */
+  bool moving() const { return m_moving; }
   /** `extra`: an artboard-space transform (a clip's framing); `opacity`
    *  fades the whole character. */
   void draw(rive::Renderer* renderer, float width, float height,
@@ -176,6 +187,7 @@ private:
   rive::rcp<rive::ViewModelInstanceRuntime> m_vm;
   CharacterAction m_action;
   Mode m_mode = Mode::idle;
+  bool m_moving = true;
 
   rive::ViewModelInstanceEnumRuntime* m_viseme = nullptr;
   rive::ViewModelInstanceEnumRuntime* m_gesture = nullptr;
@@ -198,6 +210,9 @@ private:
   float m_starsOpacity = 1.0f;
   bool m_starsCleared = true;
   bool m_starsQuickExit = true;
+  // Without a script engine (the board) the stars are drawn by this port of
+  // the script instead.
+  Stars m_native;
 };
 
 } // namespace taby

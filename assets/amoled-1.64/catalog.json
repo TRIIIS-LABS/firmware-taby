@@ -1,7 +1,7 @@
 {
   "schema": "taby_amoled_asset_catalog_v1",
   "pack_schema": "taby_amoled_asset_pack_v1",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "mount_path": "/assets",
   "display": {
     "width": 280,
@@ -795,8 +795,8 @@
       "fallback_label": "TABY",
       "loop_policy": "play_once",
       "relative_path": "a/9d165367.gif",
-      "byte_length": 53734,
-      "sha256": "33e1302152441d1747bdb44c3f946c173b60e7168991ddd26d9dfa183cda5259"
+      "byte_length": 73276,
+      "sha256": "fe2047362b02b2bc8cde3eedd2d6286d3c2c28f28f83d98646c674be3f70cd22"
     },
     {
       "id": "taby_response_ready_loop",

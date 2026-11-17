@@ -10,8 +10,11 @@
 
 extern "C" {
 #include "board_amoled_1_64.h"
+#include "taby_display.h"
+#include "taby_idle_eyes.h"
 }
 #include "esp_heap_caps.h"
+#include "esp_random.h"
 #include "esp_log.h"
 #include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
@@ -20,6 +23,7 @@ extern "C" {
 #include "freertos/task.h"
 #include "rive_plutovg.hpp"
 #include "taby_character.hpp"
+#include "taby_face.hpp"
 #include "taby_voice.hpp"
 
 extern const uint8_t taby_talk_riv_start[] asm("_binary_taby_talk_riv_start");
@@ -63,14 +67,14 @@ namespace
 {
 
 const char *TAG = "taby_live_talk";
-const char *const kTalking = "talking_default_loop";
 
 /* The panel as the GIF pack is drawn, and the character's landscape. */
 constexpr int kPanelW = 280;
 constexpr int kPanelH = 456;
 constexpr int kLandW = kPanelH;
 constexpr int kLandH = kPanelW;
-constexpr int64_t kFrameUs = 33333;
+/* A clip waiting for the face to rest shows after this whatever happens. */
+constexpr int64_t kLeaveMaxUs = 1200 * 1000;
 
 enum class Load : int
 {
@@ -95,10 +99,13 @@ struct Box
   }
 };
 
+uint32_t boardRandom() { return esp_random(); }
+
 struct Live
 {
   rive_plutovg::Factory factory;
   taby::Character character;
+  taby::LiveFace face{character, boardRandom};
   /* What the app sent; the serial and Bluetooth tasks write it. */
   taby::VoiceMotion voice;
   SemaphoreHandle_t voiceLock = nullptr;
@@ -108,14 +115,39 @@ struct Live
   rive_plutovg::Renderer *renderer = nullptr;
   /* What the canvas object shows, in LVGL's colour format. */
   lv_color_t *pixels = nullptr;
-  /* Set and cleared under the LVGL lock. */
+  /* Written under the LVGL lock, read by the render task. */
   lv_obj_t *object = nullptr;
   std::atomic<bool> showing{false};
+  std::atomic<int> wantFace{0};
+  std::atomic<int> eyes{0};
+  std::atomic<int> after{TABY_LIVE_AFTER_OTHER};
+  /* A show the render task has not started yet. */
+  std::atomic<bool> started{false};
+  /* A clip waits for the face to rest; `left` tells the display. */
+  std::atomic<bool> leaving{false};
+  std::atomic<int64_t> leaveSince{0};
+  lv_async_cb_t left = nullptr;
 };
 Live *s_live = nullptr;
 TaskHandle_t s_task = nullptr;
 
 double nowMs() { return esp_timer_get_time() / 1000.0; }
+
+bool faceFor(const char *animation_id, taby::Face *face)
+{
+  if (animation_id == nullptr) return false;
+  if (std::strcmp(animation_id, "idle_01_loop") == 0)
+    *face = taby::Face::idle;
+  else if (std::strcmp(animation_id, "listening_loop") == 0)
+    *face = taby::Face::listening;
+  else if (std::strcmp(animation_id, "working_loop") == 0)
+    *face = taby::Face::working;
+  else if (std::strcmp(animation_id, "talking_default_loop") == 0)
+    *face = taby::Face::talking;
+  else
+    return false;
+  return true;
+}
 
 Box boxFrom(const float f[4])
 {
@@ -194,7 +226,51 @@ bool load()
   return true;
 }
 
-void renderTask(void *)
+/* The face has rested (or the screen is dark): the clip may show. */
+void notifyLeft(Live &live)
+{
+  if (!live.leaving.load() || !board_amoled_1_64_lock(50)) return;
+  if (live.leaving.load() && live.left != nullptr)
+  {
+    live.leaving = false;
+    lv_async_call(live.left, nullptr);
+    live.left = nullptr;
+  }
+  board_amoled_1_64_unlock();
+}
+
+/* One frame of the character onto the panel: the box that changed. */
+void drawFrame(Live &live, const plutovg_matrix_t &placement, Box &previous)
+{
+  clearBox(live.argb, previous);
+  plutovg_canvas_reset_matrix(live.canvas);
+  plutovg_canvas_transform(live.canvas, &placement);
+  live.renderer->resetDrawn();
+  live.character.draw(live.renderer, kLandW, kLandH);
+  float drawn[4];
+  const Box current = live.renderer->drawn(drawn) ? boxFrom(drawn) : Box();
+  // The screen must lose what the last frame drew and gain this one; the
+  // panel takes even edges.
+  Box send = previous.unite(current);
+  send.x0 &= ~1;
+  send.y0 &= ~1;
+  send.x1 = std::min(kPanelW, (send.x1 + 1) & ~1);
+  send.y1 = std::min(kPanelH, (send.y1 + 1) & ~1);
+  previous = current;
+  if (!send.empty() && board_amoled_1_64_lock(50))
+  {
+    if (live.showing.load() && live.object != nullptr)
+    {
+      toScreen(send);
+      lv_area_t area = {(lv_coord_t)send.x0, (lv_coord_t)send.y0,
+                        (lv_coord_t)(send.x1 - 1), (lv_coord_t)(send.y1 - 1)};
+      lv_obj_invalidate_area(live.object, &area);
+    }
+    board_amoled_1_64_unlock();
+  }
+}
+
+[[maybe_unused]] void renderTask(void *)
 {
   if (!load())
   {
@@ -203,20 +279,32 @@ void renderTask(void *)
     return;
   }
   s_load = Load::ready;
-  taby::Character &character = s_live->character;
-  // Landscape (u right, v down) onto the portrait panel: up is the panel's
-  // +x, as in the GIF pack.
-  const plutovg_matrix_t landscape = {0, 1, -1, 0, (float)kPanelW, 0};
-  bool drawing = false;
+  // A face the display drew as a GIF while the character loaded turns live.
+  if (board_amoled_1_64_lock(1000))
+  {
+    lv_async_call(taby_display_live_ready, nullptr);
+    board_amoled_1_64_unlock();
+  }
+  Live &live = *s_live;
+  taby::LiveFace &face = live.face;
+  const taby::Placement &p = taby::kPanelPlacement;
+  const plutovg_matrix_t placement = {p.a, p.b, p.c, p.d, p.e, p.f};
   Box previous = Box::full();
+  bool fresh = true;
   int64_t last = esp_timer_get_time();
   for (;;)
   {
-    if (!s_live->showing.load())
+    if (!live.showing.load())
     {
-      if (drawing) character.setMode(taby::Mode::idle, nowMs());
-      drawing = false;
       ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+      last = esp_timer_get_time();
+      continue;
+    }
+    if (!board_amoled_1_64_display_enabled())
+    {
+      // A dark screen draws nothing; a clip waiting for the face goes ahead.
+      notifyLeft(live);
+      vTaskDelay(pdMS_TO_TICKS(200));
       last = esp_timer_get_time();
       continue;
     }
@@ -224,50 +312,40 @@ void renderTask(void *)
     const double now = frameStart / 1000.0;
     const float dt = std::min(0.1f, (frameStart - last) / 1e6f);
     last = frameStart;
-    if (!drawing)
+    if (live.started.exchange(false))
     {
-      character.setMode(taby::Mode::speaking, now);
+      // Back from a clip, a card or nothing: the face starts on its neutral
+      // rest, where the pack's clips end.
+      if (live.after.load() != TABY_LIVE_AFTER_LIVE) face.startFromRest(now);
       previous = Box::full();
-      drawing = true;
+      fresh = true;
     }
+    const taby::Face wanted = static_cast<taby::Face>(live.wantFace.load());
+    face.show(wanted);
+    face.setEyes(static_cast<taby::Eyes>(live.eyes.load()));
+    const bool leaving = live.leaving.load();
+    if (leaving)
+      face.handOver();
+    else
+      face.takeBack();
     taby::SpeechFrame frame;
-    if (xSemaphoreTake(s_live->voiceLock, pdMS_TO_TICKS(5)) == pdTRUE)
+    const taby::SpeechFrame *speech = nullptr;
+    if (wanted == taby::Face::talking && xSemaphoreTake(live.voiceLock, pdMS_TO_TICKS(5)) == pdTRUE)
     {
-      frame = s_live->voice.at(now);
-      xSemaphoreGive(s_live->voiceLock);
+      frame = live.voice.at(now);
+      xSemaphoreGive(live.voiceLock);
+      speech = &frame;
     }
-    // The body takes a gesture once the action before it has let go.
-    if (!character.layersFree()) frame.gesture = "idle";
-    character.applySpeech(frame, now);
-    character.advance(dt, now);
-
-    clearBox(s_live->argb, previous);
-    plutovg_canvas_reset_matrix(s_live->canvas);
-    plutovg_canvas_transform(s_live->canvas, &landscape);
-    s_live->renderer->resetDrawn();
-    character.draw(s_live->renderer, kLandW, kLandH);
-    float drawn[4];
-    const Box current = s_live->renderer->drawn(drawn) ? boxFrom(drawn) : Box();
-    // The screen must lose what the last frame drew and gain this one; the
-    // panel takes even edges.
-    Box send = previous.unite(current);
-    send.x0 &= ~1;
-    send.y0 &= ~1;
-    send.x1 = std::min(kPanelW, (send.x1 + 1) & ~1);
-    send.y1 = std::min(kPanelH, (send.y1 + 1) & ~1);
-    previous = current;
-    if (!send.empty() && board_amoled_1_64_lock(50))
+    if (face.advance(dt, now, speech) || fresh)
     {
-      if (s_live->showing.load() && s_live->object != nullptr)
-      {
-        toScreen(send);
-        lv_area_t area = {(lv_coord_t)send.x0, (lv_coord_t)send.y0,
-                          (lv_coord_t)(send.x1 - 1), (lv_coord_t)(send.y1 - 1)};
-        lv_obj_invalidate_area(s_live->object, &area);
-      }
-      board_amoled_1_64_unlock();
+      drawFrame(live, placement, previous);
+      fresh = false;
     }
-    const int64_t wait = kFrameUs - (esp_timer_get_time() - frameStart);
+    if (leaving && (face.atRest(now) || frameStart - live.leaveSince.load() > kLeaveMaxUs))
+    {
+      notifyLeft(live);
+    }
+    const int64_t wait = (int64_t)(face.frameMs() * 1000) - (esp_timer_get_time() - frameStart);
     vTaskDelay(wait > 1000 ? pdMS_TO_TICKS(wait / 1000) : 1);
   }
 }
@@ -278,7 +356,7 @@ extern "C" void taby_live_talk_start(void)
 {
 #if defined(TABY_HARDWARE_ROUND_1_32)
   // The character is drawn for the 1.64's 280 x 456 panel. The round board
-  // keeps its talking GIF and does not list voice_motion.
+  // keeps its GIFs and does not list voice_motion.
   return;
 #else
   Load idle = Load::idle;
@@ -304,24 +382,75 @@ extern "C" bool taby_live_talk_ready(void) { return s_load.load() == Load::ready
 
 extern "C" bool taby_live_talk_takes(const char *animation_id)
 {
-  return s_load.load() == Load::ready && animation_id != nullptr &&
-         std::strcmp(animation_id, kTalking) == 0;
+  taby::Face face;
+  return s_load.load() == Load::ready && faceFor(animation_id, &face);
 }
 
-extern "C" lv_obj_t *taby_live_talk_show(lv_obj_t *parent)
+extern "C" void taby_live_talk_take_frame(lv_obj_t *gif)
 {
-  if (s_load.load() != Load::ready) return nullptr;
+  if (s_load.load() != Load::ready || gif == nullptr || !lv_obj_check_type(gif, &lv_gif_class)) return;
+  const lv_gif_t *g = reinterpret_cast<const lv_gif_t *>(gif);
+  const lv_img_dsc_t &shown = g->imgdsc;
+  if (g->gif == nullptr || shown.data == nullptr || shown.header.w != kPanelW ||
+      shown.header.h != kPanelH || shown.header.cf != LV_IMG_CF_TRUE_COLOR_ALPHA)
+  {
+    std::memset(s_live->pixels, 0, kPanelW * kPanelH * sizeof(lv_color_t));
+    return;
+  }
+  // Two colour bytes and an alpha byte a pixel; what is clear shows black.
+  const uint8_t *from = shown.data;
+  for (int i = 0; i < kPanelW * kPanelH; ++i, from += LV_IMG_PX_SIZE_ALPHA_BYTE)
+  {
+    lv_color_t colour;
+    std::memcpy(&colour, from, sizeof(colour));
+    s_live->pixels[i] = from[LV_IMG_PX_SIZE_ALPHA_BYTE - 1] != 0 ? colour : lv_color_black();
+  }
+}
+
+extern "C" lv_obj_t *taby_live_talk_show(lv_obj_t *parent, const char *animation_id,
+                                         taby_live_after_t after)
+{
+  taby::Face face;
+  if (s_load.load() != Load::ready || !faceFor(animation_id, &face)) return nullptr;
   lv_obj_t *canvas = lv_canvas_create(parent);
   if (canvas == nullptr) return nullptr;
-  // Black until the first frame lands, a frame or two from now.
-  std::memset(s_live->pixels, 0, kPanelW * kPanelH * sizeof(lv_color_t));
+  // Until the face's first frame lands: the last live frame, the clip's
+  // last frame, or black.
+  if (after == TABY_LIVE_AFTER_OTHER)
+    std::memset(s_live->pixels, 0, kPanelW * kPanelH * sizeof(lv_color_t));
   lv_canvas_set_buffer(canvas, s_live->pixels, kPanelW, kPanelH, LV_IMG_CF_TRUE_COLOR);
   lv_obj_clear_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_pos(canvas, 0, 0);
   s_live->object = canvas;
+  s_live->wantFace = static_cast<int>(face);
+  s_live->eyes = static_cast<int>(taby_idle_eyes_mode());
+  s_live->after = after;
+  s_live->leaving = false;
+  s_live->left = nullptr;
+  s_live->started = true;
   s_live->showing = true;
   xTaskNotifyGive(s_task);
   return canvas;
+}
+
+extern "C" void taby_live_talk_change(const char *animation_id)
+{
+  taby::Face face;
+  if (s_live == nullptr || !faceFor(animation_id, &face)) return;
+  s_live->wantFace = static_cast<int>(face);
+  s_live->leaving = false;
+  s_live->left = nullptr;
+}
+
+extern "C" bool taby_live_talk_leave(lv_async_cb_t left)
+{
+  if (s_live == nullptr || !s_live->showing.load() || left == nullptr ||
+      !board_amoled_1_64_display_enabled())
+    return false;
+  s_live->left = left;
+  s_live->leaveSince = esp_timer_get_time();
+  s_live->leaving = true;
+  return true;
 }
 
 extern "C" void taby_live_talk_hide(void)
@@ -329,6 +458,14 @@ extern "C" void taby_live_talk_hide(void)
   if (s_live == nullptr) return;
   s_live->showing = false;
   s_live->object = nullptr;
+  s_live->leaving = false;
+  s_live->left = nullptr;
+}
+
+extern "C" void taby_live_talk_set_eye_motion(int mode)
+{
+  if (s_live == nullptr) return;
+  s_live->eyes = mode >= 0 && mode <= 2 ? mode : 0;
 }
 
 extern "C" bool taby_live_talk_voice_motion(const char *args)

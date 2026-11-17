@@ -5,6 +5,7 @@
 #include "esp_log.h"
 #include "esp_random.h"
 #include "nvs.h"
+#include "taby_live_talk.h"
 
 static const char *TAG = "taby_idle_eyes";
 /* Kept beside the display orientation, the other thing the device remembers
@@ -195,10 +196,12 @@ void taby_idle_eyes_forget(void) {
 }
 
 void taby_idle_eyes_apply(void) {
+    load_mode();
+    /* The live resting face (1.64 board) follows the same choice. */
+    taby_live_talk_set_eye_motion((int)s_mode);
     if (!s_face) {
         return;
     }
-    load_mode();
     if (s_mode == TABY_EYE_MOTION_NORMAL) {
         hand_back();
         return;

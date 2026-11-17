@@ -9,6 +9,7 @@
 #include "freertos/task.h"
 #include "taby_display.h"
 #include "taby_idle_eyes.h"
+#include "taby_live_talk.h"
 #include "taby_onboarding.h"
 #include "taby_reusable_ui.h"
 
@@ -354,6 +355,13 @@ bool taby_runtime_apply_transport_resolution(const taby_transport_resolution_t *
     set_fallback_text(resolution->title, resolution->subtitle);
     copy_text(s_animation_id, sizeof(s_animation_id), resolution->animation_id);
     copy_text(s_next_animation_id, sizeof(s_next_animation_id), resolution->next_animation_id);
+    /* A loop the live face draws needs no GIF way in (an older app's
+       listening_in>listening_loop, the app's working_in>working_loop): the
+       face moves there by its own transitions. */
+    if (s_next_animation_id[0] != '\0' && taby_live_talk_takes(s_next_animation_id)) {
+        copy_text(s_animation_id, sizeof(s_animation_id), s_next_animation_id);
+        s_next_animation_id[0] = '\0';
+    }
     wake_display_locked();
     taby_state_t next_state = taby_state_machine_apply_command(&s_machine, resolution->command);
     ESP_LOGI(TAG,

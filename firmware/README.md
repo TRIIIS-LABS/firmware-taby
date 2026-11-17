@@ -92,6 +92,35 @@ Since 1.3.0, with the 1.64 pack 0.4.0, the rectangular board has
 question that makes or changes something. `fishing_short`, which nothing
 played, left that pack to make room for it.
 
+### The live face
+
+Since 1.3.0 the 1.64 board draws talking live: the desktop notch's own Rive
+character, wearing the mouth motion the app sends as `VOICE_MOTION` lines, and
+`INFO` lists `voice_motion` in `capabilities`. Since 1.4.0 resting
+(`idle_01_loop`, and the idle state) and listening (`listening_loop`) are
+live too, and so is working (`working_loop`): the wizard's hat and wand, with
+the stars the wand throws, so the face goes from listening to working to
+talking by the character's own transitions, as the notch's does. On the board
+working starts straight in the wand swing: the file's way in
+(`prossesingFirst`, a second of the wand held still by the hat) is skipped by
+pointing its one transition at the swing (`prossesingtwo`), blended over
+300 ms. The stars
+are the character file's one Rive script, which the board has no engine for;
+the firmware draws them with a port of that script (`taby_stars`). Every
+other animation is still its GIF, the magnifier and the bricks among them.
+Before one
+plays, the face rests on its neutral face for about half a second, which is
+where the pack's clips start; after one, the face starts there again. The
+character is placed where the pack draws Taby's resting face. An intro sent
+before a live loop (`listening_in>listening_loop`, `working_in>working_loop`)
+is skipped, since the face
+makes its own way in. A dark screen draws nothing. The round board keeps its
+GIFs.
+
+The 1.64 pack 0.4.1 redraws `taby_response_ready_in` with its loop's 24
+colours; the first one had 8, so its tongue and glow showed wrong until the
+loop took over.
+
 ### Calmer eyes
 
 Since 1.2.0, `INFO` lists `eye_motion` in `capabilities` and reports the
@@ -103,6 +132,12 @@ what the idle state shows); every other animation plays as drawn.
 - `calm` holds the eyes centred for 3 to 7 seconds between blinks and adds the
   small tilt every 20 to 60 seconds. It never plays the long looks.
 - `still` keeps the eyes centred, with one gentle blink every 4 to 9 seconds.
+
+On the 1.64 board since 1.4.0 the resting face is the live character:
+`normal` is its own idle loop (blinks, a tilt, looks to each side), `calm`
+holds its neutral face with a blink every 3 to 7 seconds and the idle loop's
+tilt after every five to eight blinks, and `still` holds it with a blink
+every 4 to 9 seconds. Between blinks nothing is drawn.
 
 The device keeps the choice across restarts, and `FACTORY_RESET` returns it to
 `normal`. An unknown mode is `TABY:ERR eye_motion_invalid_value` and changes
