@@ -117,6 +117,13 @@ is skipped, since the face
 makes its own way in. A dark screen draws nothing. The round board keeps its
 GIFs.
 
+Talking with no `VOICE_MOTION` (over Bluetooth, which does not carry it, or
+from an app that sends none) talks by itself: after half a second without the
+app's first run, the mouth moves through made-up syllables, as unsynced with
+the voice as the talking clip it replaces. Before this the face talked with its
+mouth shut where 1.2.0's clip had moved it. A run that comes, even a late one,
+takes over, and from then on a pause in the app's motion is a shut mouth.
+
 The 1.64 pack 0.4.1 redraws `taby_response_ready_in` with its loop's 24
 colours; the first one had 8, so its tongue and glow showed wrong until the
 loop took over.

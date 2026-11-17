@@ -14,6 +14,14 @@ constexpr size_t kMostFrames = 3600; // two minutes, as the app sends at most
 constexpr size_t kRunFrames = 60;
 /** A later run moves the clock only when it says it is this far off. */
 constexpr double kClockSlackMs = 80.0;
+/** The app sends a piece's first run as its voice starts, about when the face
+ *  turns to talking; one this much earlier still belongs to the talk. */
+constexpr double kRunBeforeTalkMs = 3000.0;
+/** How long talking waits for the app's first run before Taby talks alone. */
+constexpr double kOwnTalkWaitMs = 500.0;
+/** Taby's own talk loops after about this many frames. */
+constexpr size_t kOwnTalkFrames = 300;
+constexpr double kPi = 3.14159265358979323846;
 
 const char* const kVisemes[] = {"sil", "PP", "FF", "TH", "DD", "kk", "CH", "SS",
                                 "nn",  "RR", "aa", "E",  "I",  "O",  "U"};
@@ -44,7 +52,63 @@ bool number(const char** at, long* value)
   return true;
 }
 
+struct OwnFrame
+{
+  uint8_t viseme;
+  uint8_t jaw; // 0 to 100
+};
+
+/** Phrases of words of syllables, each an optional consonant and a vowel whose
+ *  jaw opens and closes, with pauses between: the same talk every time. */
+const std::vector<OwnFrame>& ownFrames()
+{
+  static const std::vector<OwnFrame> frames = [] {
+    std::vector<OwnFrame> out;
+    uint32_t seed = 0x7461u;
+    auto next = [&seed](int lo, int hi) {
+      seed = seed * 1664525u + 1013904223u;
+      return lo + static_cast<int>((seed >> 16) % static_cast<uint32_t>(hi - lo + 1));
+    };
+    auto hold = [&out](uint8_t viseme, int jaw, int count) {
+      for (int i = 0; i < count; ++i) out.push_back({viseme, static_cast<uint8_t>(jaw)});
+    };
+    // PP to RR, and the vowels with "aa" twice, as often as speech has it.
+    const uint8_t consonants[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    const uint8_t vowels[] = {10, 10, 11, 12, 13, 14};
+    while (out.size() < kOwnTalkFrames)
+    {
+      for (int words = next(3, 7); words > 0; --words)
+      {
+        for (int syllables = next(1, 3); syllables > 0; --syllables)
+        {
+          if (next(0, 9) < 8) hold(consonants[next(0, 8)], next(8, 20), next(2, 3));
+          const uint8_t vowel = vowels[next(0, 5)];
+          const int peak = next(40, 85), length = next(3, 6);
+          for (int i = 0; i < length; ++i)
+            hold(vowel, static_cast<int>(std::lround(peak * std::sin(kPi * (i + 1) / (length + 1)))), 1);
+        }
+        if (next(0, 1) == 0) hold(0, 0, next(1, 3));
+      }
+      hold(0, 0, next(8, 16));
+    }
+    return out;
+  }();
+  return frames;
+}
+
 } // namespace
+
+SpeechFrame ownTalk(double ms)
+{
+  SpeechFrame frame;
+  frame.expression = "happy";
+  if (ms < 0) return frame;
+  const std::vector<OwnFrame>& frames = ownFrames();
+  const OwnFrame& f = frames[static_cast<size_t>(ms * kFps / 1000.0) % frames.size()];
+  frame.viseme = kVisemes[f.viseme];
+  frame.jawOpen = f.jaw;
+  return frame;
+}
 
 bool VoiceMotion::take(const char* args, double nowMs)
 {
@@ -69,6 +133,7 @@ bool VoiceMotion::take(const char* args, double nowMs)
     run.push_back({static_cast<uint8_t>(v), static_cast<uint8_t>(j), static_cast<uint8_t>(p)});
   }
 
+  m_lastRunAt = nowMs;
   const double zeroAt = nowMs - static_cast<double>(clockMs);
   if (talk != m_talk || m_stopped)
   {
@@ -118,6 +183,13 @@ bool VoiceMotion::active(double nowMs) const
 {
   return !m_stopped && m_talk >= 0 &&
          nowMs - m_zeroAt < m_frames.size() * 1000.0 / kFps;
+}
+
+SpeechFrame VoiceMotion::mouth(double nowMs, double talkingSinceMs) const
+{
+  if (m_lastRunAt >= talkingSinceMs - kRunBeforeTalkMs) return at(nowMs);
+  const double own = nowMs - talkingSinceMs - kOwnTalkWaitMs;
+  return own < 0 ? SpeechFrame() : ownTalk(own);
 }
 
 void VoiceMotion::reset()

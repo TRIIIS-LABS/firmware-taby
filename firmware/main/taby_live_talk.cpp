@@ -291,6 +291,8 @@ void drawFrame(Live &live, const plutovg_matrix_t &placement, Box &previous)
   const plutovg_matrix_t placement = {p.a, p.b, p.c, p.d, p.e, p.f};
   Box previous = Box::full();
   bool fresh = true;
+  // When the face turned to talking, or < 0 while it is not talking.
+  double talkingSince = -1;
   int64_t last = esp_timer_get_time();
   for (;;)
   {
@@ -319,8 +321,13 @@ void drawFrame(Live &live, const plutovg_matrix_t &placement, Box &previous)
       if (live.after.load() != TABY_LIVE_AFTER_LIVE) face.startFromRest(now);
       previous = Box::full();
       fresh = true;
+      talkingSince = -1;
     }
     const taby::Face wanted = static_cast<taby::Face>(live.wantFace.load());
+    if (wanted != taby::Face::talking)
+      talkingSince = -1;
+    else if (talkingSince < 0)
+      talkingSince = now;
     face.show(wanted);
     face.setEyes(static_cast<taby::Eyes>(live.eyes.load()));
     const bool leaving = live.leaving.load();
@@ -332,7 +339,7 @@ void drawFrame(Live &live, const plutovg_matrix_t &placement, Box &previous)
     const taby::SpeechFrame *speech = nullptr;
     if (wanted == taby::Face::talking && xSemaphoreTake(live.voiceLock, pdMS_TO_TICKS(5)) == pdTRUE)
     {
-      frame = live.voice.at(now);
+      frame = live.voice.mouth(now, talkingSince);
       xSemaphoreGive(live.voiceLock);
       speech = &frame;
     }
