@@ -44,7 +44,12 @@ static const char *TAG = "board_1_64";
 #define DISP_DRAW_BUF_LINES 30
 #define BOARD_MODEL_LOG "Round 1.32 AMOLED"
 #else
+#if TABY_HARDWARE_AMOLED_1_64_V2
+/* V2 swapped LCD_CS and IMU_INT1; GPIO9 is left unconfigured so it never drives the IMU. */
+#define PIN_NUM_LCD_CS GPIO_NUM_46
+#else
 #define PIN_NUM_LCD_CS GPIO_NUM_9
+#endif
 #define PIN_NUM_LCD_PCLK GPIO_NUM_10
 #define PIN_NUM_LCD_DATA0 GPIO_NUM_11
 #define PIN_NUM_LCD_DATA1 GPIO_NUM_12
@@ -56,7 +61,11 @@ static const char *TAG = "board_1_64";
 #define DISP_H 456
 #define DISP_X_OFFSET 0x14
 #define DISP_DRAW_BUF_LINES (DISP_H / 4)
+#if TABY_HARDWARE_AMOLED_1_64_V2
+#define BOARD_MODEL_LOG "1.64 V2 AMOLED"
+#else
 #define BOARD_MODEL_LOG "1.64 AMOLED"
+#endif
 #endif
 
 #define BOARD_I2C_PORT I2C_NUM_0

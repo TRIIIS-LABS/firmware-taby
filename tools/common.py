@@ -7,6 +7,11 @@ ROOT = Path(__file__).resolve().parents[1]
 BOARDS = json.loads((ROOT / "firmware/boards.json").read_text())
 
 
+def asset_dir(board):
+    """A board that shares another board's artwork names that pack in boards.json."""
+    return ROOT / "assets" / BOARDS[board].get("assets", board)
+
+
 def sha256(path):
     with Path(path).open("rb") as stream:
         digest = hashlib.sha256()

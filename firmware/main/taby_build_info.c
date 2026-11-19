@@ -25,6 +25,8 @@ const char *taby_product_name(void) {
 const char *taby_hardware_target(void) {
 #if defined(TABY_HARDWARE_ROUND_1_32) && TABY_HARDWARE_ROUND_1_32
     return "round-1.32";
+#elif defined(TABY_HARDWARE_AMOLED_1_64_V2) && TABY_HARDWARE_AMOLED_1_64_V2
+    return "amoled-1.64-v2";
 #else
     return "amoled-1.64";
 #endif
