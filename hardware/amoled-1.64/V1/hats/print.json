@@ -1,0 +1,323 @@
+{
+  "schema": "taby-print-v1",
+  "id": "hats",
+  "version": "1.0.0",
+  "board": "amoled-1.64",
+  "revision": "V1",
+  "status": "prototype",
+  "availability": "available",
+  "compatibility_notes": "Clip-on hats for the Taby 1.64 in the desktop-case of this folder's board and revision (base.stl plus back.stl, 14.03 mm deep at the top edge). Not for round-1.32.",
+  "fit_test": {
+    "status": "partial",
+    "notes": "The clip's grip (GRIP 0.7 mm) was chosen from five printed test clips on 2026-11-20 on a Bambu Lab P2S, 0.4 mm nozzle, PLA. The nine hats are built on that clip and checked against the case meshes, but had not been printed when this was recorded."
+  },
+  "units": "mm",
+  "printer_profiles": {
+    "bambu-p2s-0.4": {
+      "printer": "Bambu Lab P2S",
+      "nozzle_mm": 0.4,
+      "material": "PLA",
+      "nominal_layer_height_mm": 0.08,
+      "infill": "15%",
+      "supports": "from the bed only, under the clip's roof; blocked around the springs",
+      "source": "3MF project settings"
+    }
+  },
+  "assembly_notes": "No assembly. Push the hat straight down over the Taby's top edge, springs at the back.",
+  "cad_notes": "Parametric source is included: taby_hat_clip.py (the clip) and simple_hats.py (the hats), Python with numpy and manifold3d. The 3MF projects are packed separately and are not rebuilt by these scripts.",
+  "hats": [
+    {
+      "id": "beanie",
+      "colours": [
+        "white",
+        "blue"
+      ],
+      "colour_swaps_per_plate": 2
+    },
+    {
+      "id": "party-cone",
+      "colours": [
+        "yellow",
+        "pink"
+      ],
+      "colour_swaps_per_plate": 7
+    },
+    {
+      "id": "top-hat",
+      "colours": [
+        "black",
+        "red"
+      ],
+      "colour_swaps_per_plate": 2
+    },
+    {
+      "id": "santa-simple",
+      "colours": [
+        "white",
+        "red"
+      ],
+      "colour_swaps_per_plate": 2
+    },
+    {
+      "id": "traffic-cone",
+      "colours": [
+        "orange",
+        "white"
+      ],
+      "colour_swaps_per_plate": 4
+    },
+    {
+      "id": "crown",
+      "colours": [
+        "gold"
+      ],
+      "colour_swaps_per_plate": 0
+    },
+    {
+      "id": "cat-ears",
+      "colours": [
+        "ginger"
+      ],
+      "colour_swaps_per_plate": 0
+    },
+    {
+      "id": "bucket-hat",
+      "colours": [
+        "green"
+      ],
+      "colour_swaps_per_plate": 0
+    },
+    {
+      "id": "spiky-hair",
+      "colours": [
+        "teal"
+      ],
+      "colour_swaps_per_plate": 0
+    }
+  ],
+  "files": [
+    {
+      "file": "clip/taby-hat-clip-base.stl",
+      "role": "bare clip, for trying the grip",
+      "size": 190984,
+      "sha256": "06a8396f2e03ce69255b5fd382d8ac9e095cfb899956c9ad0a5cdf0e008e138e"
+    },
+    {
+      "file": "beanie/beanie.stl",
+      "hat": "beanie",
+      "role": "one piece",
+      "size": 953984,
+      "sha256": "ec637a9ed6f3f5ef6de969a264c3c1f083c448d03e47b720cc109138c5c9fc33"
+    },
+    {
+      "file": "beanie/beanie-white.stl",
+      "hat": "beanie",
+      "role": "white part",
+      "size": 814784,
+      "sha256": "64484294290a116707f5e948102830f49b767d24247acfd9dd15f3be9c705df5"
+    },
+    {
+      "file": "beanie/beanie-blue.stl",
+      "hat": "beanie",
+      "role": "blue part",
+      "size": 204484,
+      "sha256": "fe4c4cb42791816d51c9c12de42a72e8053a433e177aa10d469019acec48ee80"
+    },
+    {
+      "file": "beanie/beanie.3mf",
+      "hat": "beanie",
+      "role": "Bambu Studio project",
+      "printer_profile": "bambu-p2s-0.4",
+      "size": 235380,
+      "sha256": "7debf6db51631504cf8eeeddca40ef3ee23d53d115eeafef54eb91691868c14e"
+    },
+    {
+      "file": "party-cone/party-cone.stl",
+      "hat": "party-cone",
+      "role": "one piece",
+      "size": 584884,
+      "sha256": "57fc0f39d363435999f2279629f0cec9efe36b7a8f2810f2e3b042c5aa1e2b5c"
+    },
+    {
+      "file": "party-cone/party-cone-yellow.stl",
+      "hat": "party-cone",
+      "role": "yellow part",
+      "size": 520384,
+      "sha256": "917ee9fa55b52b12170d8182330815467f8a986e57a81464af4979887d808026"
+    },
+    {
+      "file": "party-cone/party-cone-pink.stl",
+      "hat": "party-cone",
+      "role": "pink part",
+      "size": 404784,
+      "sha256": "626dd154fc12fb0a38461beb786157774fb509792fbb76ed48b2739b7dde26ec"
+    },
+    {
+      "file": "party-cone/party-cone.3mf",
+      "hat": "party-cone",
+      "role": "Bambu Studio project",
+      "printer_profile": "bambu-p2s-0.4",
+      "size": 222965,
+      "sha256": "298cc4e7d45d55603bd1ba6d30fbd816894f27be672c97f6aa585f8a0d4d9d53"
+    },
+    {
+      "file": "top-hat/top-hat.stl",
+      "hat": "top-hat",
+      "role": "one piece",
+      "size": 560584,
+      "sha256": "4f14ae508eda06868b805e3efccad10840cea8fea41a3976c25a9bd9cc03b801"
+    },
+    {
+      "file": "top-hat/top-hat-black.stl",
+      "hat": "top-hat",
+      "role": "black part",
+      "size": 611584,
+      "sha256": "b23389ac979d93d3503b94807462d874639da47ab0baed0646fcf2472f790e12"
+    },
+    {
+      "file": "top-hat/top-hat-red.stl",
+      "hat": "top-hat",
+      "role": "red part",
+      "size": 51084,
+      "sha256": "e120827dad83188a255ab89fb0c07ced634c94461d028b873770a3b8888f521d"
+    },
+    {
+      "file": "top-hat/top-hat.3mf",
+      "hat": "top-hat",
+      "role": "Bambu Studio project",
+      "printer_profile": "bambu-p2s-0.4",
+      "size": 151150,
+      "sha256": "cbf53877425a468724a4ce566a11cd656049c9b37fffcf529cd39be9bdd12736"
+    },
+    {
+      "file": "santa-simple/santa-simple.stl",
+      "hat": "santa-simple",
+      "role": "one piece",
+      "size": 1110484,
+      "sha256": "7bac4522befdbe48fbaf5554ee7931537824cea88d24bb99e4c82640f783c974"
+    },
+    {
+      "file": "santa-simple/santa-simple-white.stl",
+      "hat": "santa-simple",
+      "role": "white part",
+      "size": 566084,
+      "sha256": "af5950fbb10cc10dbe5df7f1d383708c5a5ffb0b2cd2ea94b2ffe6467cd19f5e"
+    },
+    {
+      "file": "santa-simple/santa-simple-red.stl",
+      "hat": "santa-simple",
+      "role": "red part",
+      "size": 594484,
+      "sha256": "54160b6f08d833609ecaff42779839e8ab309e7b435e703056fa47b92d9a43e9"
+    },
+    {
+      "file": "santa-simple/santa-simple.3mf",
+      "hat": "santa-simple",
+      "role": "Bambu Studio project",
+      "printer_profile": "bambu-p2s-0.4",
+      "size": 256146,
+      "sha256": "1f18e2b630b6bce7ea4c838f28f82ba15fa21f991584573daaf5fe0aa11e19c5"
+    },
+    {
+      "file": "traffic-cone/traffic-cone.stl",
+      "hat": "traffic-cone",
+      "role": "one piece",
+      "size": 126084,
+      "sha256": "197d3970b27586dabb777a09cba200b5492721bada4a013631940af0c3d0bfbd"
+    },
+    {
+      "file": "traffic-cone/traffic-cone-orange.stl",
+      "hat": "traffic-cone",
+      "role": "orange part",
+      "size": 176884,
+      "sha256": "ff4f4632d8c6be307e492eec635d3bd95ee225c00ba5bf4c5153acf5f6012543"
+    },
+    {
+      "file": "traffic-cone/traffic-cone-white.stl",
+      "hat": "traffic-cone",
+      "role": "white part",
+      "size": 50884,
+      "sha256": "36d705fdab7dbf4ae653d3d8b3033a101ca3a85e60d5d32365eeaf0846246427"
+    },
+    {
+      "file": "traffic-cone/traffic-cone.3mf",
+      "hat": "traffic-cone",
+      "role": "Bambu Studio project",
+      "printer_profile": "bambu-p2s-0.4",
+      "size": 58501,
+      "sha256": "81c72a0ec89ebea3ac1d56a6665518585b707e5d06c2b2395bfbbada928cadd0"
+    },
+    {
+      "file": "crown/crown.stl",
+      "hat": "crown",
+      "role": "one piece",
+      "size": 432584,
+      "sha256": "121f28a37e31a84c5b6ecfdefa2a77747a09312631b668338c1412fe86e28240"
+    },
+    {
+      "file": "crown/crown.3mf",
+      "hat": "crown",
+      "role": "Bambu Studio project",
+      "printer_profile": "bambu-p2s-0.4",
+      "size": 101592,
+      "sha256": "20329b4c84966ccc71f8cb6db5809b650df24e73eb8f576b3190db940178d300"
+    },
+    {
+      "file": "cat-ears/cat-ears.stl",
+      "hat": "cat-ears",
+      "role": "one piece",
+      "size": 395984,
+      "sha256": "c743b0cd053bdfd20e3cfdefcae9cb66b77b8ea0d57cb6c2dede363399d4ee43"
+    },
+    {
+      "file": "cat-ears/cat-ears.3mf",
+      "hat": "cat-ears",
+      "role": "Bambu Studio project",
+      "printer_profile": "bambu-p2s-0.4",
+      "size": 95936,
+      "sha256": "a31156a7f94fa13ee7426c3e6e5431b53cb0a3bfb98a794121a3eb08cfb86a76"
+    },
+    {
+      "file": "bucket-hat/bucket-hat.stl",
+      "hat": "bucket-hat",
+      "role": "one piece",
+      "size": 111784,
+      "sha256": "840836d0ab96f9a7cc3228d222fe474e41ec75f56a662bcc52cbee4ea496b24e"
+    },
+    {
+      "file": "bucket-hat/bucket-hat.3mf",
+      "hat": "bucket-hat",
+      "role": "Bambu Studio project",
+      "printer_profile": "bambu-p2s-0.4",
+      "size": 33969,
+      "sha256": "bb69fa69c307346dde1f8ac4b9058fdab87c140fc15d845b81cd333ad6aebb83"
+    },
+    {
+      "file": "spiky-hair/spiky-hair.stl",
+      "hat": "spiky-hair",
+      "role": "one piece",
+      "size": 301884,
+      "sha256": "562cc5e4722d33fb1f54b68ceb179debd87ceaae0170e5ab28de2cd732a7219d"
+    },
+    {
+      "file": "spiky-hair/spiky-hair.3mf",
+      "hat": "spiky-hair",
+      "role": "Bambu Studio project",
+      "printer_profile": "bambu-p2s-0.4",
+      "size": 73563,
+      "sha256": "e5bf3bd71e96d2203bde90a20494c87d4dccfd435f3e4618f977e48423a02195"
+    },
+    {
+      "file": "preview.png",
+      "role": "render of the nine hats on the case model",
+      "size": 305004,
+      "sha256": "cd36ce8f64160e98cc881fe0ba822c481e2d963ad1efb70e226981b70f2f5b1b"
+    },
+    {
+      "file": "hats.jpg",
+      "role": "render of nine Tabys wearing the hats",
+      "size": 201286,
+      "sha256": "c30f1c51d9962739d62ecc56e7c08d9b5f7b6564820db74bf59c54d501dc014a"
+    }
+  ]
+}

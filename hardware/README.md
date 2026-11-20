@@ -36,6 +36,14 @@ names, checksums, and printer profiles. Native parametric CAD/STEP and assembly
 instructions were not supplied. A physical fit-test record, including exact PCB
 revision and any additional hardware needed, is still to be added.
 
+## Hats
+
+Nine small clip-on hats for the Taby 1.64, and the scripts to make your own, are in
+[amoled-1.64/V1/hats](amoled-1.64/V1/hats). They are prototypes: the clip's grip was chosen from printed
+test clips, and the hats themselves were not yet printed when added.
+
+![Render of nine Tabys, each wearing a different hat](amoled-1.64/V1/hats/hats.jpg)
+
 ## Magnet and non-slip covering
 
 For the Taby 1.64 desktop case, get an **extra-strong neodymium block magnet,

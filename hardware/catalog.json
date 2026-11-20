@@ -16,6 +16,13 @@
           "version": "1.0.0",
           "manifest": "amoled-1.64/V1/desktop-case/print.json",
           "availability": "available"
+        },
+        {
+          "id": "hats",
+          "name": "Taby 1.64 clip-on hats",
+          "version": "1.0.0",
+          "manifest": "amoled-1.64/V1/hats/print.json",
+          "availability": "available"
         }
       ],
       "status": "prototype"

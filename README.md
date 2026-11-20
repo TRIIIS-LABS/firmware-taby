@@ -142,6 +142,16 @@ Before printing, check the [printer settings and fit notes](hardware/README.md).
 The included G-code is for a **Bambu P1S, 0.4 mm nozzle**; the 3MF uses an
 **A1 mini** profile. Using a different printer? Slice the STL or 3MF for yours.
 
+### 🎩 Give it a hat
+
+<p align="center"><a href="hardware/amoled-1.64/V1/hats"><img src="hardware/amoled-1.64/V1/hats/hats.jpg" width="760" alt="Render of nine Tabys on a wall, each wearing a different printed hat"></a></p>
+
+Nine small hats clip onto the top of a Taby 1.64: beanie, party cone, top hat, Santa,
+traffic cone, crown, cat ears, bucket hat, and spiky hair. Each prints in one or two
+colours, with no supports on the outside. [Pick a hat](hardware/amoled-1.64/V1/hats), or use
+the scripts there to make your own. They are new: the clip's grip is tested on a real
+Taby, the hats themselves have not been printed yet.
+
 ---
 
 ## 🌱 Contribute
