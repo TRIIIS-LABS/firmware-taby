@@ -51,7 +51,7 @@ def main():
         if not args.confirmed_board:
             parser.error("Run device.py identify; establish the working target or identify it with the user, then pass --confirmed-board")
         # esptool's ROM read resets the device but does not write flash. A generic
-        # ESP32-S3 chip ID cannot distinguish a round board or the 1.64 V1/V2.
+        # ESP32-S3 chip ID cannot distinguish a round board or the 1.64 V1/V1.1.
         probe = subprocess.run([sys.executable, "-m", "esptool", "--chip", "esp32s3",
                                 "--port", args.port, "flash_id"], capture_output=True, text=True)
         if probe.returncode:

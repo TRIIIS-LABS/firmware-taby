@@ -2,7 +2,7 @@
 
 | Taby | Print files | Compatibility |
 | --- | --- | --- |
-| **1.64-inch rectangle** | [Download everything](https://github.com/TRIIIS-LABS/firmware-taby/releases/download/prints-1.64-1.0.0/taby-1.64-print-pack-1.0.0.zip) · [Browse files](amoled-1.64/V1/desktop-case) | Supplied for Taby 1.64; filed under the current V1 target. V2 fit has not been established. |
+| **1.64-inch rectangle** | [Download everything](https://github.com/TRIIIS-LABS/firmware-taby/releases/download/prints-1.64-1.0.0/taby-1.64-print-pack-1.0.0.zip) · [Browse files](amoled-1.64/V1/desktop-case) | Supplied for Taby 1.64; originally filed under V1 (folder name kept). V1.1 differs only in pin wiring; exact fit per PCB revision has not been independently recorded. |
 | **Round 1.32-inch** | Coming soon | Requires its own case. |
 
 ![The three supplied case parts](amoled-1.64/V1/desktop-case/preview.png)

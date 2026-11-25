@@ -12,6 +12,9 @@ from common import BOARDS, ROOT, source_digest, build_fingerprint
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("board", choices=BOARDS)
+    parser.add_argument("--pcb", choices=("V1.1", "V1"), default="V1.1",
+                        help="amoled-1.64 only: PCB revision (V1.1 = current production, "
+                             "V1 = original board with LCD_CS on GPIO9)")
     args = parser.parse_args()
     idf = Path(os.environ.get("IDF_PATH", "")) / "tools/idf.py"
     if not idf.is_file():
@@ -24,7 +27,8 @@ def main():
     subprocess.run([sys.executable, str(idf), "-B", f"build-{args.board}",
                     "-D", f"SDKCONFIG=sdkconfig.{args.board}",
                     "-D", f"SDKCONFIG_DEFAULTS={BOARDS[args.board]['sdkconfig']}",
-                    "-D", f"TABY_HARDWARE_TARGET={args.board}", "build"],
+                    "-D", f"TABY_HARDWARE_TARGET={args.board}",
+                    "-D", f"TABY_AMOLED_1_64_REVISION={args.pcb}", "build"],
                    cwd=ROOT / "firmware", check=True)
     if source_digest() != before:
         raise SystemExit("Source/assets changed during the build. Rebuild before packaging.")

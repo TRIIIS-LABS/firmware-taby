@@ -46,7 +46,7 @@ class DeviceTests(unittest.TestCase):
                                   "display_width": 280, "display_height": 456,
                                   "setup_ap_password": "private"})
         self.assertEqual(result["board"], "amoled-1.64")
-        self.assertEqual(result["revision"], "V1")
+        self.assertEqual(result["revision"], "V1.1")
         self.assertFalse(result["physical_revision_verified"])
         self.assertNotIn("setup_ap_password", result["device"])
 

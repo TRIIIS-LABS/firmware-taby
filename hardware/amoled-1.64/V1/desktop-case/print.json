@@ -3,10 +3,10 @@
   "id": "desktop-case",
   "version": "1.0.0",
   "board": "amoled-1.64",
-  "revision": "V1",
+  "revision": "V1.1",
   "status": "prototype",
   "availability": "available",
-  "compatibility_notes": "Supplied by the maintainer for the 1.64-inch Taby. Filed under the current V1 target; exact PCB revision fit has not been independently recorded. V2 fit is not established. Not for round-1.32.",
+  "compatibility_notes": "Supplied by the maintainer for the 1.64-inch Taby. Originally filed under V1 (folder name kept). Waveshare's V1 to V1.1 change is pin wiring, but the exact fit on each PCB revision has not been independently recorded. Not for round-1.32.",
   "fit_test": {
     "status": "not_recorded"
   },

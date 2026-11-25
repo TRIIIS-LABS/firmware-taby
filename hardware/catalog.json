@@ -3,7 +3,7 @@
   "targets": [
     {
       "board": "amoled-1.64",
-      "revision": "V1",
+      "revision": "V1.1",
       "display": {
         "shape": "rectangle",
         "width_px": 280,
