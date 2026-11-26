@@ -164,6 +164,19 @@ to perform unrelated actions in a host application.
 helper prints only an allowlisted version/hardware summary; do not publish raw
 INFO/DIAG output, Wi-Fi credentials, or personal device logs in issues.
 
+### Touch that is silent at start
+
+The 1.64 board has no reset line to its touch chip, so a chip reset (an
+update, a USB reconnect) does not restart it, and afterwards the chip can stay
+silent for seconds or minutes. Since 1.4.1 the board starts without touch when
+the chip has not answered after eight tries 25 ms apart: the face, USB and
+Bluetooth work, and taps and holds do nothing yet. A low-priority task tries
+the chip again once a second and takes touch up when it answers, without a
+restart. Before 1.4.1 a silent chip ended the whole start, and the board
+restarted about every three seconds until it answered. The logic is in
+`main/taby_touch_start.c`, tested by `tests/test_touch_start.py`. The round
+board resets its touch chip through its own pin and still needs it to start.
+
 ### Bluetooth and local Wi-Fi
 
 Select Bluetooth on the device to use its BLE GATT service:
