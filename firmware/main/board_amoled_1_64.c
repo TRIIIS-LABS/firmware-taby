@@ -21,6 +21,7 @@
 #include "freertos/semphr.h"
 #include "freertos/task.h"
 #include "nvs.h"
+#include "taby_touch_start.h"
 
 static const char *TAG = "board_1_64";
 
@@ -69,8 +70,6 @@ static const char *TAG = "board_1_64";
 #else
 #define TOUCH_ADDR 0x38
 #endif
-#define TOUCH_INIT_RETRY_COUNT 8
-#define TOUCH_INIT_RETRY_DELAY_MS 25
 #define TOUCH_TAP_MIN_US (60 * 1000LL)
 #define TOUCH_TAP_MAX_US (700 * 1000LL)
 #define TOUCH_TAP_REARM_US (180 * 1000LL)
@@ -137,6 +136,10 @@ static lv_color_t *s_rotation_buf = NULL;
 static esp_timer_handle_t s_tick_timer = NULL;
 static board_amoled_1_64_touch_sample_t s_last_touch = {0};
 static bool s_touch_press_active = false;
+#if !TABY_HARDWARE_ROUND_1_32
+/* Read only once taken up: a chip silent at start is tried again later. */
+static taby_touch_t s_touch;
+#endif
 static int64_t s_touch_press_start_us = 0;
 static int64_t s_touch_last_tap_us = 0;
 static uint32_t s_touch_signal = 0;
@@ -804,6 +807,20 @@ static void board_orientation_monitor_task(void *arg) {
 }
 #endif
 
+#if !TABY_HARDWARE_ROUND_1_32
+/* One try: the chip takes the command that sets it working (mode 0). */
+static bool board_touch_answers(void *context) {
+    (void)context;
+    const uint8_t mode = 0x00;
+    return board_i2c_write_reg(TOUCH_ADDR, 0x00, &mode, 1) == ESP_OK;
+}
+
+static void board_touch_pause(uint32_t ms, void *context) {
+    (void)context;
+    vTaskDelay(pdMS_TO_TICKS(ms));
+}
+#endif
+
 static esp_err_t board_touch_init(void) {
 #if TABY_HARDWARE_ROUND_1_32
     gpio_config_t reset_config = {
@@ -824,26 +841,31 @@ static esp_err_t board_touch_init(void) {
     uint8_t probe[2] = {0};
     return board_i2c_read_reg(TOUCH_ADDR, 0x02, probe, sizeof(probe));
 #else
-    uint8_t mode = 0x00;
-    esp_err_t last_err = ESP_FAIL;
-
-    for (int attempt = 1; attempt <= TOUCH_INIT_RETRY_COUNT; ++attempt) {
-        last_err = board_i2c_write_reg(TOUCH_ADDR, 0x00, &mode, 1);
-        if (last_err == ESP_OK) {
-            if (attempt > 1) {
-                ESP_LOGW(TAG, "Touch init succeeded on retry %d", attempt);
-            }
-            return ESP_OK;
-        }
-
-        ESP_LOGW(TAG, "Touch init attempt %d/%d failed: %s",
-                 attempt, TOUCH_INIT_RETRY_COUNT, esp_err_to_name(last_err));
-        vTaskDelay(pdMS_TO_TICKS(TOUCH_INIT_RETRY_DELAY_MS));
+    // A silent chip no longer ends the start: the board starts without touch
+    // and board_touch_later_task takes it up once it answers.
+    if (!taby_touch_first_tries(&s_touch, board_touch_answers, board_touch_pause, NULL)) {
+        ESP_LOGW(TAG, "Touch silent at start after %u tries; starting without it, trying again every %u ms",
+                 (unsigned)s_touch.first_tries, (unsigned)TABY_TOUCH_LATER_PAUSE_MS);
+    } else if (s_touch.first_tries > 1) {
+        ESP_LOGW(TAG, "Touch init succeeded on retry %u", (unsigned)s_touch.first_tries);
     }
-
-    return last_err;
+    return ESP_OK;
 #endif
 }
+
+#if !TABY_HARDWARE_ROUND_1_32
+/* Low priority and one I2C write a second, so the face never waits on it. */
+static void board_touch_later_task(void *arg) {
+    (void)arg;
+    for (;;) {
+        vTaskDelay(pdMS_TO_TICKS(TABY_TOUCH_LATER_PAUSE_MS));
+        if (taby_touch_try_again(&s_touch, board_touch_answers, NULL)) {
+            ESP_LOGW(TAG, "Touch answered on later try %u; taps work now", (unsigned)s_touch.later_tries);
+            vTaskDelete(NULL);
+        }
+    }
+}
+#endif
 
 static bool board_touch_read_raw(uint16_t *raw_x, uint16_t *raw_y) {
 #if TABY_HARDWARE_ROUND_1_32
@@ -853,6 +875,9 @@ static bool board_touch_read_raw(uint16_t *raw_x, uint16_t *raw_y) {
     }
 #else
     uint8_t points = 0;
+    if (!taby_touch_taken_up(&s_touch)) {
+        return false;
+    }
     if (board_i2c_read_reg(TOUCH_ADDR, 0x02, &points, 1) != ESP_OK || points == 0) {
         return false;
     }
@@ -1607,6 +1632,11 @@ esp_err_t board_amoled_1_64_init(void) {
     }
 
 #if !TABY_HARDWARE_ROUND_1_32
+    if (!taby_touch_taken_up(&s_touch)
+        && xTaskCreate(board_touch_later_task, "taby_touch_later", 3 * 1024, NULL, 1, NULL) != pdPASS) {
+        ESP_LOGW(TAG, "touch retry task unavailable; taps stay off until the next start");
+    }
+
     bool imu_available;
     taskENTER_CRITICAL(&s_orientation_state_lock);
     imu_available = s_orientation_imu.available;
