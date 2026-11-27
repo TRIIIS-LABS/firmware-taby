@@ -275,6 +275,10 @@ static bool render_current_state_locked(void) {
     return rendered;
 }
 
+#if !TABY_HARDWARE_ROUND_1_32
+static const char *season_rest_clip(void);
+#endif
+
 void taby_runtime_start(void) {
     if (s_runtime_started) {
         return;
