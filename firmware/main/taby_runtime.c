@@ -710,7 +710,12 @@ static taby_season_t season_copy(void) {
 }
 
 #if !TABY_HARDWARE_ROUND_1_32
+/* The live face wears the season itself (taby_dress.h); the season's clip is
+   the rest only while the live face is not there. */
 static const char *season_rest_clip(void) {
+    if (taby_live_talk_ready()) {
+        return NULL;
+    }
     taby_season_t season = season_copy();
     return taby_season_rest_clip(taby_season_look_at(&season, esp_timer_get_time()));
 }

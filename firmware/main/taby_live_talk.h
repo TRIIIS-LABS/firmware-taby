@@ -26,6 +26,9 @@ bool taby_live_talk_offered(void);
 
 /* The character is loaded and takes VOICE_MOTION. */
 bool taby_live_talk_ready(void);
+/* The live face over the last full five seconds: frames a second, and the
+   average and longest time a frame took to draw and show, in ms (DIAG). */
+void taby_live_talk_frame_stats(float *fps, float *draw_ms, float *worst_ms);
 
 /* The face draws this animation live (idle_01_loop, listening_loop and
    talking_default_loop, once the character is loaded) rather than playing

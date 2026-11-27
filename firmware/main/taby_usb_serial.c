@@ -530,6 +530,14 @@ static void write_diag_json(void) {
 
     add_string_or_empty(root, "schema", "taby_usb_diag_v1");
     add_common_info_fields(root, false);
+    {
+        /* How smoothly the live face draws: the last full five seconds. */
+        float fps = 0, draw_ms = 0, worst_ms = 0;
+        taby_live_talk_frame_stats(&fps, &draw_ms, &worst_ms);
+        cJSON_AddNumberToObject(root, "live_fps", fps);
+        cJSON_AddNumberToObject(root, "live_draw_ms", draw_ms);
+        cJSON_AddNumberToObject(root, "live_draw_worst_ms", worst_ms);
+    }
     add_usb_capabilities(root);
     add_usb_recent_events(root);
     usb_write_prefixed_json("TABY:DIAG ", root, "TABY:ERR diag_encode_failed");

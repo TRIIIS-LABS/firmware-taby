@@ -170,18 +170,29 @@ On the 1.64 board the app can dress Taby's resting face for Christmas:
 `SEASON christmas hat <seconds>` (Taby in a Santa hat, small coloured lights
 down both sides of the screen) or `SEASON christmas lights <seconds>` (the
 lights alone, for a Taby that wears a printed hat), for 1 to 43,200 seconds.
-While it lasts, the rest (`idle_01_loop` and the idle state, which the live
-face draws otherwise) plays the clip `christmas_idle_hat_loop` or
-`christmas_idle_lights_loop` from the pack: the resting face with a blink
-every 4.2 s, the hat dipping with it. Every other face plays as before.
 `SEASON off` ends it; `SEASON?` answers
 `TABY:SEASON {"season":"christmas","look":"hat","seconds_left":N,"max_seconds":43200}`.
+
+While it lasts, the live resting face wears the dress: the app's hat and
+lights as pictures (`main/christmas_dress.bin`, made by
+`tools/christmas_dress.py`), put on the panel before the face each frame, so
+the face moves exactly as it does without them, the hat goes where the face
+goes, and the face is drawn over the dress, so the eyes are never covered.
+The Eyes setting still decides how the face moves (still stays still), and
+a dark screen draws nothing. Every other face takes the dress off at once.
+While the live face is not there (it loads for a few seconds after a start),
+the rest plays the clip `christmas_idle_hat_loop` or
+`christmas_idle_lights_loop` from the pack instead.
+
 The device has no clock and keeps nothing of it: when the seconds run out,
 or at any restart, the rest is the normal one again, so the app sends it
 again before it ends while it is the season. USB only, like `EYE_MOTION`.
-`INFO` lists `season` in `capabilities` and reports the look as `season`.
-The round board has no Christmas clips and no `SEASON`. The logic is in
-`main/taby_season.c`, tested by `tests/test_season.py`.
+`INFO` lists `season` in `capabilities` and reports the look as `season`;
+`DIAG` reports how smoothly the live face draws (`live_fps`, `live_draw_ms`,
+`live_draw_worst_ms`, over the last five seconds). The round board has no
+Christmas clips and no `SEASON`. The logic is in `main/taby_season.c` and
+`main/taby_dress.c`, tested by `tests/test_season.py` and
+`tests/test_dress.py`.
 
 ### Touch that is silent at start
 

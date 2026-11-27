@@ -10,6 +10,7 @@ idf_component_register(
         "taby_display.c"
         "taby_eye_motion.c"
         "taby_season.c"
+        "taby_dress.c"
         "taby_touch_start.c"
         "generated/taby_reusable_icons.c"
         "taby_http_server.c"
@@ -32,7 +33,7 @@ idf_component_register(
     INCLUDE_DIRS "."
     REQUIRES bt driver esp_adc esp_event esp_http_server esp_lcd esp_netif esp_timer esp_wifi json lvgl mdns mqtt nvs_flash esp_lcd_sh8601 spiffs taby_character
     # The desktop notch's Rive character, which talks live (taby_live_talk).
-    EMBED_FILES "taby-talk.riv"
+    EMBED_FILES "taby-talk.riv" "christmas_dress.bin"
 )
 target_compile_options(${COMPONENT_LIB} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-std=gnu++17>)
 
