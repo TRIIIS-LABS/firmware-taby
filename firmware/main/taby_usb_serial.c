@@ -338,6 +338,9 @@ static void add_common_info_fields(cJSON *root, bool include_setup_ap_password) 
     cJSON_AddNumberToObject(root, "brightness_raw", board_amoled_1_64_brightness_raw());
     add_display_orientation_fields(root, true);
     add_string_or_empty(root, "eye_motion", taby_eye_motion_name(taby_runtime_eye_motion()));
+#if !TABY_HARDWARE_ROUND_1_32
+    add_string_or_empty(root, "season", taby_season_look_name(taby_runtime_season(NULL)));
+#endif
     cJSON_AddNumberToObject(root, "free_heap_bytes", esp_get_free_heap_size());
     cJSON_AddNumberToObject(root, "minimum_free_heap_bytes", esp_get_minimum_free_heap_size());
 }
@@ -507,6 +510,10 @@ static void add_usb_capabilities(cJSON *root) {
     cJSON_AddItemToArray(capabilities, cJSON_CreateString("clear"));
     /* EYE_MOTION normal|calm|still, kept across restarts (1.2.0). */
     cJSON_AddItemToArray(capabilities, cJSON_CreateString("eye_motion"));
+#if !TABY_HARDWARE_ROUND_1_32
+    /* SEASON christmas hat|lights <seconds> / off: the Christmas rest, RAM only (1.4.1). */
+    cJSON_AddItemToArray(capabilities, cJSON_CreateString("season"));
+#endif
     /* VOICE_MOTION: Taby talks live, wearing the app's mouth motion. */
     if (taby_live_talk_offered()) {
         cJSON_AddItemToArray(capabilities, cJSON_CreateString("voice_motion"));
@@ -665,6 +672,50 @@ static void write_eye_motion_json(void) {
     usb_write_prefixed_json("TABY:EYE_MOTION ", root, "TABY:ERR eye_motion_encode_failed");
     cJSON_Delete(root);
 }
+
+#if !TABY_HARDWARE_ROUND_1_32
+static void write_season_json(void) {
+    cJSON *root = cJSON_CreateObject();
+    if (!root) {
+        usb_write_error_reason("season_encode_failed");
+        return;
+    }
+    uint32_t seconds_left = 0;
+    taby_season_look_t look = taby_runtime_season(&seconds_left);
+    add_string_or_empty(root, "season", look == TABY_SEASON_OFF ? "off" : "christmas");
+    add_string_or_empty(root, "look", taby_season_look_name(look));
+    cJSON_AddNumberToObject(root, "seconds_left", seconds_left);
+    cJSON_AddNumberToObject(root, "max_seconds", TABY_SEASON_MAX_SECONDS);
+    usb_write_prefixed_json("TABY:SEASON ", root, "TABY:ERR season_encode_failed");
+    cJSON_Delete(root);
+}
+
+/* SEASON? reads it; SEASON christmas hat|lights <seconds> dresses the rest
+   for that long; SEASON off ends it. Kept in RAM only (taby_season.h). */
+static bool handle_season_command(const char *command_text) {
+    taby_season_look_t look = TABY_SEASON_OFF;
+    uint32_t seconds = 0;
+    switch (taby_season_parse_command(command_text, &look, &seconds)) {
+        case TABY_SEASON_COMMAND_QUERY:
+            write_season_json();
+            return true;
+        case TABY_SEASON_COMMAND_SET:
+            taby_runtime_set_season(look, seconds);
+            write_season_json();
+            return true;
+        case TABY_SEASON_COMMAND_OFF:
+            taby_runtime_set_season(TABY_SEASON_OFF, 0);
+            write_season_json();
+            return true;
+        case TABY_SEASON_COMMAND_INVALID:
+            usb_write_error_reason("season_invalid_value");
+            return true;
+        case TABY_SEASON_COMMAND_NONE:
+        default:
+            return false;
+    }
+}
+#endif
 
 /* EYE_MOTION? reads the choice; EYE_MOTION <normal|calm|still> saves it and
    answers with what the device now holds. */
@@ -994,6 +1045,12 @@ static void handle_usb_line(char *line) {
     if (handle_eye_motion_command(command_text)) {
         return;
     }
+
+#if !TABY_HARDWARE_ROUND_1_32
+    if (handle_season_command(command_text)) {
+        return;
+    }
+#endif
 
     const char *reusable_ui_command = reusable_ui_command_from_command(command_text);
     if (reusable_ui_command) {

@@ -58,6 +58,9 @@ static const taby_animation_asset_t k_animation_assets[] = {
     {"calm_work_medium_f000", "/assets/animations/calm_work_medium_f000.gif", NULL, 0, 1000U, true},
     {"calm_work_high_f000", "/assets/animations/calm_work_high_f000.gif", NULL, 0, 1000U, true},
     {"idle_02_loop", "/assets/animations/idle_02_loop.gif", NULL, 0, 7875U, true},
+    /* The Christmas rest (taby_season.h): the 1.64 pack only. */
+    {"christmas_idle_hat_loop", "/assets/animations/christmas_idle_hat_loop.gif", NULL, 0, 4200U, true},
+    {"christmas_idle_lights_loop", "/assets/animations/christmas_idle_lights_loop.gif", NULL, 0, 4200U, true},
     {"idle_variation_loop", "/assets/animations/idle_variation_loop.gif", NULL, 0, 1667U, true},
     {"listening_in", "/assets/animations/listening_in.gif", NULL, 0, 2000U, false},
     {"listening_loop", "/assets/animations/listening_loop.gif", NULL, 0, 2667U, true},
@@ -211,6 +214,18 @@ static const char *canonical_animation_id(const char *animation_id) {
     return animation_id;
 }
 
+/* What the rest plays instead of idle_01_loop while a season is on; NULL means the rest itself. */
+static const char *(*s_rest_override)(void) = NULL;
+
+void taby_animation_assets_set_rest_override(const char *(*rest)(void)) {
+    s_rest_override = rest;
+}
+
+bool taby_animation_id_rests(const char *animation_id) {
+    const char *canonical_id = canonical_animation_id(animation_id);
+    return canonical_id && strcmp(canonical_id, "idle_01_loop") == 0;
+}
+
 bool taby_animation_asset_for_id(const char *animation_id, taby_animation_asset_t *out_asset) {
     if (!animation_id || !out_asset) {
         return false;
@@ -219,6 +234,12 @@ bool taby_animation_asset_for_id(const char *animation_id, taby_animation_asset_
     reset_animation_asset(out_asset);
 
     const char *canonical_id = canonical_animation_id(animation_id);
+    if (s_rest_override && strcmp(canonical_id, "idle_01_loop") == 0) {
+        const char *season_rest = s_rest_override();
+        if (season_rest && season_rest[0] != '\0') {
+            canonical_id = season_rest;
+        }
+    }
     for (size_t i = 0; i < sizeof(k_animation_assets) / sizeof(k_animation_assets[0]); ++i) {
         if (strcmp(canonical_id, k_animation_assets[i].animation_id) == 0) {
             *out_asset = k_animation_assets[i];

@@ -164,6 +164,25 @@ to perform unrelated actions in a host application.
 helper prints only an allowlisted version/hardware summary; do not publish raw
 INFO/DIAG output, Wi-Fi credentials, or personal device logs in issues.
 
+### The Christmas rest
+
+On the 1.64 board the app can dress Taby's resting face for Christmas:
+`SEASON christmas hat <seconds>` (Taby in a Santa hat, small coloured lights
+down both sides of the screen) or `SEASON christmas lights <seconds>` (the
+lights alone, for a Taby that wears a printed hat), for 1 to 43,200 seconds.
+While it lasts, the rest (`idle_01_loop` and the idle state, which the live
+face draws otherwise) plays the clip `christmas_idle_hat_loop` or
+`christmas_idle_lights_loop` from the pack: the resting face with a blink
+every 4.2 s, the hat dipping with it. Every other face plays as before.
+`SEASON off` ends it; `SEASON?` answers
+`TABY:SEASON {"season":"christmas","look":"hat","seconds_left":N,"max_seconds":43200}`.
+The device has no clock and keeps nothing of it: when the seconds run out,
+or at any restart, the rest is the normal one again, so the app sends it
+again before it ends while it is the season. USB only, like `EYE_MOTION`.
+`INFO` lists `season` in `capabilities` and reports the look as `season`.
+The round board has no Christmas clips and no `SEASON`. The logic is in
+`main/taby_season.c`, tested by `tests/test_season.py`.
+
 ### Touch that is silent at start
 
 The 1.64 board has no reset line to its touch chip, so a chip reset (an

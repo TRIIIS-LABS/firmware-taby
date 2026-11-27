@@ -349,6 +349,26 @@
       "sha256": "53ff11c489482ee9183dd9078064787e07230a723c25b1130ea151f9895b0707"
     },
     {
+      "id": "christmas_idle_hat_loop",
+      "version": 1,
+      "duration_ms": 4200,
+      "fallback_label": "IDLE",
+      "loop_policy": "loop",
+      "relative_path": "a/5e0ec77f.gif",
+      "byte_length": 21299,
+      "sha256": "dd84860ae6d68a976940177e3b7c85418b3dbe356c84d33ef1b8987034fab7f7"
+    },
+    {
+      "id": "christmas_idle_lights_loop",
+      "version": 1,
+      "duration_ms": 4200,
+      "fallback_label": "IDLE",
+      "loop_policy": "loop",
+      "relative_path": "a/c9a5639d.gif",
+      "byte_length": 7758,
+      "sha256": "8ffa7faa4d3bcf197d25aa85db910af0a7436749931d9e6db863342515094057"
+    },
+    {
       "id": "idle_variation_loop",
       "version": 1,
       "duration_ms": 1667,
