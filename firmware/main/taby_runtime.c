@@ -13,6 +13,7 @@
 #include "taby_onboarding.h"
 #include "taby_reusable_ui.h"
 #include "taby_season.h"
+#include "taby_season_store.h"
 #include "taby_animation_assets.h"
 
 static const char *TAG = "taby_runtime";
@@ -277,6 +278,7 @@ static bool render_current_state_locked(void) {
 
 #if !TABY_HARDWARE_ROUND_1_32
 static const char *season_rest_clip(void);
+static void season_load(void);
 #endif
 
 void taby_runtime_start(void) {
@@ -286,6 +288,7 @@ void taby_runtime_start(void) {
 
     taby_state_machine_init(&s_machine);
 #if !TABY_HARDWARE_ROUND_1_32
+    season_load();
     taby_animation_assets_set_rest_override(season_rest_clip);
 #endif
     s_runtime_started = true;
@@ -694,32 +697,37 @@ bool taby_runtime_reset_eye_motion(void) {
     return apply_eye_motion(taby_idle_eyes_erase());
 }
 
-/* The Christmas rest (taby_season.h): RAM only. From 1.4.2 every start rests
-   in the Christmas hat with no end (Peter, 2026-11-28: "set by default that its
-   christmas hat"), until an app tells otherwise; a told season ends by itself
-   when its seconds run out, as in 1.4.1. 1.64 only: the round board's pack has
-   no Christmas clips. */
-static taby_season_t s_season = {TABY_SEASON_CHRISTMAS_HAT, TABY_SEASON_NO_END_US};
+/* The Christmas rest (taby_season.h): the look now. From 1.4.3 it is loaded
+   from NVS at start (the hat when a unit was never told) and a told look is
+   stored, so it holds across power until an app tells another. 1.64 only: the
+   round board's pack has no Christmas clips, so it is always off there; on
+   the 1.64 it is off only until taby_runtime_start loads it. */
+static taby_season_look_t s_season_look = TABY_SEASON_OFF;
 static portMUX_TYPE s_season_lock = portMUX_INITIALIZER_UNLOCKED;
-static TaskHandle_t s_season_task = NULL;
 
-static taby_season_t season_copy(void) {
-    taby_season_t copy;
+static taby_season_look_t season_now(void) {
     taskENTER_CRITICAL(&s_season_lock);
-    copy = s_season;
+    taby_season_look_t look = s_season_look;
     taskEXIT_CRITICAL(&s_season_lock);
-    return copy;
+    return look;
 }
 
 #if !TABY_HARDWARE_ROUND_1_32
+/* The told look, or the hat when this unit was never told one. */
+static void season_load(void) {
+    taby_season_look_t look = taby_season_store_load();
+    taskENTER_CRITICAL(&s_season_lock);
+    s_season_look = look;
+    taskEXIT_CRITICAL(&s_season_lock);
+}
+
 /* The live face wears the season itself (taby_dress.h); the season's clip is
    the rest only while the live face is not there. */
 static const char *season_rest_clip(void) {
     if (taby_live_talk_ready()) {
         return NULL;
     }
-    taby_season_t season = season_copy();
-    return taby_season_rest_clip(taby_season_look_at(&season, esp_timer_get_time()));
+    return taby_season_rest_clip(season_now());
 }
 
 /* Redraws the face only while it rests, so a clip playing is never cut. */
@@ -737,53 +745,37 @@ static void redraw_rest(void) {
     board_amoled_1_64_unlock();
 }
 
-/* Sleeps until the season's seconds run out, then puts the normal rest back. */
-static void season_task(void *arg) {
-    (void)arg;
-    for (;;) {
-        taby_season_t season = season_copy();
-        int64_t now_us = esp_timer_get_time();
-        TickType_t wait = portMAX_DELAY;
-        if (taby_season_look_at(&season, now_us) != TABY_SEASON_OFF) {
-            /* Up to 12 hours: in ticks by the tick period, which cannot overflow. */
-            wait = (TickType_t)(((season.until_us - now_us) / 1000 + 50) / portTICK_PERIOD_MS) + 1;
-        }
-        if (ulTaskNotifyTake(pdTRUE, wait) == 0 && season.look != TABY_SEASON_OFF) {
-            ESP_LOGI(TAG, "season ran out; the rest is the normal one again");
-            redraw_rest();
-        }
-    }
-}
 #endif
 
 bool taby_runtime_set_season(taby_season_look_t look, uint32_t seconds) {
+    /* The seconds of the told form end nothing from 1.4.3 (taby_season.h). */
+    (void)seconds;
 #if TABY_HARDWARE_ROUND_1_32
     (void)look;
-    (void)seconds;
     return false;
 #else
+    esp_err_t stored = taby_season_store_save(look);
+    if (stored != ESP_OK) {
+        ESP_LOGW(TAG, "failed to store season look=%s: %s; shown until the next start",
+                 taby_season_look_name(look), esp_err_to_name(stored));
+    }
     taskENTER_CRITICAL(&s_season_lock);
-    taby_season_set(&s_season, look, seconds, esp_timer_get_time());
+    bool changed = s_season_look != look;
+    s_season_look = look;
     taskEXIT_CRITICAL(&s_season_lock);
-    ESP_LOGI(TAG, "season look=%s seconds=%u", taby_season_look_name(look), (unsigned)seconds);
-    if (!s_season_task &&
-        xTaskCreate(season_task, "taby_season", 3072, NULL, 1, &s_season_task) != pdPASS) {
-        s_season_task = NULL;
-        ESP_LOGW(TAG, "season task unavailable; a restart ends the season");
+    /* The app tells the same look every 30 minutes: only a new one redraws. */
+    if (changed) {
+        ESP_LOGI(TAG, "season look=%s stored=%d", taby_season_look_name(look), stored == ESP_OK ? 1 : 0);
+        redraw_rest();
     }
-    if (s_season_task) {
-        xTaskNotifyGive(s_season_task);
-    }
-    redraw_rest();
     return true;
 #endif
 }
 
 taby_season_look_t taby_runtime_season(uint32_t *out_seconds_left) {
-    taby_season_t season = season_copy();
-    int64_t now_us = esp_timer_get_time();
+    taby_season_look_t look = season_now();
     if (out_seconds_left) {
-        *out_seconds_left = taby_season_seconds_left(&season, now_us);
+        *out_seconds_left = taby_season_seconds_left(look);
     }
-    return taby_season_look_at(&season, now_us);
+    return look;
 }

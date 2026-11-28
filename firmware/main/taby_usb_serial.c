@@ -511,7 +511,8 @@ static void add_usb_capabilities(cJSON *root) {
     /* EYE_MOTION normal|calm|still, kept across restarts (1.2.0). */
     cJSON_AddItemToArray(capabilities, cJSON_CreateString("eye_motion"));
 #if !TABY_HARDWARE_ROUND_1_32
-    /* SEASON christmas hat|lights <seconds> / off: the Christmas rest, RAM only (1.4.1). */
+    /* SEASON christmas hat|lights <seconds> / off: the Christmas rest (1.4.1),
+       kept across restarts and the hat when never told (1.4.3). */
     cJSON_AddItemToArray(capabilities, cJSON_CreateString("season"));
 #endif
     /* VOICE_MOTION: Taby talks live, wearing the app's mouth motion. */
@@ -699,7 +700,7 @@ static void write_season_json(void) {
 }
 
 /* SEASON? reads it; SEASON christmas hat|lights <seconds> dresses the rest
-   for that long; SEASON off ends it. Kept in RAM only (taby_season.h). */
+   and SEASON off ends it, each kept until told another (taby_season.h). */
 static bool handle_season_command(const char *command_text) {
     taby_season_look_t look = TABY_SEASON_OFF;
     uint32_t seconds = 0;

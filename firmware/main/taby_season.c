@@ -102,36 +102,48 @@ taby_season_command_t taby_season_parse_command(
     return TABY_SEASON_COMMAND_INVALID;
 }
 
-void taby_season_set(taby_season_t *season, taby_season_look_t look, uint32_t seconds, int64_t now_us) {
-    if (look == TABY_SEASON_OFF || seconds == 0) {
-        taby_season_off(season);
-        return;
+/* The byte kept for each told look. 0 is never written, so a unit that was
+   never told reads as such even if the key held 0. */
+enum {
+    STORED_OFF = 1,
+    STORED_HAT = 2,
+    STORED_LIGHTS = 3,
+};
+
+uint8_t taby_season_stored_value(taby_season_look_t look) {
+    switch (look) {
+        case TABY_SEASON_CHRISTMAS_HAT:
+            return STORED_HAT;
+        case TABY_SEASON_CHRISTMAS_LIGHTS:
+            return STORED_LIGHTS;
+        case TABY_SEASON_OFF:
+        default:
+            return STORED_OFF;
     }
-    if (seconds > TABY_SEASON_MAX_SECONDS) {
-        seconds = TABY_SEASON_MAX_SECONDS;
-    }
-    season->look = look;
-    season->until_us = now_us + (int64_t)seconds * 1000000;
 }
 
-void taby_season_off(taby_season_t *season) {
-    season->look = TABY_SEASON_OFF;
-    season->until_us = 0;
+taby_season_look_t taby_season_look_from_stored(bool stored, uint8_t value) {
+    if (!stored) {
+        return TABY_SEASON_DEFAULT_LOOK;
+    }
+    switch (value) {
+        case STORED_OFF:
+            return TABY_SEASON_OFF;
+        case STORED_HAT:
+            return TABY_SEASON_CHRISTMAS_HAT;
+        case STORED_LIGHTS:
+            return TABY_SEASON_CHRISTMAS_LIGHTS;
+        default:
+            return TABY_SEASON_DEFAULT_LOOK;
+    }
 }
 
-taby_season_look_t taby_season_look_at(const taby_season_t *season, int64_t now_us) {
-    if (season->look == TABY_SEASON_OFF || now_us >= season->until_us) {
-        return TABY_SEASON_OFF;
-    }
-    return season->look;
+bool taby_season_needs_store(bool stored, uint8_t value, taby_season_look_t look) {
+    return !stored || value != taby_season_stored_value(look);
 }
 
-uint32_t taby_season_seconds_left(const taby_season_t *season, int64_t now_us) {
-    if (taby_season_look_at(season, now_us) == TABY_SEASON_OFF) {
-        return 0;
-    }
-    int64_t left = (season->until_us - now_us + 999999) / 1000000;
-    return left > TABY_SEASON_MAX_SECONDS ? TABY_SEASON_MAX_SECONDS : (uint32_t)left;
+uint32_t taby_season_seconds_left(taby_season_look_t look) {
+    return look == TABY_SEASON_OFF ? 0 : TABY_SEASON_MAX_SECONDS;
 }
 
 const char *taby_season_look_name(taby_season_look_t look) {

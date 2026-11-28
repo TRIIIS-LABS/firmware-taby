@@ -169,9 +169,11 @@ INFO/DIAG output, Wi-Fi credentials, or personal device logs in issues.
 On the 1.64 board the app can dress Taby's resting face for Christmas:
 `SEASON christmas hat <seconds>` (Taby in a Santa hat, small coloured lights
 down both sides of the screen) or `SEASON christmas lights <seconds>` (the
-lights alone, for a Taby that wears a printed hat), for 1 to 43,200 seconds.
-`SEASON off` ends it; `SEASON?` answers
-`TABY:SEASON {"season":"christmas","look":"hat","seconds_left":N,"max_seconds":43200}`.
+lights alone, for a Taby that wears a printed hat); the seconds, 1 to 43,200,
+are still required and end nothing since 1.4.3. `SEASON off` ends it;
+`SEASON?` answers
+`TABY:SEASON {"season":"christmas","look":"hat","seconds_left":43200,"max_seconds":43200}`
+(`seconds_left` is 0 when off and the most otherwise).
 
 While it lasts, the live resting face wears the dress: the app's hat and
 lights as pictures (`main/christmas_dress.bin`, made by
@@ -184,9 +186,12 @@ While the live face is not there (it loads for a few seconds after a start),
 the rest plays the clip `christmas_idle_hat_loop` or
 `christmas_idle_lights_loop` from the pack instead.
 
-The device has no clock and keeps nothing of it: when the seconds run out,
-or at any restart, the rest is the normal one again, so the app sends it
-again before it ends while it is the season. USB only, like `EYE_MOTION`.
+Since 1.4.3 the look is kept across power, as the Eyes setting is: the last
+look an app tells (hat, lights or off) is stored and holds until it tells
+another, and a unit never told rests in the hat. The device has no clock, so
+nothing ends a look by itself; the app ends the season (the desktop app tells
+`off` when it connects after 6 January). Telling the stored look again
+writes nothing. USB only, like `EYE_MOTION`.
 `INFO` lists `season` in `capabilities` and reports the look as `season`;
 `DIAG` reports how smoothly the live face draws (`live_fps`, `live_draw_ms`,
 `live_draw_worst_ms`, over the last five seconds). The round board has no
