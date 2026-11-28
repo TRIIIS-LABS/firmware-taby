@@ -1,18 +1,19 @@
 #pragma once
 
-/* The Christmas rest: while the app says it is the season, the 1.64 board's
-   resting face is a Christmas clip from the pack instead of the live face,
-   Taby in a Santa hat with lights at the screen's sides, or the lights alone.
+/* The Christmas rest: the 1.64 board's resting face wears a Santa hat with
+   lights at the screen's sides, or the lights alone (taby_dress.h); while the
+   live face is not there, the rest is the matching Christmas clip from the pack.
 
-   The device has no clock and keeps nothing of this across a restart: the app
-   sends `SEASON christmas hat|lights <seconds>` and sends it again before the
-   seconds run out; when they do, or after `SEASON off`, or at any power-up,
-   the rest is the normal one again. So no Taby can stay dressed after the
-   season or after the app is gone.
+   From 1.4.3 the look is kept across power, as the Eyes setting is: the last
+   look an app tells (`SEASON christmas hat|lights <seconds>` or `SEASON off`)
+   is stored and holds until it tells another; a unit never told rests in the
+   hat (1.4.2). The device has no clock, so nothing ends a look by itself: the
+   seconds of the told form are still accepted, for the apps that send them,
+   and end nothing. The app ends the season (1.0.14 tells `off` after 6 January).
 
    Nothing here touches LVGL, a clock or NVS, so it builds on the host and is
-   tested by tests/test_season.py. taby_runtime.c holds the one season, reads
-   the uptime clock and redraws the rest. */
+   tested by tests/test_season.py. taby_season_store.c keeps the look in NVS;
+   taby_runtime.c holds the look now and redraws the rest. */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -25,14 +26,11 @@ typedef enum {
     TABY_SEASON_CHRISTMAS_LIGHTS = 2,
 } taby_season_look_t;
 
-/* The longest a season lasts without being sent again: 12 hours. */
+/* The most seconds the told form takes, and what SEASON reports as left for
+   any look but off: a told look has no end. */
 #define TABY_SEASON_MAX_SECONDS 43200U
-
-typedef struct {
-    taby_season_look_t look;
-    /* Uptime in microseconds when the look ends. */
-    int64_t until_us;
-} taby_season_t;
+/* A unit never told a season rests in the hat (Peter, 2026-11-28). */
+#define TABY_SEASON_DEFAULT_LOOK TABY_SEASON_CHRISTMAS_HAT
 
 typedef enum {
     TABY_SEASON_COMMAND_NONE = 0, /* not a SEASON command */
@@ -47,12 +45,16 @@ taby_season_command_t taby_season_parse_command(
     taby_season_look_t *out_look,
     uint32_t *out_seconds);
 
-void taby_season_set(taby_season_t *season, taby_season_look_t look, uint32_t seconds, int64_t now_us);
-void taby_season_off(taby_season_t *season);
-
-/* The look now: off once its seconds have run out. */
-taby_season_look_t taby_season_look_at(const taby_season_t *season, int64_t now_us);
-uint32_t taby_season_seconds_left(const taby_season_t *season, int64_t now_us);
+/* The byte stored for a told look (never 0). */
+uint8_t taby_season_stored_value(taby_season_look_t look);
+/* The look a unit starts in: the stored one; the hat when nothing (or a byte
+   this firmware does not know) is stored. */
+taby_season_look_t taby_season_look_from_stored(bool stored, uint8_t value);
+/* Whether telling `look` changes what is stored, so the same look told again
+   every 30 minutes writes nothing. */
+bool taby_season_needs_store(bool stored, uint8_t value, taby_season_look_t look);
+/* What SEASON reports as seconds_left: 0 for off, the most for a look. */
+uint32_t taby_season_seconds_left(taby_season_look_t look);
 
 /* "hat", "lights" or "off". */
 const char *taby_season_look_name(taby_season_look_t look);

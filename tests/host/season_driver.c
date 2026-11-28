@@ -2,8 +2,8 @@
 
    Modes, one JSON object per line out:
      commands            hex-encoded lines through taby_season_parse_command
-     run SECONDS LOOK    a season of SECONDS from uptime 0, its look at each
-                         step of one second up to SECONDS + 2
+     stored              the look a unit starts in for each stored byte, what
+                         SEASON reports as left, and when a told look is written
      rest LOOK           what the rest (idle_01_loop and the idle state) plays
                          with the season's look, through the real clip table
    Built with sanitizers. */
@@ -68,18 +68,28 @@ int main(int argc, char **argv) {
         }
         return 0;
     }
-    if (argc == 4 && strcmp(argv[1], "run") == 0) {
-        uint32_t seconds = (uint32_t)strtoul(argv[2], NULL, 10);
-        taby_season_t season = {TABY_SEASON_OFF, 0};
-        taby_season_set(&season, look_from(argv[3]), seconds, 0);
-        printf("{\"steps\":[");
-        for (uint32_t s = 0; s <= seconds + 2; ++s) {
-            int64_t now = (int64_t)s * 1000000;
-            printf("%s[\"%s\",%u]", s ? "," : "", taby_season_look_name(taby_season_look_at(&season, now)),
-                   (unsigned)taby_season_seconds_left(&season, now));
+    if (argc == 2 && strcmp(argv[1], "stored") == 0) {
+        const taby_season_look_t looks[] = {TABY_SEASON_OFF, TABY_SEASON_CHRISTMAS_HAT, TABY_SEASON_CHRISTMAS_LIGHTS};
+        printf("{\"never_told\":\"%s\",\"after_power\":{", taby_season_look_name(taby_season_look_from_stored(false, 0)));
+        for (size_t i = 0; i < 3; ++i) {
+            uint8_t value = taby_season_stored_value(looks[i]);
+            printf("%s\"%s\":[%u,\"%s\"]", i ? "," : "", taby_season_look_name(looks[i]), (unsigned)value,
+                   taby_season_look_name(taby_season_look_from_stored(true, value)));
         }
-        taby_season_off(&season);
-        printf("],\"after_off\":\"%s\"}\n", taby_season_look_name(taby_season_look_at(&season, 0)));
+        printf("},\"unknown_bytes\":[");
+        const uint8_t unknown[] = {0, 4, 255};
+        for (size_t i = 0; i < 3; ++i) {
+            printf("%s\"%s\"", i ? "," : "", taby_season_look_name(taby_season_look_from_stored(true, unknown[i])));
+        }
+        printf("],\"seconds_left\":{");
+        for (size_t i = 0; i < 3; ++i) {
+            printf("%s\"%s\":%u", i ? "," : "", taby_season_look_name(looks[i]), (unsigned)taby_season_seconds_left(looks[i]));
+        }
+        uint8_t hat = taby_season_stored_value(TABY_SEASON_CHRISTMAS_HAT);
+        printf("},\"writes\":{\"first_told\":%s,\"same_again\":%s,\"another\":%s}}\n",
+               taby_season_needs_store(false, 0, TABY_SEASON_CHRISTMAS_HAT) ? "true" : "false",
+               taby_season_needs_store(true, hat, TABY_SEASON_CHRISTMAS_HAT) ? "true" : "false",
+               taby_season_needs_store(true, hat, TABY_SEASON_OFF) ? "true" : "false");
         return 0;
     }
     if (argc == 3 && strcmp(argv[1], "rest") == 0) {
@@ -102,6 +112,6 @@ int main(int argc, char **argv) {
         taby_animation_assets_set_rest_override(NULL);
         return 0;
     }
-    fprintf(stderr, "usage: season_driver commands | run SECONDS LOOK | rest LOOK\n");
+    fprintf(stderr, "usage: season_driver commands | stored | rest LOOK\n");
     return 2;
 }

@@ -1,5 +1,6 @@
-"""The Christmas rest, off-device: the SEASON command, a season that ends by
-itself, and the rest playing the Christmas clip only while the season is on.
+"""The Christmas rest, off-device: the SEASON command, the told look kept across
+power (the hat when never told), and the rest playing the Christmas clip only
+while the season is on.
 
 tests/host/season_driver.c links firmware/main/taby_season.c with the real
 clip table (taby_animation_assets.c), built with AddressSanitizer and
@@ -66,10 +67,22 @@ class SeasonTest(unittest.TestCase):
         self.assertEqual([g["command"] for g in self.commands("SEASONS", "EYE_MOTION calm", "idle_01_loop")],
                          ["none"] * 3)
 
-    def test_a_season_ends_by_itself_when_its_seconds_run_out(self):
-        steps = self.run_driver(["run", "3", "hat"])[0]
-        self.assertEqual(steps["steps"], [["hat", 3], ["hat", 2], ["hat", 1], ["off", 0], ["off", 0], ["off", 0]])
-        self.assertEqual(steps["after_off"], "off")
+    def test_a_unit_never_told_rests_in_the_hat_and_a_told_look_survives_power(self):
+        got = self.run_driver(["stored"])[0]
+        self.assertEqual(got["never_told"], "hat")
+        for look, (value, after) in got["after_power"].items():
+            self.assertEqual(after, look, f"a told {look} must come back after a power-up")
+            self.assertNotEqual(value, 0, "0 is never stored, so it cannot be told apart from never told")
+        self.assertEqual(len({value for value, _ in got["after_power"].values()}), 3)
+        self.assertEqual(got["unknown_bytes"], ["hat"] * 3)
+
+    def test_a_told_look_has_no_end(self):
+        got = self.run_driver(["stored"])[0]
+        self.assertEqual(got["seconds_left"], {"off": 0, "hat": 43200, "lights": 43200})
+
+    def test_the_same_look_told_every_30_minutes_writes_nothing(self):
+        self.assertEqual(self.run_driver(["stored"])[0]["writes"],
+                         {"first_told": True, "same_again": False, "another": True})
 
     def test_the_rest_plays_the_christmas_clip_only_while_the_season_is_on(self):
         hat = self.run_driver(["rest", "hat"])[0]

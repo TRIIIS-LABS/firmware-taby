@@ -10,6 +10,7 @@ idf_component_register(
         "taby_display.c"
         "taby_eye_motion.c"
         "taby_season.c"
+        "taby_season_store.c"
         "taby_dress.c"
         "taby_touch_start.c"
         "generated/taby_reusable_icons.c"
