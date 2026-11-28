@@ -4,11 +4,11 @@
    resting face is a Christmas clip from the pack instead of the live face,
    Taby in a Santa hat with lights at the screen's sides, or the lights alone.
 
-   The device has no clock and keeps nothing of this across a restart: the app
-   sends `SEASON christmas hat|lights <seconds>` and sends it again before the
-   seconds run out; when they do, or after `SEASON off`, or at any power-up,
-   the rest is the normal one again. So no Taby can stay dressed after the
-   season or after the app is gone.
+   The device has no clock and keeps nothing of this across a restart. From
+   1.4.2 every power-up rests in the hat with no end, until an app says
+   otherwise: the app sends `SEASON christmas hat|lights <seconds>` and sends
+   it again before the seconds run out; when they do, or after `SEASON off`,
+   the rest is the normal one until the next power-up.
 
    Nothing here touches LVGL, a clock or NVS, so it builds on the host and is
    tested by tests/test_season.py. taby_runtime.c holds the one season, reads
@@ -27,6 +27,9 @@ typedef enum {
 
 /* The longest a season lasts without being sent again: 12 hours. */
 #define TABY_SEASON_MAX_SECONDS 43200U
+/* The start-up season (1.4.2): far enough away never to come, small enough
+   that the seconds-left sum cannot overflow; reported as the 12-hour most. */
+#define TABY_SEASON_NO_END_US (INT64_MAX / 4)
 
 typedef struct {
     taby_season_look_t look;

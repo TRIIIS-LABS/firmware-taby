@@ -694,10 +694,12 @@ bool taby_runtime_reset_eye_motion(void) {
     return apply_eye_motion(taby_idle_eyes_erase());
 }
 
-/* The Christmas rest (taby_season.h): RAM only, so every start is the normal
-   rest, and it ends by itself when its seconds run out. 1.64 only: the round
-   board's pack has no Christmas clips. */
-static taby_season_t s_season = {TABY_SEASON_OFF, 0};
+/* The Christmas rest (taby_season.h): RAM only. From 1.4.2 every start rests
+   in the Christmas hat with no end (Peter, 2026-11-28: "set by default that its
+   christmas hat"), until an app tells otherwise; a told season ends by itself
+   when its seconds run out, as in 1.4.1. 1.64 only: the round board's pack has
+   no Christmas clips. */
+static taby_season_t s_season = {TABY_SEASON_CHRISTMAS_HAT, TABY_SEASON_NO_END_US};
 static portMUX_TYPE s_season_lock = portMUX_INITIALIZER_UNLOCKED;
 static TaskHandle_t s_season_task = NULL;
 

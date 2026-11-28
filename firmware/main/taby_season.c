@@ -130,7 +130,8 @@ uint32_t taby_season_seconds_left(const taby_season_t *season, int64_t now_us) {
     if (taby_season_look_at(season, now_us) == TABY_SEASON_OFF) {
         return 0;
     }
-    return (uint32_t)((season->until_us - now_us + 999999) / 1000000);
+    int64_t left = (season->until_us - now_us + 999999) / 1000000;
+    return left > TABY_SEASON_MAX_SECONDS ? TABY_SEASON_MAX_SECONDS : (uint32_t)left;
 }
 
 const char *taby_season_look_name(taby_season_look_t look) {
