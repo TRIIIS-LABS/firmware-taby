@@ -12,6 +12,8 @@ extern "C" {
 #include "board_amoled_1_64.h"
 #include "taby_display.h"
 #include "taby_idle_eyes.h"
+#include "taby_dress.h"
+#include "taby_runtime.h"
 }
 #include "esp_heap_caps.h"
 #include "esp_random.h"
@@ -28,6 +30,9 @@ extern "C" {
 
 extern const uint8_t taby_talk_riv_start[] asm("_binary_taby_talk_riv_start");
 extern const uint8_t taby_talk_riv_end[] asm("_binary_taby_talk_riv_end");
+/* The Christmas dress (taby_dress.h), made from the app's drawing. */
+extern const uint8_t christmas_dress_bin_start[] asm("_binary_christmas_dress_bin_start");
+extern const uint8_t christmas_dress_bin_end[] asm("_binary_christmas_dress_bin_end");
 
 /*
  * The firmware's C++ is the live character (Rive and its renderer), and its
@@ -239,16 +244,70 @@ void notifyLeft(Live &live)
   board_amoled_1_64_unlock();
 }
 
-/* One frame of the character onto the panel: the box that changed. */
-void drawFrame(Live &live, const plutovg_matrix_t &placement, Box &previous)
+/* How long frames take, for DIAG: the last full five seconds. */
+std::atomic<float> s_statFps{0}, s_statDrawMs{0}, s_statWorstMs{0};
+
+/* The Christmas dress on the resting face: what this frame wears. */
+struct Dress
 {
-  clearBox(live.argb, previous);
+  /* 0: none, 1: the lights, 2: the hat and the lights. */
+  int wear = 0;
+  /* How far the hat moves with the face (the last frame's face box). */
+  int dx = 0, dy = 0;
+  /* The dress changed: the whole panel is drawn again. */
+  bool changed = false;
+};
+taby_dress_t s_dress;
+bool s_dressReady = false;
+
+Box fromDress(const taby_dress_box_t &b) { return {b.x0, b.y0, b.x1, b.y1}; }
+
+/* The dress goes on before the face, so the face is drawn over it and the
+   eyes are never covered. The lights are drawn afresh in their own boxes. */
+Box putOnDress(Live &live, const Dress &dress)
+{
+  Box hat;
+  if (dress.wear == 0) return hat;
+  for (size_t i = 0; i < s_dress.count; ++i)
+  {
+    const taby_dress_sprite_t &sprite = s_dress.sprites[i];
+    if (sprite.kind == TABY_DRESS_LIGHTS)
+    {
+      const Box lights = {std::max(0, (int)sprite.panel_x), std::max(0, (int)sprite.panel_y),
+                          std::min(kPanelW, sprite.panel_x + (int)sprite.width),
+                          std::min(kPanelH, sprite.panel_y + (int)sprite.height)};
+      if (!lights.empty()) clearBox(live.argb, lights);
+      taby_dress_blit(live.argb, kPanelW, kPanelH, &sprite, 0, 0);
+    }
+    else if (dress.wear == 2)
+    {
+      hat = hat.unite(fromDress(taby_dress_blit(live.argb, kPanelW, kPanelH, &sprite, dress.dx, dress.dy)));
+    }
+  }
+  return hat;
+}
+
+/* One frame of the character onto the panel: the box that changed. `face`
+   is where this frame drew the face (the next frame's hat follows it). */
+void drawFrame(Live &live, const plutovg_matrix_t &placement, Box &previous,
+               const Dress &dress = Dress(), Box *face = nullptr)
+{
+  if (dress.changed)
+  {
+    std::memset(live.argb, 0, kPanelW * kPanelH * sizeof(uint32_t));
+    previous = Box::full();
+  }
+  else
+    clearBox(live.argb, previous);
+  const Box hat = putOnDress(live, dress);
   plutovg_canvas_reset_matrix(live.canvas);
   plutovg_canvas_transform(live.canvas, &placement);
   live.renderer->resetDrawn();
   live.character.draw(live.renderer, kLandW, kLandH);
   float drawn[4];
-  const Box current = live.renderer->drawn(drawn) ? boxFrom(drawn) : Box();
+  const Box faceBox = live.renderer->drawn(drawn) ? boxFrom(drawn) : Box();
+  if (face != nullptr && !faceBox.empty()) *face = faceBox;
+  const Box current = faceBox.unite(hat);
   // The screen must lose what the last frame drew and gain this one; the
   // panel takes even edges.
   Box send = previous.unite(current);
@@ -278,6 +337,18 @@ void drawFrame(Live &live, const plutovg_matrix_t &placement, Box &previous)
     vTaskDelete(nullptr);
     return;
   }
+  {
+    // The dress is copied where its pixels are aligned; without it there is
+    // no Christmas on the live face (the season's clip still plays as the rest).
+    const size_t bytes = christmas_dress_bin_end - christmas_dress_bin_start;
+    uint8_t *copy = static_cast<uint8_t *>(heap_caps_aligned_alloc(16, bytes, MALLOC_CAP_SPIRAM));
+    if (copy != nullptr)
+    {
+      std::memcpy(copy, christmas_dress_bin_start, bytes);
+      s_dressReady = taby_dress_parse(copy, bytes, &s_dress);
+    }
+    ESP_LOGI(TAG, "christmas dress %s (%u bytes)", s_dressReady ? "ready" : "unavailable", (unsigned)bytes);
+  }
   s_load = Load::ready;
   // A face the display drew as a GIF while the character loaded turns live.
   if (board_amoled_1_64_lock(1000))
@@ -294,6 +365,11 @@ void drawFrame(Live &live, const plutovg_matrix_t &placement, Box &previous)
   // When the face turned to talking, or < 0 while it is not talking.
   double talkingSince = -1;
   int64_t last = esp_timer_get_time();
+  // What the resting face last wore, and where its face was last drawn.
+  int worn = 0;
+  Box lastFace;
+  int64_t statSince = last, statDrawUs = 0, statWorstUs = 0;
+  int statFrames = 0;
   for (;;)
   {
     if (!live.showing.load())
@@ -343,10 +419,39 @@ void drawFrame(Live &live, const plutovg_matrix_t &placement, Box &previous)
       xSemaphoreGive(live.voiceLock);
       speech = &frame;
     }
+    // The Christmas season (taby_season.h) dresses the resting face only:
+    // the face the Eyes setting draws, still or moving, wears it; any other
+    // face, a clip on its way in, or the season off takes it off at once.
+    Dress dress;
+    const taby_season_look_t look = taby_runtime_season(nullptr);
+    if (s_dressReady && look != TABY_SEASON_OFF && wanted == taby::Face::idle && !leaving)
+      dress.wear = look == TABY_SEASON_CHRISTMAS_HAT ? 2 : 1;
+    if (dress.wear != worn)
+    {
+      dress.changed = true;
+      fresh = true;
+      worn = dress.wear;
+    }
+    if (dress.wear == 2) taby_dress_offset(&s_dress, {lastFace.x0, lastFace.y0, lastFace.x1, lastFace.y1}, &dress.dx, &dress.dy);
     if (face.advance(dt, now, speech) || fresh)
     {
-      drawFrame(live, placement, previous);
+      const int64_t drawStart = esp_timer_get_time();
+      drawFrame(live, placement, previous, dress, &lastFace);
+      const int64_t took = esp_timer_get_time() - drawStart;
+      statDrawUs += took;
+      statWorstUs = std::max(statWorstUs, took);
+      ++statFrames;
       fresh = false;
+    }
+    if (frameStart - statSince >= 5000000)
+    {
+      const float span = (frameStart - statSince) / 1e6f;
+      s_statFps = statFrames / span;
+      s_statDrawMs = statFrames ? statDrawUs / 1000.0f / statFrames : 0.0f;
+      s_statWorstMs = statWorstUs / 1000.0f;
+      statSince = frameStart;
+      statDrawUs = statWorstUs = 0;
+      statFrames = 0;
     }
     if (leaving && (face.atRest(now) || frameStart - live.leaveSince.load() > kLeaveMaxUs))
     {
@@ -386,6 +491,13 @@ extern "C" bool taby_live_talk_offered(void)
 }
 
 extern "C" bool taby_live_talk_ready(void) { return s_load.load() == Load::ready; }
+
+extern "C" void taby_live_talk_frame_stats(float *fps, float *draw_ms, float *worst_ms)
+{
+  if (fps) *fps = s_statFps.load();
+  if (draw_ms) *draw_ms = s_statDrawMs.load();
+  if (worst_ms) *worst_ms = s_statWorstMs.load();
+}
 
 extern "C" bool taby_live_talk_takes(const char *animation_id)
 {

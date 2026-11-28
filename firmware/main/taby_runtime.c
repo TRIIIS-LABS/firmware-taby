@@ -12,6 +12,8 @@
 #include "taby_live_talk.h"
 #include "taby_onboarding.h"
 #include "taby_reusable_ui.h"
+#include "taby_season.h"
+#include "taby_animation_assets.h"
 
 static const char *TAG = "taby_runtime";
 
@@ -273,12 +275,19 @@ static bool render_current_state_locked(void) {
     return rendered;
 }
 
+#if !TABY_HARDWARE_ROUND_1_32
+static const char *season_rest_clip(void);
+#endif
+
 void taby_runtime_start(void) {
     if (s_runtime_started) {
         return;
     }
 
     taby_state_machine_init(&s_machine);
+#if !TABY_HARDWARE_ROUND_1_32
+    taby_animation_assets_set_rest_override(season_rest_clip);
+#endif
     s_runtime_started = true;
     s_last_render_valid = false;
     clear_custom_ui_state();
@@ -683,4 +692,96 @@ bool taby_runtime_set_eye_motion(taby_eye_motion_t mode) {
 
 bool taby_runtime_reset_eye_motion(void) {
     return apply_eye_motion(taby_idle_eyes_erase());
+}
+
+/* The Christmas rest (taby_season.h): RAM only, so every start is the normal
+   rest, and it ends by itself when its seconds run out. 1.64 only: the round
+   board's pack has no Christmas clips. */
+static taby_season_t s_season = {TABY_SEASON_OFF, 0};
+static portMUX_TYPE s_season_lock = portMUX_INITIALIZER_UNLOCKED;
+static TaskHandle_t s_season_task = NULL;
+
+static taby_season_t season_copy(void) {
+    taby_season_t copy;
+    taskENTER_CRITICAL(&s_season_lock);
+    copy = s_season;
+    taskEXIT_CRITICAL(&s_season_lock);
+    return copy;
+}
+
+#if !TABY_HARDWARE_ROUND_1_32
+/* The live face wears the season itself (taby_dress.h); the season's clip is
+   the rest only while the live face is not there. */
+static const char *season_rest_clip(void) {
+    if (taby_live_talk_ready()) {
+        return NULL;
+    }
+    taby_season_t season = season_copy();
+    return taby_season_rest_clip(taby_season_look_at(&season, esp_timer_get_time()));
+}
+
+/* Redraws the face only while it rests, so a clip playing is never cut. */
+static void redraw_rest(void) {
+    if (!s_runtime_started || !board_amoled_1_64_lock(1000)) {
+        return;
+    }
+    taby_state_t state = s_machine.current_state;
+    bool resting = state == TABY_STATE_AMBIENT_IDLE ||
+                   (state == TABY_STATE_CUSTOM_ANIMATION && taby_animation_id_rests(s_animation_id));
+    if (resting) {
+        s_last_render_valid = false;
+        render_current_state_locked();
+    }
+    board_amoled_1_64_unlock();
+}
+
+/* Sleeps until the season's seconds run out, then puts the normal rest back. */
+static void season_task(void *arg) {
+    (void)arg;
+    for (;;) {
+        taby_season_t season = season_copy();
+        int64_t now_us = esp_timer_get_time();
+        TickType_t wait = portMAX_DELAY;
+        if (taby_season_look_at(&season, now_us) != TABY_SEASON_OFF) {
+            /* Up to 12 hours: in ticks by the tick period, which cannot overflow. */
+            wait = (TickType_t)(((season.until_us - now_us) / 1000 + 50) / portTICK_PERIOD_MS) + 1;
+        }
+        if (ulTaskNotifyTake(pdTRUE, wait) == 0 && season.look != TABY_SEASON_OFF) {
+            ESP_LOGI(TAG, "season ran out; the rest is the normal one again");
+            redraw_rest();
+        }
+    }
+}
+#endif
+
+bool taby_runtime_set_season(taby_season_look_t look, uint32_t seconds) {
+#if TABY_HARDWARE_ROUND_1_32
+    (void)look;
+    (void)seconds;
+    return false;
+#else
+    taskENTER_CRITICAL(&s_season_lock);
+    taby_season_set(&s_season, look, seconds, esp_timer_get_time());
+    taskEXIT_CRITICAL(&s_season_lock);
+    ESP_LOGI(TAG, "season look=%s seconds=%u", taby_season_look_name(look), (unsigned)seconds);
+    if (!s_season_task &&
+        xTaskCreate(season_task, "taby_season", 3072, NULL, 1, &s_season_task) != pdPASS) {
+        s_season_task = NULL;
+        ESP_LOGW(TAG, "season task unavailable; a restart ends the season");
+    }
+    if (s_season_task) {
+        xTaskNotifyGive(s_season_task);
+    }
+    redraw_rest();
+    return true;
+#endif
+}
+
+taby_season_look_t taby_runtime_season(uint32_t *out_seconds_left) {
+    taby_season_t season = season_copy();
+    int64_t now_us = esp_timer_get_time();
+    if (out_seconds_left) {
+        *out_seconds_left = taby_season_seconds_left(&season, now_us);
+    }
+    return taby_season_look_at(&season, now_us);
 }
